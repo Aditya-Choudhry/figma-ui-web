@@ -54,6 +54,28 @@ class PopupController {
             this.showProgress(20);
             
             console.log('Injecting capture function...');
+            
+            // First try a simple test
+            const testResults = await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: () => {
+                    console.log('Simple test function executing...');
+                    return {
+                        test: 'success',
+                        bodyExists: !!document.body,
+                        bodyChildren: document.body ? document.body.children.length : 0,
+                        url: window.location.href
+                    };
+                }
+            });
+            
+            console.log('Test results:', testResults);
+            
+            if (!testResults || !testResults[0] || !testResults[0].result) {
+                throw new Error('Basic script injection failed');
+            }
+            
+            // Now try the full capture
             const results = await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 func: this.capturePageFunction
@@ -70,8 +92,11 @@ class PopupController {
             }
             
             if (!results[0].result) {
+                console.log('Full results object:', JSON.stringify(results, null, 2));
                 throw new Error('Capture function returned no data');
             }
+            
+            console.log('Raw data received:', results[0].result);
             
             this.updateStatus('Processing elements...', 'loading');
             this.showProgress(60);
@@ -109,8 +134,12 @@ class PopupController {
                 
                 capture() {
                     try {
+                        console.log('Starting DOM capture...');
                         const body = document.body;
                         const html = document.documentElement;
+                        
+                        console.log('Body element:', body);
+                        console.log('Body children count:', body ? body.children.length : 0);
                         
                         const pageData = {
                             url: window.location.href,
@@ -125,9 +154,14 @@ class PopupController {
                             }
                         };
                         
+                        console.log('Page data:', pageData);
+                        
                         this.traverseElement(body, 0);
                         
-                        return {
+                        console.log('Elements found:', this.elements.length);
+                        console.log('Sample elements:', this.elements.slice(0, 3));
+                        
+                        const result = {
                             page: pageData,
                             elements: this.elements,
                             images: this.images,
@@ -135,6 +169,9 @@ class PopupController {
                             colors: Array.from(this.colors),
                             fonts: Array.from(this.fonts)
                         };
+                        
+                        console.log('Final capture result:', result);
+                        return result;
                     } catch (error) {
                         console.error('Capture error:', error);
                         throw error;
@@ -142,19 +179,34 @@ class PopupController {
                 }
                 
                 traverseElement(element, depth) {
-                    if (!element || element.nodeType !== Node.ELEMENT_NODE) return;
+                    if (!element || element.nodeType !== Node.ELEMENT_NODE) {
+                        console.log('Skipping non-element node');
+                        return;
+                    }
+                    
+                    console.log(`Processing element: ${element.tagName} at depth ${depth}`);
                     
                     const skipTags = ['SCRIPT', 'STYLE', 'META', 'LINK', 'TITLE', 'HEAD'];
-                    if (skipTags.includes(element.tagName)) return;
+                    if (skipTags.includes(element.tagName)) {
+                        console.log(`Skipping ${element.tagName} (in skip list)`);
+                        return;
+                    }
                     
                     const computedStyle = window.getComputedStyle(element);
                     if (computedStyle.display === 'none' || 
                         computedStyle.visibility === 'hidden' ||
-                        computedStyle.opacity === '0') return;
+                        computedStyle.opacity === '0') {
+                        console.log(`Skipping ${element.tagName} (hidden)`);
+                        return;
+                    }
                     
                     const rect = element.getBoundingClientRect();
-                    if (rect.width === 0 && rect.height === 0) return;
+                    if (rect.width === 0 && rect.height === 0) {
+                        console.log(`Skipping ${element.tagName} (zero dimensions)`);
+                        return;
+                    }
                     
+                    console.log(`Adding element: ${element.tagName}, size: ${rect.width}x${rect.height}`);
                     const elementData = this.extractElementData(element, computedStyle, rect, depth);
                     this.elements.push(elementData);
                     

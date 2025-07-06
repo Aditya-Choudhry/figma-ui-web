@@ -72,25 +72,108 @@ class WebsiteCapture:
         chrome_options.add_argument('--disable-setuid-sandbox')
         chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
         
-        try:
-            # Try to find chromium binary in Replit environment
-            import subprocess
-            result = subprocess.run(['which', 'chromium'], capture_output=True, text=True)
-            if result.returncode == 0:
-                chrome_options.binary_location = result.stdout.strip()
-            
-            self.driver = webdriver.Chrome(options=chrome_options)
-        except Exception as e:
-            print(f"Error setting up WebDriver with system Chrome: {e}")
-            # Fallback to ChromeDriverManager
-            try:
-                service = Service(ChromeDriverManager().install())
-                self.driver = webdriver.Chrome(service=service, options=chrome_options)
-            except Exception as fallback_error:
-                print(f"Fallback WebDriver setup failed: {fallback_error}")
-                raise Exception("Unable to initialize WebDriver")
+        # Try multiple approaches to find working browser
+        browser_attempts = [
+            # Try ChromeDriverManager first - most reliable
+            ("ChromeDriverManager", lambda: self._try_chromedriver_manager(chrome_options))
+        ]
         
-        return self.driver
+        for attempt_name, attempt in browser_attempts:
+            try:
+                print(f"Trying {attempt_name}...")
+                self.driver = attempt()
+                if self.driver:
+                    print(f"✓ WebDriver setup successful with {attempt_name}")
+                    return self.driver
+            except Exception as e:
+                print(f"✗ {attempt_name} failed: {str(e)[:200]}")
+                continue
+        
+        raise Exception("Unable to initialize WebDriver - no compatible browser found")
+    
+    def _try_chromium_setup(self, chrome_options):
+        """Try to set up with Chromium using ChromeDriverManager"""
+        try:
+            print("Setting up Chromium with ChromeDriverManager...")
+            
+            # Use the known working Chromium path from Nix
+            chromium_path = '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium'
+            chrome_options.binary_location = chromium_path
+            
+            # Install compatible ChromeDriver
+            service = Service(ChromeDriverManager().install())
+            
+            # Add more stability options for Replit environment
+            chrome_options.add_argument('--disable-background-networking')
+            chrome_options.add_argument('--disable-sync')
+            chrome_options.add_argument('--disable-translate')
+            chrome_options.add_argument('--disable-ipc-flooding-protection')
+            chrome_options.add_argument('--disable-hang-monitor')
+            chrome_options.add_argument('--disable-popup-blocking')
+            chrome_options.add_argument('--disable-prompt-on-repost')
+            chrome_options.add_argument('--disable-domain-reliability')
+            chrome_options.add_argument('--disable-component-extensions-with-background-pages')
+            
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+            print("✓ Chromium WebDriver setup successful")
+            return driver
+            
+        except Exception as e:
+            print(f"Chromium setup failed: {e}")
+            raise Exception(f"Chromium WebDriver setup failed: {e}")
+    
+    def _try_chrome_setup(self, chrome_options):
+        """Try to set up with system Chrome"""
+        chrome_options.binary_location = None  # Reset binary location
+        return webdriver.Chrome(options=chrome_options)
+    
+    def _try_chromedriver_manager(self, chrome_options):
+        """Try to set up with ChromeDriverManager using Chromium"""
+        import os
+        import subprocess
+        
+        print("Installing ChromeDriver and setting up with Chromium...")
+        
+        # Force fresh download of latest ChromeDriver version
+        import shutil
+        cache_dir = os.path.expanduser('~/.wdm')
+        if os.path.exists(cache_dir):
+            shutil.rmtree(cache_dir)
+        
+        driver_path = ChromeDriverManager().install()
+        print(f"ChromeDriver installed at: {driver_path}")
+        
+        # Ensure ChromeDriver has execute permissions
+        os.chmod(driver_path, 0o755)
+        
+        # Test ChromeDriver binary directly
+        try:
+            result = subprocess.run([driver_path, '--version'], 
+                                  capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                print(f"✓ ChromeDriver binary test successful: {result.stdout.strip()}")
+            else:
+                print(f"✗ ChromeDriver binary test failed: {result.stderr}")
+                raise Exception(f"ChromeDriver binary test failed")
+        except Exception as e:
+            print(f"✗ ChromeDriver binary test error: {e}")
+            raise
+        
+        # Set Chromium binary location
+        chromium_path = '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium'
+        chrome_options.binary_location = chromium_path
+        
+        # Add environment variables for library paths
+        os.environ['LD_LIBRARY_PATH'] = '/nix/store/*/lib:' + os.environ.get('LD_LIBRARY_PATH', '')
+        
+        # Create service with the ChromeDriver
+        service = Service(driver_path, log_output='webdriver.log')
+        
+        # Create driver
+        print("Creating WebDriver instance...")
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        print("✓ ChromeDriverManager + Chromium setup successful")
+        return driver
     
     def capture_viewport(self, url, viewport_config):
         """Capture website at specific viewport size"""
@@ -103,16 +186,20 @@ class WebsiteCapture:
             
             print(f"Capturing {url} at {viewport_config['device']} ({viewport_config['width']}x{viewport_config['height']})")
             
-            # Navigate to page
+            # Navigate to page with timeout
+            print(f"Navigating to: {url}")
+            self.driver.set_page_load_timeout(30)
             self.driver.get(url)
             
             # Wait for page to load
-            WebDriverWait(self.driver, 10).until(
+            print("Waiting for page load...")
+            WebDriverWait(self.driver, 15).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
             
-            # Additional wait for dynamic content
-            time.sleep(3)
+            # Additional wait for dynamic content (reduced for faster testing)
+            print("Waiting for dynamic content...")
+            time.sleep(2)
             
             # Get page dimensions for full scroll capture
             total_height = self.driver.execute_script("return document.body.scrollHeight")
@@ -170,6 +257,9 @@ class WebsiteCapture:
                     const match = value.match(/(-?\\d*\\.?\\d+)/);
                     return match ? parseFloat(match[1]) : 0;
                 };
+                
+                // Make parsePixelValue globally available for element processing
+                window.parsePixelValue = parsePixelValue;
                 
                 // Extract background images and IMG src
                 const backgroundImages = [];

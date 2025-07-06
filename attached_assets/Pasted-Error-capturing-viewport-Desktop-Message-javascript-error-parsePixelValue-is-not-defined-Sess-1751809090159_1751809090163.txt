@@ -1,0 +1,86 @@
+Error capturing viewport Desktop: Message: javascript error: parsePixelValue is not defined
+  (Session info: chrome=137.0.7151.122)
+Stacktrace:
+        GetHandleVerifier [0x0xd43b03+62899]
+        GetHandleVerifier [0x0xd43b44+62964]
+        (No symbol) [0x0xb710f3]
+        (No symbol) [0x0xb778e0]
+        (No symbol) [0x0xb79e53]
+        (No symbol) [0x0xc00ddd]
+        (No symbol) [0x0xbde50c]
+        (No symbol) [0x0xbffd81]
+        (No symbol) [0x0xbde306]
+        (No symbol) [0x0xbad670]
+        (No symbol) [0x0xbae4e4]
+        GetHandleVerifier [0x0xfa4793+2556483]
+        GetHandleVerifier [0x0xf9fd02+2537394]
+        GetHandleVerifier [0x0xd6a2fa+220586]
+        GetHandleVerifier [0x0xd5aae8+157080]
+        GetHandleVerifier [0x0xd6141d+184013]
+        GetHandleVerifier [0x0xd4ba68+95512]
+        GetHandleVerifier [0x0xd4bc10+95936]
+        GetHandleVerifier [0x0xd36b5a+9738]
+        BaseThreadInitThunk [0x0x76b8fcc9+25]
+        RtlGetAppContainerNamedObjectPath [0x0x772c82ae+286]
+        RtlGetAppContainerNamedObjectPath [0x0x772c827e+238]
+
+Failed to capture desktop
+Capturing https://www.bottomless.com at Tablet (768x1024)
+Error capturing viewport Tablet: Message: javascript error: parsePixelValue is not defined
+  (Session info: chrome=137.0.7151.122)
+Stacktrace:
+        GetHandleVerifier [0x0xd43b03+62899]
+        GetHandleVerifier [0x0xd43b44+62964]
+        (No symbol) [0x0xb710f3]
+        (No symbol) [0x0xb778e0]
+        (No symbol) [0x0xb79e53]
+        (No symbol) [0x0xc00ddd]
+        (No symbol) [0x0xbde50c]
+        (No symbol) [0x0xbffd81]
+        (No symbol) [0x0xbde306]
+        (No symbol) [0x0xbad670]
+        (No symbol) [0x0xbae4e4]
+        GetHandleVerifier [0x0xfa4793+2556483]
+        GetHandleVerifier [0x0xf9fd02+2537394]
+        GetHandleVerifier [0x0xd6a2fa+220586]
+        GetHandleVerifier [0x0xd5aae8+157080]
+        GetHandleVerifier [0x0xd6141d+184013]
+        GetHandleVerifier [0x0xd4ba68+95512]
+        GetHandleVerifier [0x0xd4bc10+95936]
+        GetHandleVerifier [0x0xd36b5a+9738]
+        BaseThreadInitThunk [0x0x76b8fcc9+25]
+        RtlGetAppContainerNamedObjectPath [0x0x772c82ae+286]
+        RtlGetAppContainerNamedObjectPath [0x0x772c827e+238]
+
+Failed to capture tablet
+Capturing https://www.bottomless.com at Mobile (375x667)
+Created TensorFlow Lite XNNPACK delegate for CPU.
+Attempting to use a delegate that only supports static-sized tensors with a graph that has dynamic-sized tensors (tensor#-1 is a dynamic-sized tensor).
+Error capturing viewport Mobile: Message: javascript error: parsePixelValue is not defined
+  (Session info: chrome=137.0.7151.122)
+Stacktrace:
+        GetHandleVerifier [0x0xd43b03+62899]
+        GetHandleVerifier [0x0xd43b44+62964]
+        (No symbol) [0x0xb710f3]
+        (No symbol) [0x0xb778e0]
+        (No symbol) [0x0xb79e53]
+        (No symbol) [0x0xc00ddd]
+        (No symbol) [0x0xbde50c]
+        (No symbol) [0x0xbffd81]
+        (No symbol) [0x0xbde306]
+        (No symbol) [0x0xbad670]
+        (No symbol) [0x0xbae4e4]
+        GetHandleVerifier [0x0xfa4793+2556483]
+        GetHandleVerifier [0x0xf9fd02+2537394]
+        GetHandleVerifier [0x0xd6a2fa+220586]
+        GetHandleVerifier [0x0xd5aae8+157080]
+        GetHandleVerifier [0x0xd6141d+184013]
+        GetHandleVerifier [0x0xd4ba68+95512]
+        GetHandleVerifier [0x0xd4bc10+95936]
+        GetHandleVerifier [0x0xd36b5a+9738]
+        BaseThreadInitThunk [0x0x76b8fcc9+25]
+        RtlGetAppContainerNamedObjectPath [0x0x772c82ae+286]
+        RtlGetAppContainerNamedObjectPath [0x0x772c827e+238]
+
+Failed to capture mobile
+127.0.0.1 - - [06/Jul/2025 19:07:45] "POST /api/capture-responsive HTTP/1.1" 500 -

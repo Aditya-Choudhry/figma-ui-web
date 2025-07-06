@@ -1,8 +1,8 @@
-modules = ["nodejs-20", "python-3.11", "web"]
+modules = ["nodejs-20", "python-3.11", "web", "python3"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["geckodriver", "openssl", "postgresql", "chromium"]
+packages = ["chromium", "geckodriver", "openssl", "postgresql", "glib", "nss", "nspr", "xorg.libxcb", "xorg.libX11", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXrandr"]
 
 [workflows]
 runButton = "Project"

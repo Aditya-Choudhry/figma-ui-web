@@ -1,0 +1,69 @@
+VM674:6 
+        
+        
+       POST http://localhost:5000/api/capture-responsive 500 (INTERNAL SERVER ERROR)
+onmessage @ VM674:6
+postMessage
+postMessage @ figma_app-f1bcbbd97adc86a8.min.js.br:216
+await in postMessage
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1139
+postMessageAndWait @ 7982-7f3b8988be551dc8.min.js.br:1139
+fetch @ 7982-7f3b8988be551dc8.min.js.br:1139
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1113
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func294 @ jsvm-cpp.wasm.br:0x33c57
+$jsvm_callFunction @ jsvm-cpp.wasm.br:0xaecb
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1014
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1042
+iframeMessageHandler @ 7982-7f3b8988be551dc8.min.js.br:1000
+T.toplevelWindowMessageChannel.port2.onmessage @ figma_app-f1bcbbd97adc86a8.min.js.br:196
+vendor-core-0d62532059ea4067.min.js.br:77 Responsive capture error: Error {message: 'Server error: 500', stack: '    at <anonymous> (PLUGIN_3_SOURCE:25)\n'}
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1042
+deepWrap @ 7982-7f3b8988be551dc8.min.js.br:993
+e.registerPromise.then.e.deepWrap.message @ 7982-7f3b8988be551dc8.min.js.br:1113
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1113
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func294 @ jsvm-cpp.wasm.br:0x33c57
+$jsvm_callFunction @ jsvm-cpp.wasm.br:0xaecb
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1014
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1042
+iframeMessageHandler @ 7982-7f3b8988be551dc8.min.js.br:1000
+T.toplevelWindowMessageChannel.port2.onmessage @ figma_app-f1bcbbd97adc86a8.min.js.br:196
+vendor-core-0d62532059ea4067.min.js.br:77 [Local fonts] using agent

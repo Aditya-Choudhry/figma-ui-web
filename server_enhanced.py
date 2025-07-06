@@ -1647,7 +1647,8 @@ class WebsiteCapture:
                     'textAlign': element.get('visual', {}).get('textAlign', 'left'),
                     'textDecoration': element.get('visual', {}).get('textDecoration', 'none'),
                     'position': element.get('position', {}),
-                    'tag': element.get('tagName') or element.get('tag', 'unknown')
+                    'tag': element.get('tagName') or element.get('tag', 'unknown'),
+                    'figmaProperties': self.map_css_to_figma_text(element.get('visual', {}))
                 }
                 text_elements.append(text_info)
             
@@ -1685,19 +1686,10 @@ class WebsiteCapture:
                 }
                 shapes['dots'].append(dot_info)
             
-            # Detect rectangles (div elements with defined dimensions)
-            elif (tag_name in ['div', 'section', 'article'] and 
-                  position.get('width', 0) > 0 and position.get('height', 0) > 0):
-                
-                rect_info = {
-                    'width': position.get('width', 0),
-                    'height': position.get('height', 0),
-                    'backgroundColor': visual.get('backgroundColor', 'transparent'),
-                    'borderRadius': visual.get('borderRadius', '0px'),
-                    'position': position,
-                    'border': visual.get('border', 'none')
-                }
-                shapes['rectangles'].append(rect_info)
+            # Create detailed Figma rectangles for each structural element
+            if tag_name in ['div', 'section', 'article', 'header', 'footer', 'main', 'nav', 'aside']:
+                figma_rect = self.create_figma_rectangle_section(element, visual, position, tag_name)
+                shapes['rectangles'].append(figma_rect)
         
         # Analyze color usage with context
         color_analysis = []
@@ -1798,6 +1790,199 @@ class WebsiteCapture:
             }
         except ValueError:
             return None
+
+    def map_css_to_figma_text(self, visual_styles):
+        """Map CSS text properties to Figma text properties"""
+        return {
+            'fills': [{'type': 'SOLID', 'color': self.parse_color(visual_styles.get('color', '#000000'))}],
+            'fontSize': self.parse_pixel_value(visual_styles.get('fontSize', '16px')),
+            'fontName': {
+                'family': visual_styles.get('fontFamily', 'Inter').split(',')[0].strip().strip('"\''),
+                'style': self.map_font_style_weight(visual_styles.get('fontWeight', 'normal'), visual_styles.get('fontStyle', 'normal'))
+            },
+            'lineHeight': self.map_line_height(visual_styles.get('lineHeight', 'normal')),
+            'letterSpacing': self.map_letter_spacing(visual_styles.get('letterSpacing', '0px')),
+            'textAlignHorizontal': self.map_text_align(visual_styles.get('textAlign', 'left')),
+            'textDecoration': self.map_text_decoration(visual_styles.get('textDecoration', 'none'))
+        }
+    
+    def create_figma_rectangle_section(self, element, visual, position, tag_name):
+        """Create comprehensive Figma rectangle with all CSS properties mapped"""
+        x = position.get('x', 0)
+        y = position.get('y', 0)
+        width = position.get('width', 100)
+        height = position.get('height', 40)
+        
+        # Map background fills
+        fills = []
+        if visual.get('backgroundColor') and visual.get('backgroundColor') != 'transparent':
+            color_rgb = self.parse_color(visual.get('backgroundColor'))
+            if color_rgb:
+                fills.append({
+                    'type': 'SOLID',
+                    'color': color_rgb
+                })
+        
+        # Map border strokes
+        strokes = []
+        stroke_weight = 0
+        if visual.get('border') and visual.get('border') != 'none':
+            border_parts = visual.get('border', '').split()
+            if len(border_parts) >= 3:
+                stroke_weight = self.parse_pixel_value(border_parts[0])
+                stroke_color = border_parts[2] if len(border_parts) > 2 else '#000000'
+                color_rgb = self.parse_color(stroke_color)
+                if color_rgb:
+                    strokes.append({
+                        'type': 'SOLID',
+                        'color': color_rgb
+                    })
+        
+        # Map corner radius
+        corner_radius = self.parse_pixel_value(visual.get('borderRadius', '0px'))
+        
+        # Map effects (shadows)
+        effects = []
+        if visual.get('boxShadow') and visual.get('boxShadow') != 'none':
+            shadow_effect = self.map_box_shadow_to_figma(visual.get('boxShadow'))
+            if shadow_effect:
+                effects.append(shadow_effect)
+        
+        # Detect Auto Layout properties
+        layout_mode = 'NONE'
+        primary_axis_align = 'MIN'
+        counter_axis_align = 'MIN'
+        item_spacing = 0
+        
+        if visual.get('display') == 'flex':
+            layout_mode = 'HORIZONTAL' if visual.get('flexDirection', 'row') == 'row' else 'VERTICAL'
+            primary_axis_align = self.map_justify_content(visual.get('justifyContent', 'flex-start'))
+            counter_axis_align = self.map_align_items(visual.get('alignItems', 'stretch'))
+            item_spacing = self.parse_pixel_value(visual.get('gap', '0px'))
+        
+        return {
+            'type': 'RECTANGLE',
+            'name': f"{tag_name.upper()}_Section",
+            'width': width,
+            'height': height,
+            'backgroundColor': visual.get('backgroundColor', 'transparent'),
+            'borderRadius': visual.get('borderRadius', '0px'),
+            'position': position,
+            'border': visual.get('border', 'none'),
+            'figmaProperties': {
+                'x': x,
+                'y': y,
+                'width': width,
+                'height': height,
+                'fills': fills,
+                'strokes': strokes,
+                'strokeWeight': stroke_weight,
+                'cornerRadius': corner_radius,
+                'effects': effects,
+                'layoutMode': layout_mode,
+                'primaryAxisAlignItems': primary_axis_align,
+                'counterAxisAlignItems': counter_axis_align,
+                'paddingLeft': self.parse_pixel_value(visual.get('paddingLeft', '0px')),
+                'paddingRight': self.parse_pixel_value(visual.get('paddingRight', '0px')),
+                'paddingTop': self.parse_pixel_value(visual.get('paddingTop', '0px')),
+                'paddingBottom': self.parse_pixel_value(visual.get('paddingBottom', '0px')),
+                'itemSpacing': item_spacing,
+                'opacity': float(visual.get('opacity', 1)),
+                'visible': visual.get('display', 'block') != 'none'
+            },
+            'cssProperties': visual,
+            'hierarchicalInfo': {
+                'depth': element.get('visual_hierarchy', {}).get('depth', 0),
+                'hasChildren': element.get('visual_hierarchy', {}).get('hasChildren', False),
+                'parentTag': element.get('visual_hierarchy', {}).get('parentTag'),
+                'zIndex': self.parse_pixel_value(visual.get('zIndex', '0'))
+            }
+        }
+    
+    def map_font_style_weight(self, weight, style):
+        """Map CSS font weight and style to Figma font style"""
+        weight_mapping = {
+            '100': 'Thin', '200': 'ExtraLight', '300': 'Light',
+            '400': 'Regular', '500': 'Medium', '600': 'SemiBold',
+            '700': 'Bold', '800': 'ExtraBold', '900': 'Black',
+            'normal': 'Regular', 'bold': 'Bold'
+        }
+        base_style = weight_mapping.get(str(weight), 'Regular')
+        return base_style + (' Italic' if style == 'italic' else '')
+    
+    def map_line_height(self, line_height):
+        """Map CSS line height to Figma line height"""
+        if line_height == 'normal':
+            return {'unit': 'AUTO'}
+        elif line_height.endswith('px'):
+            return {'unit': 'PIXELS', 'value': self.parse_pixel_value(line_height)}
+        elif line_height.endswith('%'):
+            return {'unit': 'PERCENT', 'value': float(line_height.rstrip('%'))}
+        else:
+            try:
+                return {'unit': 'PERCENT', 'value': float(line_height) * 100}
+            except:
+                return {'unit': 'AUTO'}
+    
+    def map_letter_spacing(self, letter_spacing):
+        """Map CSS letter spacing to Figma letter spacing"""
+        if letter_spacing == 'normal':
+            return {'unit': 'PIXELS', 'value': 0}
+        return {'unit': 'PIXELS', 'value': self.parse_pixel_value(letter_spacing)}
+    
+    def map_text_align(self, text_align):
+        """Map CSS text align to Figma text align"""
+        mapping = {'left': 'LEFT', 'center': 'CENTER', 'right': 'RIGHT', 'justify': 'JUSTIFIED'}
+        return mapping.get(text_align, 'LEFT')
+    
+    def map_text_decoration(self, text_decoration):
+        """Map CSS text decoration to Figma text decoration"""
+        if 'underline' in text_decoration:
+            return 'UNDERLINE'
+        elif 'line-through' in text_decoration:
+            return 'STRIKETHROUGH'
+        return 'NONE'
+    
+    def map_justify_content(self, justify_content):
+        """Map CSS justify-content to Figma primary axis alignment"""
+        mapping = {
+            'flex-start': 'MIN', 'center': 'CENTER', 
+            'flex-end': 'MAX', 'space-between': 'SPACE_BETWEEN'
+        }
+        return mapping.get(justify_content, 'MIN')
+    
+    def map_align_items(self, align_items):
+        """Map CSS align-items to Figma counter axis alignment"""
+        mapping = {
+            'flex-start': 'MIN', 'center': 'CENTER',
+            'flex-end': 'MAX', 'stretch': 'STRETCH'
+        }
+        return mapping.get(align_items, 'MIN')
+    
+    def map_box_shadow_to_figma(self, box_shadow):
+        """Map CSS box-shadow to Figma drop shadow effect"""
+        try:
+            import re
+            # Parse box-shadow: offset-x offset-y blur-radius spread-radius color
+            numbers = re.findall(r'-?\d+(?:\.\d+)?px', box_shadow)
+            colors = re.findall(r'#[0-9A-Fa-f]{3,6}|rgba?\([^)]+\)', box_shadow)
+            
+            if len(numbers) >= 3:
+                shadow_color = self.parse_color(colors[0] if colors else '#000000')
+                return {
+                    'type': 'DROP_SHADOW',
+                    'offset': {
+                        'x': self.parse_pixel_value(numbers[0]),
+                        'y': self.parse_pixel_value(numbers[1])
+                    },
+                    'radius': self.parse_pixel_value(numbers[2]),
+                    'spread': self.parse_pixel_value(numbers[3]) if len(numbers) > 3 else 0,
+                    'color': shadow_color if shadow_color else {'r': 0, 'g': 0, 'b': 0},
+                    'visible': True
+                }
+        except:
+            pass
+        return None
 
     def create_error_response(self, url, viewport_config, error_message):
         """Create mock capture data for development when no browser is available"""

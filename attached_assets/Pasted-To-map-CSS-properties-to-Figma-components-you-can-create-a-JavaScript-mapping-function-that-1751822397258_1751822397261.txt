@@ -1,0 +1,168 @@
+To **map CSS properties to Figma components**, you can create a **JavaScript mapping function** that translates common CSS styles into their **Figma equivalents**. This is useful for building design-to-code tools, reverse engineering websites into design files, or creating Figma plugin utilities.
+
+---
+
+## 🧠 Core Mapping Logic: CSS → Figma
+
+Below is a JavaScript function that **maps a CSS object** to a **Figma node structure** (simplified). You can expand this depending on your use case.
+
+---
+
+### ✅ FUNCTION: `mapCssToFigmaNode(css)`
+
+```js
+function mapCssToFigmaNode(css) {
+  const figmaNode = {
+    type: "RECTANGLE", // or TEXT, LINE, etc.
+    fills: [],
+    strokes: [],
+    cornerRadius: 0,
+    strokeWeight: 0,
+    textStyle: {},
+    layoutMode: "NONE",
+    effects: [],
+    width: 0,
+    height: 0,
+    position: { x: 0, y: 0 },
+  };
+
+  // Background color
+  if (css.backgroundColor) {
+    figmaNode.fills.push({
+      type: "SOLID",
+      color: hexToRgb(css.backgroundColor)
+    });
+  }
+
+  // Border
+  if (css.borderColor && css.borderWidth) {
+    figmaNode.strokes.push({
+      type: "SOLID",
+      color: hexToRgb(css.borderColor)
+    });
+    figmaNode.strokeWeight = parseInt(css.borderWidth);
+  }
+
+  // Border radius
+  if (css.borderRadius) {
+    figmaNode.cornerRadius = parseInt(css.borderRadius);
+  }
+
+  // Font style
+  if (css.fontSize || css.fontWeight || css.fontFamily || css.color) {
+    figmaNode.type = "TEXT";
+    figmaNode.textStyle = {
+      fontSize: parseInt(css.fontSize),
+      fontWeight: css.fontWeight,
+      fontFamily: css.fontFamily,
+      fills: [{
+        type: "SOLID",
+        color: hexToRgb(css.color)
+      }]
+    };
+  }
+
+  // Box Shadow
+  if (css.boxShadow) {
+    const parsedShadow = parseBoxShadow(css.boxShadow);
+    if (parsedShadow) {
+      figmaNode.effects.push({
+        type: "DROP_SHADOW",
+        ...parsedShadow
+      });
+    }
+  }
+
+  // Size
+  if (css.width) figmaNode.width = parseInt(css.width);
+  if (css.height) figmaNode.height = parseInt(css.height);
+
+  return figmaNode;
+}
+
+// Helper: Convert HEX to Figma RGB
+function hexToRgb(hex) {
+  const bigint = parseInt(hex.replace("#", ""), 16);
+  return {
+    r: ((bigint >> 16) & 255) / 255,
+    g: ((bigint >> 8) & 255) / 255,
+    b: (bigint & 255) / 255
+  };
+}
+
+// Helper: Parse CSS box-shadow
+function parseBoxShadow(shadowStr) {
+  const parts = shadowStr.match(/(-?\d+px)/g);
+  const color = shadowStr.match(/#[0-9A-Fa-f]{6}|rgba?\(.+?\)/g);
+  if (!parts || !color) return null;
+  return {
+    offset: { x: parseInt(parts[0]), y: parseInt(parts[1]) },
+    radius: parseInt(parts[2]),
+    color: hexToRgb(color[0].startsWith("#") ? color[0] : "#000000"),
+    visible: true,
+    spread: parts[3] ? parseInt(parts[3]) : 0
+  };
+}
+```
+
+---
+
+## 🧪 Example Usage
+
+```js
+const css = {
+  backgroundColor: "#1E88E5",
+  borderColor: "#000",
+  borderWidth: "2px",
+  borderRadius: "8px",
+  fontSize: "18px",
+  fontWeight: "bold",
+  fontFamily: "Arial",
+  color: "#FFF",
+  width: "200px",
+  height: "50px",
+  boxShadow: "4px 4px 10px #000000"
+};
+
+console.log(mapCssToFigmaNode(css));
+```
+
+---
+
+## 📌 Mapping Table (CSS ↔️ Figma)
+
+| CSS Property       | Figma Equivalent           | Notes                              |
+| ------------------ | -------------------------- | ---------------------------------- |
+| `background-color` | `fills`                    | HEX converted to RGB               |
+| `border`           | `strokes` + `strokeWeight` | No support for dashed in Figma yet |
+| `border-radius`    | `cornerRadius`             | Supports numeric px                |
+| `font-size`        | `textStyle.fontSize`       | Only for TEXT nodes                |
+| `font-weight`      | `textStyle.fontWeight`     | `400`, `700`, etc.                 |
+| `font-family`      | `textStyle.fontFamily`     | Must be available in Figma fonts   |
+| `color`            | `textStyle.fills`          | Text color                         |
+| `box-shadow`       | `effects`                  | Only `DROP_SHADOW` supported       |
+| `width` / `height` | `width`, `height`          | Optional — for layout definition   |
+
+---
+
+## 💥 Advanced: Auto-Layout Mapping
+
+If your CSS uses Flexbox or Grid, map it to:
+
+```js
+figmaNode.layoutMode = "HORIZONTAL" | "VERTICAL";
+figmaNode.primaryAxisAlignItems = "SPACE_BETWEEN";
+figmaNode.counterAxisAlignItems = "CENTER";
+```
+
+---
+
+## 🛠️ Want to Build a Figma Plugin?
+
+If you're making a **Figma plugin** that converts CSS to Figma components:
+
+* Use this mapping inside your plugin `code.ts`.
+* You can use `figma.createText()`, `figma.createRectangle()`, etc.
+* Apply the mapped properties on the generated nodes.
+
+Let me know if you want the **plugin starter code**.

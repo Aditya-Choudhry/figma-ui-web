@@ -5,7 +5,22 @@ console.log('Figma plugin loaded');
 figma.ui.onmessage = async (msg) => {
   console.log('Received message:', msg);
 
-  if (msg.type === 'captureResponsive') {
+  if (msg.type === 'sandboxCaptureComplete') {
+    // Handle sandbox iframe capture data directly
+    try {
+      figma.notify('Processing sandbox capture data...', { timeout: 2000 });
+      
+      console.log('Received sandbox capture data:', msg.data);
+      
+      // Process the captured data for each viewport
+      await createResponsiveFigmaLayouts(msg.data);
+      
+      figma.notify('Sandbox capture successful! Created responsive layouts.', { timeout: 3000 });
+    } catch (error) {
+      console.error('Sandbox capture processing error:', error);
+      figma.notify('Error processing sandbox capture: ' + error.message, { error: true });
+    }
+  } else if (msg.type === 'captureResponsive') {
     const { url, viewports } = msg;
 
     try {

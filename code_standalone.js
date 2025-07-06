@@ -5,17 +5,21 @@
 figma.showUI(__html__, { width: 450, height: 700 });
 
 // Listen for messages from the UI
-figma.ui.onmessage = async (msg) => {
+figma.ui.onmessage = (msg) => {
     if (msg.type === 'IMPORT_WEBSITE_DATA') {
-        try {
-            await processWebsiteData(msg.data);
-        } catch (error) {
-            figma.notify(`Error processing website data: ${error.message}`, { error: true });
-        }
+        processWebsiteData(msg.data)
+            .then(() => {
+                figma.notify('Website data processed successfully!', { timeout: 3000 });
+            })
+            .catch((error) => {
+                console.error('Error processing website data:', error);
+                figma.notify(`Error processing website data: ${error.message}`, { error: true });
+            });
     }
 };
 
-async function processWebsiteData(data) {
+function processWebsiteData(data) {
+    return new Promise((resolve, reject) => {
     try {
         figma.notify(`Processing ${data.device} viewport from ${data.url}...`);
         
@@ -36,7 +40,7 @@ async function processWebsiteData(data) {
             if (elementCount >= 20) break; // Limit elements for performance
             
             try {
-                const figmaNode = await createFigmaNodeFromElement(element);
+                const figmaNode = createFigmaNodeFromElement(element);
                 if (figmaNode) {
                     mainFrame.appendChild(figmaNode);
                     elementCount++;
@@ -59,20 +63,23 @@ async function processWebsiteData(data) {
         figma.viewport.scrollAndZoomIntoView([mainFrame]);
         
         figma.notify(`✓ Created ${elementCount} elements for ${data.device} viewport`);
+        resolve();
         
     } catch (error) {
         console.error('Processing error:', error);
         figma.notify(`Error: ${error.message}`, { error: true });
+        reject(error);
     }
+    });
 }
 
-async function createFigmaNodeFromElement(element) {
+function createFigmaNodeFromElement(element) {
     try {
         const nodeType = determineAdvancedNodeType(element);
         
         switch (nodeType) {
             case 'TEXT':
-                return await createAdvancedTextNode(element);
+                return createAdvancedTextNode(element);
             case 'IMAGE':
                 return createImageNode(element);
             case 'RECTANGLE':
@@ -129,7 +136,7 @@ async function createAdvancedTextNode(element) {
         const fontFamily = mapWebFontToFigma(element.typography.fontFamily);
         const fontStyle = mapFontStyleAndWeight(element.typography.fontWeight, element.typography.fontStyle);
         
-        await figma.loadFontAsync({ family: fontFamily, style: fontStyle });
+        figma.loadFontAsync({ family: fontFamily, style: fontStyle }).catch(() => {});
         
         // Set text content
         textNode.characters = element.textContent.trim() || 'Text';
@@ -210,7 +217,7 @@ async function createImageNode(element) {
         // Create placeholder text for image
         if (element.attributes && element.attributes.alt) {
             const placeholderText = figma.createText();
-            await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+            figma.loadFontAsync({ family: 'Inter', style: 'Regular' }).catch(() => {});
             placeholderText.characters = `Image: ${element.attributes.alt}`;
             placeholderText.fontSize = 12;
             placeholderText.fills = [{ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }];

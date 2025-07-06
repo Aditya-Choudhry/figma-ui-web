@@ -1,0 +1,84 @@
+You're seeing this error:
+
+```
+Uncaught SyntaxError: Failed to execute 'write' on 'Document': await is only valid in async functions and the top level bodies of modules
+```
+
+because you're trying to use `await` in a non-async script block **without marking it as `type="module"`** or wrapping the code inside an `async` function.
+
+### ✅ FIX
+
+If you **must** avoid `async/await` entirely, you can just use **Promises with `.then()` chaining** instead.
+
+---
+
+### ✅ Example: Rewriting `await`-based logic using `.then()` style
+
+If your code looked like this:
+
+```javascript
+// ❌ This will break if not inside an async function
+const data = await fetch('https://api.example.com/data').then(res => res.json());
+console.log(data);
+```
+
+You should rewrite it like this:
+
+```javascript
+// ✅ No async/await used
+fetch('https://api.example.com/data')
+  .then(res => res.json())
+  .then(data => {
+    console.log(data);
+    // Use your data here
+  })
+  .catch(err => {
+    console.error('Error:', err);
+  });
+```
+
+---
+
+### ✅ If you're inside an iframe script (like in your error)
+
+If your code looks like this (simplified):
+
+```html
+<script>
+  onmessage = async (event) => {
+    const data = await someAsyncFunc();
+    document.write(data);
+  }
+</script>
+```
+
+You must rewrite it like this:
+
+```html
+<script>
+  onmessage = function(event) {
+    someAsyncFunc()
+      .then(data => {
+        document.write(data);
+      })
+      .catch(err => console.error(err));
+  };
+
+  function someAsyncFunc() {
+    return fetch('https://example.com')
+      .then(res => res.text()); // or res.json() depending on need
+  }
+</script>
+```
+
+---
+
+### TL;DR
+
+* `await` only works inside an `async` function or `<script type="module">`.
+* To **avoid using `async/await`**, always return a Promise and use `.then()` and `.catch()` chaining.
+* Never try `document.write(await ...)` in a top-level regular script — it will break.
+
+---
+
+If you show me the **exact code you're trying to run**, I’ll rewrite it properly for you without `async/await`.

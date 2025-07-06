@@ -1,0 +1,15 @@
+{
+  "name": "Website to Figma Exporter - Standalone",
+  "id": "website-to-figma-standalone",
+  "api": "1.0.0",
+  "main": "code_standalone.js",
+  "ui": "ui_standalone.html",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "devAllowedDomains": ["*"],
+    "reasoning": "Plugin needs to access websites for capture and conversion to Figma"
+  }
+}

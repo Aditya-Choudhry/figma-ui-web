@@ -316,6 +316,26 @@
     </div>
     
     <script>
+        // CSS Tree for robust CSS parsing (lightweight, zero dependencies)
+        const cssTree = {
+            parse: function(css) {
+                // Simple CSS parser fallback if css-tree isn't available
+                const rules = [];
+                const ruleMatches = css.match(/([^{]+)\{([^}]*)\}/g);
+                if (ruleMatches) {
+                    ruleMatches.forEach(rule => {
+                        const parts = rule.split('{');
+                        if (parts.length === 2) {
+                            const selector = parts[0].trim();
+                            const declarations = parts[1].replace('}', '').trim();
+                            rules.push({ selector, declarations });
+                        }
+                    });
+                }
+                return { rules };
+            }
+        };
+
         class StandaloneWebsiteCapture {
             constructor() {
                 this.captureForm = document.getElementById('captureForm');
@@ -434,10 +454,17 @@
             extractContentFromIframe(iframe, viewportConfig) {
                 try {
                     const doc = iframe.contentDocument || iframe.contentWindow.document;
+                    const win = iframe.contentWindow;
                     const elements = [];
                     
-                    // Traverse DOM and extract elements
-                    this.traverseDOM(doc.body, elements, 0);
+                    // Extract stylesheets for comprehensive CSS analysis
+                    const stylesheets = this.extractStylesheets(doc);
+                    
+                    // Traverse DOM and extract elements with comprehensive analysis
+                    this.traverseDOM(doc.body, elements, 0, win, stylesheets);
+                    
+                    // Extract images and convert to base64 if possible
+                    const images = this.extractImages(doc, win);
                     
                     return {
                         device: viewportConfig.device,
@@ -451,33 +478,38 @@
                             url: iframe.src,
                             viewport_width: viewportConfig.width,
                             viewport_height: viewportConfig.height,
-                            device_pixel_ratio: 1
+                            device_pixel_ratio: win.devicePixelRatio || 1,
+                            total_height: Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight)
                         },
-                        elements: elements.slice(0, 20), // Limit elements
+                        elements: elements.slice(0, 30), // Increased limit
                         text_styles: this.extractTextStyles(elements),
                         colors: this.extractColors(elements),
-                        images: []
+                        images: images,
+                        stylesheets: stylesheets
                     };
                 } catch (error) {
                     throw new Error('Cannot access iframe content due to CORS restrictions');
                 }
             }
             
-            traverseDOM(element, elements, depth) {
-                if (depth > 5 || elements.length > 20) return; // Limit recursion
+            traverseDOM(element, elements, depth, win, stylesheets) {
+                if (depth > 6 || elements.length > 30) return; // Limit recursion
                 
                 if (element.nodeType !== Node.ELEMENT_NODE) return;
                 
                 const rect = element.getBoundingClientRect();
-                const computedStyle = window.getComputedStyle(element);
+                const computedStyle = win.getComputedStyle(element);
                 
-                // Skip hidden elements
-                if (rect.width === 0 || rect.height === 0) return;
+                // Skip hidden elements but allow small elements for better coverage
+                if (rect.width <= 1 && rect.height <= 1) return;
+                if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden') return;
                 
+                // Enhanced element data extraction
                 const elementData = {
                     tagName: element.tagName,
                     className: element.className,
-                    textContent: element.textContent ? element.textContent.trim().substring(0, 100) : '',
+                    id: element.id,
+                    textContent: this.getCleanTextContent(element),
                     position: {
                         x: Math.round(rect.left),
                         y: Math.round(rect.top),
@@ -488,24 +520,67 @@
                         backgroundColor: computedStyle.backgroundColor,
                         color: computedStyle.color,
                         borderRadius: computedStyle.borderRadius,
-                        boxShadow: computedStyle.boxShadow
+                        boxShadow: computedStyle.boxShadow,
+                        border: computedStyle.border,
+                        borderColor: computedStyle.borderColor,
+                        borderWidth: computedStyle.borderWidth,
+                        borderStyle: computedStyle.borderStyle,
+                        opacity: computedStyle.opacity,
+                        backgroundImage: computedStyle.backgroundImage,
+                        backgroundSize: computedStyle.backgroundSize,
+                        backgroundPosition: computedStyle.backgroundPosition
                     },
                     typography: {
                         fontFamily: computedStyle.fontFamily,
                         fontSize: computedStyle.fontSize,
                         fontWeight: computedStyle.fontWeight,
+                        fontStyle: computedStyle.fontStyle,
                         lineHeight: computedStyle.lineHeight,
                         textAlign: computedStyle.textAlign,
+                        textDecoration: computedStyle.textDecoration,
+                        letterSpacing: computedStyle.letterSpacing,
+                        textTransform: computedStyle.textTransform,
                         color: computedStyle.color
                     },
                     layout_detection: {
-                        isTextNode: element.children.length === 0 && element.textContent.trim().length > 0,
+                        isTextNode: this.isTextNode(element),
                         isFlexContainer: computedStyle.display === 'flex',
-                        isGridContainer: computedStyle.display === 'grid'
+                        isGridContainer: computedStyle.display === 'grid',
+                        isBlock: computedStyle.display === 'block',
+                        isInline: computedStyle.display === 'inline',
+                        isInlineBlock: computedStyle.display === 'inline-block',
+                        position: computedStyle.position,
+                        float: computedStyle.float
+                    },
+                    flex_properties: {
+                        flexDirection: computedStyle.flexDirection,
+                        justifyContent: computedStyle.justifyContent,
+                        alignItems: computedStyle.alignItems,
+                        flexWrap: computedStyle.flexWrap,
+                        alignContent: computedStyle.alignContent,
+                        gap: computedStyle.gap || computedStyle.gridGap
+                    },
+                    spacing: {
+                        marginTop: computedStyle.marginTop,
+                        marginRight: computedStyle.marginRight,
+                        marginBottom: computedStyle.marginBottom,
+                        marginLeft: computedStyle.marginLeft,
+                        paddingTop: computedStyle.paddingTop,
+                        paddingRight: computedStyle.paddingRight,
+                        paddingBottom: computedStyle.paddingBottom,
+                        paddingLeft: computedStyle.paddingLeft
                     },
                     visual_hierarchy: {
                         zIndex: computedStyle.zIndex === 'auto' ? 1 : parseInt(computedStyle.zIndex) || 1,
                         depth: depth
+                    },
+                    attributes: {
+                        href: element.href,
+                        src: element.src,
+                        alt: element.alt,
+                        title: element.title,
+                        role: element.role,
+                        type: element.type
                     }
                 };
                 
@@ -513,8 +588,90 @@
                 
                 // Recursively process children
                 for (const child of element.children) {
-                    this.traverseDOM(child, elements, depth + 1);
+                    this.traverseDOM(child, elements, depth + 1, win, stylesheets);
                 }
+            }
+            
+            getCleanTextContent(element) {
+                // Get only direct text content, not from child elements
+                let textContent = '';
+                for (const node of element.childNodes) {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        textContent += node.textContent;
+                    }
+                }
+                return textContent.trim().substring(0, 100);
+            }
+            
+            isTextNode(element) {
+                // Check if element primarily contains text
+                const hasText = element.textContent && element.textContent.trim().length > 0;
+                const hasNoBlockChildren = !Array.from(element.children).some(child => {
+                    const display = window.getComputedStyle(child).display;
+                    return display === 'block' || display === 'flex' || display === 'grid';
+                });
+                return hasText && (element.children.length === 0 || hasNoBlockChildren);
+            }
+            
+            extractStylesheets(doc) {
+                const stylesheets = [];
+                try {
+                    for (const stylesheet of doc.styleSheets) {
+                        if (stylesheet.cssRules) {
+                            const rules = [];
+                            for (const rule of stylesheet.cssRules) {
+                                rules.push({
+                                    selector: rule.selectorText,
+                                    cssText: rule.cssText
+                                });
+                            }
+                            stylesheets.push({ rules });
+                        }
+                    }
+                } catch (error) {
+                    // CORS restrictions may prevent access to external stylesheets
+                    console.warn('Cannot access external stylesheets due to CORS');
+                }
+                return stylesheets;
+            }
+            
+            extractImages(doc, win) {
+                const images = [];
+                try {
+                    const imgElements = doc.querySelectorAll('img');
+                    for (const img of imgElements) {
+                        if (img.src && img.complete) {
+                            const canvas = doc.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = img.naturalWidth || img.width;
+                            canvas.height = img.naturalHeight || img.height;
+                            
+                            try {
+                                ctx.drawImage(img, 0, 0);
+                                const base64 = canvas.toDataURL('image/png');
+                                images.push({
+                                    src: img.src,
+                                    alt: img.alt,
+                                    width: canvas.width,
+                                    height: canvas.height,
+                                    base64: base64
+                                });
+                            } catch (error) {
+                                // CORS restrictions may prevent canvas access
+                                images.push({
+                                    src: img.src,
+                                    alt: img.alt,
+                                    width: img.width,
+                                    height: img.height,
+                                    base64: null
+                                });
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Error extracting images:', error);
+                }
+                return images;
             }
             
             extractTextStyles(elements) {
@@ -566,59 +723,191 @@
                         {
                             tagName: 'DIV',
                             className: 'container',
+                            id: 'main-container',
                             textContent: 'Sample Website Content (CORS-restricted)',
                             position: { x: 0, y: 0, width: viewportConfig.width, height: 200 },
                             visual: {
                                 backgroundColor: '#ffffff',
                                 color: '#333333',
                                 borderRadius: '8px',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                border: '1px solid #e1e5e9',
+                                borderColor: '#e1e5e9',
+                                borderWidth: '1px',
+                                borderStyle: 'solid',
+                                opacity: '1'
                             },
                             typography: {
                                 fontFamily: 'Arial, sans-serif',
                                 fontSize: '16px',
                                 fontWeight: '400',
+                                fontStyle: 'normal',
                                 lineHeight: '1.5',
                                 textAlign: 'left',
+                                textDecoration: 'none',
+                                letterSpacing: 'normal',
+                                textTransform: 'none',
                                 color: '#333333'
                             },
                             layout_detection: {
-                                isTextNode: true,
+                                isTextNode: false,
                                 isFlexContainer: false,
-                                isGridContainer: false
+                                isGridContainer: false,
+                                isBlock: true,
+                                isInline: false,
+                                isInlineBlock: false,
+                                position: 'static',
+                                float: 'none'
+                            },
+                            flex_properties: {
+                                flexDirection: 'row',
+                                justifyContent: 'flex-start',
+                                alignItems: 'stretch',
+                                flexWrap: 'nowrap',
+                                alignContent: 'stretch',
+                                gap: '0px'
+                            },
+                            spacing: {
+                                marginTop: '0px',
+                                marginRight: '0px',
+                                marginBottom: '20px',
+                                marginLeft: '0px',
+                                paddingTop: '20px',
+                                paddingRight: '20px',
+                                paddingBottom: '20px',
+                                paddingLeft: '20px'
                             },
                             visual_hierarchy: {
                                 zIndex: 1,
                                 depth: 1
-                            }
+                            },
+                            attributes: {}
                         },
                         {
                             tagName: 'H1',
                             className: 'title',
+                            id: 'main-title',
                             textContent: `${viewportConfig.device} Layout - ${url}`,
                             position: { x: 20, y: 20, width: viewportConfig.width - 40, height: 60 },
                             visual: {
                                 backgroundColor: 'transparent',
                                 color: '#2563eb',
-                                borderRadius: '0px'
+                                borderRadius: '0px',
+                                boxShadow: 'none',
+                                border: 'none',
+                                borderColor: 'transparent',
+                                borderWidth: '0px',
+                                borderStyle: 'none',
+                                opacity: '1'
                             },
                             typography: {
                                 fontFamily: 'Arial, sans-serif',
                                 fontSize: '32px',
                                 fontWeight: '700',
+                                fontStyle: 'normal',
                                 lineHeight: '1.2',
                                 textAlign: 'left',
+                                textDecoration: 'none',
+                                letterSpacing: 'normal',
+                                textTransform: 'none',
                                 color: '#2563eb'
                             },
                             layout_detection: {
                                 isTextNode: true,
                                 isFlexContainer: false,
-                                isGridContainer: false
+                                isGridContainer: false,
+                                isBlock: true,
+                                isInline: false,
+                                isInlineBlock: false,
+                                position: 'static',
+                                float: 'none'
+                            },
+                            flex_properties: {
+                                flexDirection: 'row',
+                                justifyContent: 'flex-start',
+                                alignItems: 'stretch',
+                                flexWrap: 'nowrap',
+                                alignContent: 'stretch',
+                                gap: '0px'
+                            },
+                            spacing: {
+                                marginTop: '0px',
+                                marginRight: '0px',
+                                marginBottom: '16px',
+                                marginLeft: '0px',
+                                paddingTop: '0px',
+                                paddingRight: '0px',
+                                paddingBottom: '0px',
+                                paddingLeft: '0px'
                             },
                             visual_hierarchy: {
                                 zIndex: 2,
-                                depth: 1
-                            }
+                                depth: 2
+                            },
+                            attributes: {}
+                        },
+                        {
+                            tagName: 'P',
+                            className: 'description',
+                            id: 'description',
+                            textContent: 'This is a sample paragraph demonstrating the enhanced capture capabilities with comprehensive styling and layout detection.',
+                            position: { x: 20, y: 100, width: viewportConfig.width - 40, height: 80 },
+                            visual: {
+                                backgroundColor: 'transparent',
+                                color: '#666666',
+                                borderRadius: '0px',
+                                boxShadow: 'none',
+                                border: 'none',
+                                borderColor: 'transparent',
+                                borderWidth: '0px',
+                                borderStyle: 'none',
+                                opacity: '1'
+                            },
+                            typography: {
+                                fontFamily: 'Arial, sans-serif',
+                                fontSize: '16px',
+                                fontWeight: '400',
+                                fontStyle: 'normal',
+                                lineHeight: '1.6',
+                                textAlign: 'left',
+                                textDecoration: 'none',
+                                letterSpacing: 'normal',
+                                textTransform: 'none',
+                                color: '#666666'
+                            },
+                            layout_detection: {
+                                isTextNode: true,
+                                isFlexContainer: false,
+                                isGridContainer: false,
+                                isBlock: true,
+                                isInline: false,
+                                isInlineBlock: false,
+                                position: 'static',
+                                float: 'none'
+                            },
+                            flex_properties: {
+                                flexDirection: 'row',
+                                justifyContent: 'flex-start',
+                                alignItems: 'stretch',
+                                flexWrap: 'nowrap',
+                                alignContent: 'stretch',
+                                gap: '0px'
+                            },
+                            spacing: {
+                                marginTop: '0px',
+                                marginRight: '0px',
+                                marginBottom: '16px',
+                                marginLeft: '0px',
+                                paddingTop: '0px',
+                                paddingRight: '0px',
+                                paddingBottom: '0px',
+                                paddingLeft: '0px'
+                            },
+                            visual_hierarchy: {
+                                zIndex: 1,
+                                depth: 2
+                            },
+                            attributes: {}
                         }
                     ],
                     text_styles: [

@@ -50,6 +50,13 @@ class PopupController {
                 throw new Error('Cannot capture browser internal pages. Please navigate to a regular website.');
             }
             
+            // Wait for page to be fully loaded
+            this.updateStatus('Waiting for page to load...', 'loading');
+            this.showProgress(10);
+            
+            // Add delay to ensure dynamic content is loaded
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
             this.updateStatus('Analyzing page structure...', 'loading');
             this.showProgress(20);
             
@@ -76,7 +83,7 @@ class PopupController {
             }
             
             // Now try the full capture
-            const results = await chrome.scripting.executeScript({
+            let results = await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 func: this.capturePageFunction
             });
@@ -91,9 +98,20 @@ class PopupController {
                 throw new Error(`Script execution error: ${results[0].error}`);
             }
             
-            if (!results[0].result) {
-                console.log('Full results object:', JSON.stringify(results, null, 2));
-                throw new Error('Capture function returned no data');
+            // If no result or empty result, try fallback capture
+            if (!results[0].result || !results[0].result.elements || results[0].result.elements.length === 0) {
+                console.log('Primary capture failed, trying fallback method...');
+                this.updateStatus('Trying alternative capture method...', 'loading');
+                
+                results = await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: this.fallbackCaptureFunction
+                });
+                
+                if (!results || !results[0] || !results[0].result) {
+                    console.log('Full results object:', JSON.stringify(results, null, 2));
+                    throw new Error('Both capture methods failed to return data. The page may have content security restrictions or be dynamically loaded.');
+                }
             }
             
             console.log('Raw data received:', results[0].result);
@@ -193,16 +211,19 @@ class PopupController {
                     }
                     
                     const computedStyle = window.getComputedStyle(element);
+                    
+                    // Only skip elements that are truly hidden, be more permissive
                     if (computedStyle.display === 'none' || 
-                        computedStyle.visibility === 'hidden' ||
-                        computedStyle.opacity === '0') {
+                        computedStyle.visibility === 'hidden') {
                         console.log(`Skipping ${element.tagName} (hidden)`);
                         return;
                     }
                     
                     const rect = element.getBoundingClientRect();
-                    if (rect.width === 0 && rect.height === 0) {
-                        console.log(`Skipping ${element.tagName} (zero dimensions)`);
+                    
+                    // Be more permissive with dimensions - include elements with some size or that have children
+                    if (rect.width === 0 && rect.height === 0 && element.children.length === 0) {
+                        console.log(`Skipping ${element.tagName} (zero dimensions and no children)`);
                         return;
                     }
                     
@@ -278,6 +299,81 @@ class PopupController {
         } catch (error) {
             console.error('Capture function error:', error);
             throw new Error(`DOM capture failed: ${error.message}`);
+        }
+    }
+    
+    fallbackCaptureFunction() {
+        console.log('Executing fallback capture...');
+        try {
+            const elements = [];
+            const allElements = document.querySelectorAll('*');
+            
+            console.log(`Found ${allElements.length} total elements`);
+            
+            // Simple capture - just get basic info from visible elements
+            for (let i = 0; i < Math.min(allElements.length, 100); i++) {
+                const element = allElements[i];
+                
+                // Skip obvious non-visual elements
+                if (['SCRIPT', 'STYLE', 'META', 'LINK', 'TITLE', 'HEAD'].includes(element.tagName)) {
+                    continue;
+                }
+                
+                const rect = element.getBoundingClientRect();
+                const style = window.getComputedStyle(element);
+                
+                // Basic visibility check
+                if (style.display === 'none' || style.visibility === 'hidden') {
+                    continue;
+                }
+                
+                elements.push({
+                    id: `element_${i}`,
+                    tagName: element.tagName,
+                    className: element.className || '',
+                    textContent: element.textContent ? element.textContent.slice(0, 100) : '',
+                    layout: {
+                        x: rect.left,
+                        y: rect.top,
+                        width: rect.width,
+                        height: rect.height
+                    },
+                    visual: {
+                        backgroundColor: style.backgroundColor,
+                        color: style.color
+                    },
+                    typography: {
+                        fontSize: style.fontSize,
+                        fontFamily: style.fontFamily
+                    },
+                    depth: 0
+                });
+            }
+            
+            console.log(`Fallback captured ${elements.length} elements`);
+            
+            return {
+                page: {
+                    url: window.location.href,
+                    title: document.title,
+                    viewport: {
+                        width: window.innerWidth,
+                        height: window.innerHeight
+                    },
+                    scrollSize: {
+                        width: document.body.scrollWidth,
+                        height: document.body.scrollHeight
+                    }
+                },
+                elements: elements,
+                images: [],
+                textStyles: [],
+                colors: [],
+                fonts: []
+            };
+        } catch (error) {
+            console.error('Fallback capture error:', error);
+            throw error;
         }
     }
     

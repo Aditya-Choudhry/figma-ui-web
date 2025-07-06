@@ -333,7 +333,7 @@ async function createAdvancedNodeFromElement(element) {
       }
 
       // Set text alignment
-      if (typography?.textAlign) {
+      if (typography && typography.textAlign) {
         const alignMap = { 'left': 'LEFT', 'center': 'CENTER', 'right': 'RIGHT' };
         node.textAlignHorizontal = alignMap[typography.textAlign] || 'LEFT';
       }
@@ -367,7 +367,7 @@ async function createAdvancedNodeFromElement(element) {
 
         // Apply gap
         if (layout.gap) {
-          node.itemSpacing = element.parse_pixel_value?.(layout.gap) || 0;
+          node.itemSpacing = element.parse_pixel_value ? element.parse_pixel_value(layout.gap) : parseFloat(layout.gap) || 0;
         }
       }
 
@@ -390,13 +390,13 @@ async function createAdvancedNodeFromElement(element) {
     }
 
     // Apply border radius
-    if (visual?.borderRadius && node.cornerRadius !== undefined) {
-      const radius = element.parse_pixel_value?.(visual.borderRadius) || 0;
+    if (visual && visual.borderRadius && node.cornerRadius !== undefined) {
+      const radius = element.parse_pixel_value ? element.parse_pixel_value(visual.borderRadius) : parseFloat(visual.borderRadius) || 0;
       node.cornerRadius = radius;
     }
 
     // Apply opacity
-    if (visual?.opacity && visual.opacity !== '1') {
+    if (visual && visual.opacity && visual.opacity !== '1') {
       node.opacity = parseFloat(visual.opacity) || 1;
     }
 

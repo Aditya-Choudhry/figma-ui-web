@@ -722,8 +722,10 @@ class WebsiteCapture:
             meta_description = self.extract_meta_description(soup)
             
             # Extract all real elements with comprehensive data
+            print(f"🔍 Starting element extraction for viewport {viewport_config['width']}x{viewport_config['height']}")
             elements = []
             self.extract_html_elements(soup.body if soup.body else soup, elements, 0, viewport_config, url)
+            print(f"✅ Extracted {len(elements)} total elements from HTML structure")
             
             # Extract real CSS information
             css_data = self.extract_css_information(soup, response.text, url)
@@ -741,7 +743,9 @@ class WebsiteCapture:
             structured_data = self.extract_structured_data(soup)
             
             # Create comprehensive design analysis
+            print(f"🎨 Creating design analysis from {len(elements)} elements, {len(images)} images, {len(real_colors)} colors")
             design_analysis = self.create_design_analysis(elements, images, real_colors, typography_styles, css_data)
+            print(f"📊 Design analysis complete: {len(design_analysis.get('textElements', []))} text elements, {design_analysis.get('summary', {}).get('totalShapes', 0)} shapes")
             
             return {
                 'device': viewport_config['device'],
@@ -806,6 +810,7 @@ class WebsiteCapture:
     def extract_html_elements(self, element, elements, depth, viewport_config, base_url):
         """Extract real HTML elements with comprehensive data"""
         if depth > 8 or len(elements) > 30:
+            print(f"⚠️  Stopping extraction: depth={depth}, elements={len(elements)}")
             return
             
         if not hasattr(element, 'name') or not element.name:
@@ -823,7 +828,10 @@ class WebsiteCapture:
         structural_tags = {'div', 'section', 'article', 'header', 'footer', 'main', 'nav', 'aside'}
         if not text_content and element.name not in structural_tags and not element.find('img'):
             if len(list(element.children)) == 0:
+                print(f"⏭️  Skipping empty {element.name} element with no text/children at depth {depth}")
                 return
+        
+        print(f"🔍 Processing {element.name} element at depth {depth} - text: '{text_content[:30]}...' children: {len(list(element.children))}")
         
         # Extract comprehensive element data
         element_data = {

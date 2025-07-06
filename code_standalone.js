@@ -128,7 +128,7 @@ function determineAdvancedNodeType(element) {
     return 'RECTANGLE';
 }
 
-async function createAdvancedTextNode(element) {
+function createAdvancedTextNode(element) {
     try {
         const textNode = figma.createText();
         
@@ -193,7 +193,7 @@ async function createAdvancedTextNode(element) {
     }
 }
 
-async function createImageNode(element) {
+function createImageNode(element) {
     try {
         const frameNode = figma.createFrame();
         

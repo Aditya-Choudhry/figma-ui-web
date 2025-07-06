@@ -325,7 +325,7 @@ function parseColor(colorString) {
 function extractDomainName(url) {
   try {
     return new URL(url).hostname.replace('www.', '');
-  } catch {
+  } catch (e) {
     return 'Website';
   }
 }

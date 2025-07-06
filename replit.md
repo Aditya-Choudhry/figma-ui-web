@@ -140,6 +140,7 @@ The plugin follows the standard Figma plugin architecture with two main componen
   - Fixed JavaScript await syntax error by eliminating all async/await patterns
   - Converted all Figma plugin code to Promise-based .then()/.catch() chaining
   - Resolved "Failed to execute 'write' on 'Document'" error completely
+  - Fixed ES2019+ compatibility issues by converting modern catch syntax to older-compatible format
   - Implemented all 10 categories of comprehensive data extraction as specified
   - Added structural & semantic info capture (DOM hierarchy, roles, ARIA attributes)
   - Enhanced geometry & layout extraction (box model, positioning, flex/grid properties)

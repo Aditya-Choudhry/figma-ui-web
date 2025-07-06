@@ -1,0 +1,94 @@
+[Local fonts] using agent
+vendor-core-0d62532059ea4067.min.js.br:77 Syntax error on line 328: Unexpected token {
+  } catch {
+          ^
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+q @ 7982-7f3b8988be551dc8.min.js.br:608
+await in q
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:738
+await in (anonymous)
+eu @ 7982-7f3b8988be551dc8.min.js.br:738
+ed @ 7982-7f3b8988be551dc8.min.js.br:738
+await in ed
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:738
+await in (anonymous)
+enqueue @ figma_app-f1bcbbd97adc86a8.min.js.br:68
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:738
+runLastPlugin @ 7982-7f3b8988be551dc8.min.js.br:207
+_FigmaApp_runLastPlugin @ compiled_wasm.js.br:2
+$wasm-function[21055] @ compiled_wasm.wasm.br:0x13d71ec
+$wasm-function[25206] @ compiled_wasm.wasm.br:0x167b3c7
+$wasm-function[1530] @ compiled_wasm.wasm.br:0x28e08
+$wasm-function[32193] @ compiled_wasm.wasm.br:0x1a8d534
+(anonymous) @ compiled_wasm.js.br:2
+(anonymous) @ compiled_wasm.js.br:2
+_wrapCppCall @ compiled_wasm.js.br:2
+(anonymous) @ compiled_wasm.js.br:2
+triggerAction @ 7982-7f3b8988be551dc8.min.js.br:207
+X @ 7982-7f3b8988be551dc8.min.js.br:205
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:205
+(anonymous) @ figma_app-f1bcbbd97adc86a8.min.js.br:269
+push.320953.Object.assign.system @ 7982-7f3b8988be551dc8.min.js.br:1460
+user @ 7982-7f3b8988be551dc8.min.js.br:1460
+onSelectItem @ figma_app-f1bcbbd97adc86a8.min.js.br:269
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1365
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1365
+ez @ vendor-core-0d62532059ea4067.min.js.br:15
+e$ @ vendor-core-0d62532059ea4067.min.js.br:15
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:15
+tn @ vendor-core-0d62532059ea4067.min.js.br:15
+ti @ vendor-core-0d62532059ea4067.min.js.br:15
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:15
+oL @ vendor-core-0d62532059ea4067.min.js.br:15
+eM @ vendor-core-0d62532059ea4067.min.js.br:15
+tu @ vendor-core-0d62532059ea4067.min.js.br:15
+nz @ vendor-core-0d62532059ea4067.min.js.br:15
+nI @ vendor-core-0d62532059ea4067.min.js.br:15
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+vendor-core-0d62532059ea4067.min.js.br:77 Error: Syntax error on line 328: Unexpected token {
+    at q (7982-7f3b8988be551dc8.min.js.br:608:45)
+    at async 7982-7f3b8988be551dc8.min.js.br:738:9483
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:738
+Promise.catch
+eu @ 7982-7f3b8988be551dc8.min.js.br:738
+ed @ 7982-7f3b8988be551dc8.min.js.br:738
+await in ed
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:738
+await in (anonymous)
+enqueue @ figma_app-f1bcbbd97adc86a8.min.js.br:68
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:738
+runLastPlugin @ 7982-7f3b8988be551dc8.min.js.br:207
+_FigmaApp_runLastPlugin @ compiled_wasm.js.br:2
+$wasm-function[21055] @ compiled_wasm.wasm.br:0x13d71ec
+$wasm-function[25206] @ compiled_wasm.wasm.br:0x167b3c7
+$wasm-function[1530] @ compiled_wasm.wasm.br:0x28e08
+$wasm-function[32193] @ compiled_wasm.wasm.br:0x1a8d534
+(anonymous) @ compiled_wasm.js.br:2
+(anonymous) @ compiled_wasm.js.br:2
+_wrapCppCall @ compiled_wasm.js.br:2
+(anonymous) @ compiled_wasm.js.br:2
+triggerAction @ 7982-7f3b8988be551dc8.min.js.br:207
+X @ 7982-7f3b8988be551dc8.min.js.br:205
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:205
+(anonymous) @ figma_app-f1bcbbd97adc86a8.min.js.br:269
+push.320953.Object.assign.system @ 7982-7f3b8988be551dc8.min.js.br:1460
+user @ 7982-7f3b8988be551dc8.min.js.br:1460
+onSelectItem @ figma_app-f1bcbbd97adc86a8.min.js.br:269
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1365
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1365
+ez @ vendor-core-0d62532059ea4067.min.js.br:15
+e$ @ vendor-core-0d62532059ea4067.min.js.br:15
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:15
+tn @ vendor-core-0d62532059ea4067.min.js.br:15
+ti @ vendor-core-0d62532059ea4067.min.js.br:15
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:15
+oL @ vendor-core-0d62532059ea4067.min.js.br:15
+eM @ vendor-core-0d62532059ea4067.min.js.br:15
+tu @ vendor-core-0d62532059ea4067.min.js.br:15
+nz @ vendor-core-0d62532059ea4067.min.js.br:15
+nI @ vendor-core-0d62532059ea4067.min.js.br:15
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+vendor-core-0d62532059ea4067.min.js.br:77 Error: Syntax error on line 328: Unexpected token {
+    at q (7982-7f3b8988be551dc8.min.js.br:608:45)
+    at async 7982-7f3b8988be551dc8.min.js.br:738:9483

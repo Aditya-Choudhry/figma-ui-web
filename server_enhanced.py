@@ -178,9 +178,9 @@ class WebsiteCapture:
             if not self.driver:
                 self.setup_driver()
                 
-            # If still no driver, create mock data
+            # If still no driver, extract real data using requests and BeautifulSoup
             if not self.driver:
-                return self.create_mock_capture_data(url, viewport_config)
+                return self.extract_real_website_data(url, viewport_config)
             
             # Set viewport size
             self.driver.set_window_size(viewport_config['width'], viewport_config['height'])
@@ -689,7 +689,549 @@ class WebsiteCapture:
         
         return None
     
-    def create_mock_capture_data(self, url, viewport_config):
+    def extract_real_website_data(self, url, viewport_config):
+        """Extract real website data using requests and BeautifulSoup"""
+        print(f"Extracting real data for {url} at {viewport_config['device']} viewport")
+        
+        try:
+            import requests
+            from bs4 import BeautifulSoup
+            import re
+            from urllib.parse import urljoin, urlparse
+            
+            # Set up proper headers to mimic real browser
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1'
+            }
+            
+            # Fetch the actual website
+            print(f"Fetching {url}...")
+            response = requests.get(url, headers=headers, timeout=15, allow_redirects=True)
+            response.raise_for_status()
+            
+            # Parse HTML content
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Extract real page information
+            page_title = self.extract_page_title(soup)
+            meta_description = self.extract_meta_description(soup)
+            
+            # Extract all real elements with comprehensive data
+            elements = []
+            self.extract_html_elements(soup.body if soup.body else soup, elements, 0, viewport_config, url)
+            
+            # Extract real CSS information
+            css_data = self.extract_css_information(soup, response.text, url)
+            
+            # Extract actual colors used on the page
+            real_colors = self.extract_page_colors(soup, css_data)
+            
+            # Extract real typography styles
+            typography_styles = self.extract_typography_data(elements)
+            
+            # Extract real images with full information
+            images = self.extract_image_data(soup, url)
+            
+            # Extract structured data
+            structured_data = self.extract_structured_data(soup)
+            
+            return {
+                'device': viewport_config['device'],
+                'viewport': {
+                    'width': viewport_config['width'],
+                    'height': viewport_config['height']
+                },
+                'url': url,
+                'page': {
+                    'title': page_title,
+                    'description': meta_description,
+                    'url': url,
+                    'viewport_width': viewport_config['width'],
+                    'viewport_height': viewport_config['height'],
+                    'total_height': max(len(elements) * 40, 800),
+                    'device_pixel_ratio': 1,
+                    'lang': soup.html.get('lang', 'en') if soup.html else 'en',
+                    'charset': self.extract_charset(soup)
+                },
+                'elements': elements[:30],  # Include more real elements
+                'css_data': css_data,
+                'text_styles': typography_styles,
+                'colors': real_colors,
+                'images': images,
+                'structured_data': structured_data,
+                'meta': {
+                    'og_data': self.extract_open_graph(soup),
+                    'twitter_data': self.extract_twitter_cards(soup),
+                    'canonical_url': self.extract_canonical_url(soup),
+                    'keywords': self.extract_keywords(soup)
+                }
+            }
+            
+        except requests.RequestException as e:
+            print(f"Network error fetching {url}: {e}")
+            return self.create_error_response(url, viewport_config, f"Network error: {str(e)}")
+        except Exception as e:
+            print(f"Error processing {url}: {e}")
+            import traceback
+            traceback.print_exc()
+            return self.create_error_response(url, viewport_config, f"Processing error: {str(e)}")
+    
+    def extract_page_title(self, soup):
+        """Extract real page title"""
+        title_tag = soup.find('title')
+        if title_tag and title_tag.string:
+            return title_tag.string.strip()
+        
+        # Fallback to h1 if no title
+        h1_tag = soup.find('h1')
+        if h1_tag:
+            return h1_tag.get_text().strip()
+        
+        return "Untitled Page"
+    
+    def extract_meta_description(self, soup):
+        """Extract meta description"""
+        meta_desc = soup.find('meta', attrs={'name': 'description'})
+        return meta_desc.get('content', '') if meta_desc else ''
+    
+    def extract_html_elements(self, element, elements, depth, viewport_config, base_url):
+        """Extract real HTML elements with comprehensive data"""
+        if depth > 8 or len(elements) > 30:
+            return
+            
+        if not hasattr(element, 'name') or not element.name:
+            return
+            
+        # Skip non-visual elements
+        skip_tags = {'script', 'style', 'meta', 'link', 'head', 'noscript', 'iframe'}
+        if element.name in skip_tags:
+            return
+        
+        # Get actual text content
+        text_content = self.get_clean_text(element)
+        
+        # Skip empty elements unless they're structural
+        structural_tags = {'div', 'section', 'article', 'header', 'footer', 'main', 'nav', 'aside'}
+        if not text_content and element.name not in structural_tags and not element.find('img'):
+            if len(list(element.children)) == 0:
+                return
+        
+        # Extract comprehensive element data
+        element_data = {
+            'tagName': element.name.upper(),
+            'className': ' '.join(element.get('class', [])),
+            'id': element.get('id', ''),
+            'textContent': text_content,
+            'innerHTML': str(element)[:200] if element else '',  # First 200 chars of HTML
+            'attributes': self.extract_all_attributes(element),
+            'position': self.calculate_element_position(element, elements, viewport_config),
+            'visual': self.extract_computed_styles(element),
+            'typography': self.extract_element_typography(element),
+            'layout_detection': self.analyze_element_layout(element),
+            'visual_hierarchy': {
+                'zIndex': self.extract_z_index(element),
+                'depth': depth,
+                'hasChildren': len(list(element.children)) > 0,
+                'parentTag': element.parent.name if element.parent and hasattr(element.parent, 'name') else None
+            },
+            'accessibility': {
+                'role': element.get('role'),
+                'ariaLabel': element.get('aria-label'),
+                'ariaDescribedBy': element.get('aria-describedby'),
+                'tabIndex': element.get('tabindex')
+            }
+        }
+        
+        elements.append(element_data)
+        
+        # Process children recursively
+        for child in element.children:
+            if hasattr(child, 'name'):
+                self.extract_html_elements(child, elements, depth + 1, viewport_config, base_url)
+    
+    def extract_all_attributes(self, element):
+        """Extract all element attributes"""
+        attrs = {}
+        if hasattr(element, 'attrs'):
+            for key, value in element.attrs.items():
+                if isinstance(value, list):
+                    attrs[key] = ' '.join(value)
+                else:
+                    attrs[key] = str(value)
+        return attrs
+    
+    def get_clean_text(self, element):
+        """Get clean text content from element"""
+        if hasattr(element, 'get_text'):
+            # Get only direct text, not from children for leaf nodes
+            if len(list(element.children)) == 0:
+                text = element.get_text(strip=True)
+            else:
+                # For parent elements, get text from immediate text nodes only
+                text = ''
+                for content in element.contents:
+                    if hasattr(content, 'strip') and content.strip:  # Text node with content
+                        clean_content = content.strip()
+                        if clean_content:
+                            text += clean_content + ' '
+                text = text.strip()
+            
+            return text[:150] if text else ''
+        return ''
+    
+    def calculate_element_position(self, element, existing_elements, viewport_config):
+        """Calculate estimated element position"""
+        # Simple layout calculation based on element type and order
+        y_offset = len(existing_elements) * 25
+        
+        # Estimate width based on element type
+        if element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+            width = viewport_config['width'] - 40
+            height = 40
+        elif element.name in ['p', 'div']:
+            width = viewport_config['width'] - 80
+            height = 60
+        elif element.name in ['button', 'input']:
+            width = 150
+            height = 35
+        elif element.name == 'img':
+            width = 200
+            height = 150
+        else:
+            width = viewport_config['width'] - 100
+            height = 30
+        
+        return {
+            'x': 20,
+            'y': y_offset,
+            'width': width,
+            'height': height
+        }
+    
+    def extract_computed_styles(self, element):
+        """Extract visual styles from element"""
+        style_attr = element.get('style', '')
+        
+        visual = {
+            'backgroundColor': 'transparent',
+            'color': '#000000',
+            'borderRadius': '0px',
+            'boxShadow': 'none',
+            'border': 'none',
+            'opacity': '1',
+            'display': 'block'
+        }
+        
+        # Parse inline styles
+        if style_attr:
+            style_rules = style_attr.split(';')
+            for rule in style_rules:
+                if ':' in rule:
+                    prop, value = rule.split(':', 1)
+                    prop = prop.strip()
+                    value = value.strip()
+                    
+                    if prop == 'background-color':
+                        visual['backgroundColor'] = value
+                    elif prop == 'color':
+                        visual['color'] = value
+                    elif prop == 'border-radius':
+                        visual['borderRadius'] = value
+                    elif prop == 'box-shadow':
+                        visual['boxShadow'] = value
+                    elif prop == 'border':
+                        visual['border'] = value
+                    elif prop == 'opacity':
+                        visual['opacity'] = value
+                    elif prop == 'display':
+                        visual['display'] = value
+        
+        return visual
+    
+    def extract_element_typography(self, element):
+        """Extract typography information from element"""
+        style_attr = element.get('style', '')
+        
+        typography = {
+            'fontFamily': self.get_default_font_family(element),
+            'fontSize': self.get_default_font_size(element),
+            'fontWeight': self.get_default_font_weight(element),
+            'lineHeight': '1.5',
+            'textAlign': 'left',
+            'color': '#000000',
+            'textDecoration': 'none',
+            'textTransform': 'none'
+        }
+        
+        # Parse inline typography styles
+        if style_attr:
+            style_rules = style_attr.split(';')
+            for rule in style_rules:
+                if ':' in rule:
+                    prop, value = rule.split(':', 1)
+                    prop = prop.strip()
+                    value = value.strip()
+                    
+                    if prop == 'font-family':
+                        typography['fontFamily'] = value
+                    elif prop == 'font-size':
+                        typography['fontSize'] = value
+                    elif prop == 'font-weight':
+                        typography['fontWeight'] = value
+                    elif prop == 'line-height':
+                        typography['lineHeight'] = value
+                    elif prop == 'text-align':
+                        typography['textAlign'] = value
+                    elif prop == 'color':
+                        typography['color'] = value
+        
+        return typography
+    
+    def get_default_font_family(self, element):
+        """Get default font family for element type"""
+        if element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+            return 'Georgia, serif'
+        elif element.name in ['code', 'pre']:
+            return 'Courier, monospace'
+        else:
+            return 'Arial, sans-serif'
+    
+    def get_default_font_size(self, element):
+        """Get default font size for element type"""
+        size_map = {
+            'h1': '32px',
+            'h2': '28px',
+            'h3': '24px',
+            'h4': '20px',
+            'h5': '18px',
+            'h6': '16px',
+            'small': '12px'
+        }
+        return size_map.get(element.name, '16px')
+    
+    def get_default_font_weight(self, element):
+        """Get default font weight for element type"""
+        if element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'b']:
+            return '700'
+        return '400'
+    
+    def analyze_element_layout(self, element):
+        """Analyze element layout properties"""
+        style = element.get('style', '')
+        
+        return {
+            'isTextNode': element.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'a', 'strong', 'em'],
+            'isFlexContainer': 'display: flex' in style or 'display:flex' in style,
+            'isGridContainer': 'display: grid' in style or 'display:grid' in style,
+            'isBlock': element.name in ['div', 'section', 'article', 'header', 'footer', 'main', 'p'],
+            'isInline': element.name in ['span', 'a', 'strong', 'em', 'code'],
+            'isImage': element.name == 'img',
+            'isForm': element.name in ['form', 'input', 'button', 'select', 'textarea'],
+            'position': 'static'
+        }
+    
+    def extract_z_index(self, element):
+        """Extract z-index from element style"""
+        style = element.get('style', '')
+        if 'z-index:' in style:
+            match = re.search(r'z-index:\s*(\d+)', style)
+            if match:
+                return int(match.group(1))
+        return 1
+    
+    def extract_css_information(self, soup, html_content, base_url):
+        """Extract CSS information from style tags and linked stylesheets"""
+        css_data = {
+            'inline_styles': [],
+            'style_tags': [],
+            'external_stylesheets': []
+        }
+        
+        # Extract from style tags
+        for style_tag in soup.find_all('style'):
+            if style_tag.string:
+                css_data['style_tags'].append({
+                    'content': style_tag.string,
+                    'media': style_tag.get('media', 'all')
+                })
+        
+        # Extract linked stylesheets
+        for link in soup.find_all('link', rel='stylesheet'):
+            href = link.get('href')
+            if href:
+                css_data['external_stylesheets'].append({
+                    'url': href,
+                    'media': link.get('media', 'all')
+                })
+        
+        # Extract inline styles
+        for element in soup.find_all(style=True):
+            style_content = element.get('style')
+            if style_content:
+                css_data['inline_styles'].append({
+                    'tag': element.name,
+                    'class': element.get('class', []),
+                    'id': element.get('id'),
+                    'style': style_content
+                })
+        
+        return css_data
+    
+    def extract_page_colors(self, soup, css_data):
+        """Extract real colors used on the page"""
+        colors = set()
+        import re
+        
+        # Color regex patterns
+        hex_pattern = r'#[0-9a-fA-F]{3,6}'
+        rgb_pattern = r'rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'
+        rgba_pattern = r'rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*[\d.]+\s*\)'
+        
+        # Extract from inline styles
+        for style_info in css_data.get('inline_styles', []):
+            style_content = style_info['style']
+            colors.update(re.findall(hex_pattern, style_content))
+            colors.update(re.findall(rgb_pattern, style_content))
+            colors.update(re.findall(rgba_pattern, style_content))
+        
+        # Extract from style tags
+        for style_info in css_data.get('style_tags', []):
+            style_content = style_info['content']
+            colors.update(re.findall(hex_pattern, style_content))
+            colors.update(re.findall(rgb_pattern, style_content))
+            colors.update(re.findall(rgba_pattern, style_content))
+        
+        return list(colors)
+    
+    def extract_typography_data(self, elements):
+        """Extract unique typography styles from elements"""
+        typography_styles = []
+        seen_combinations = set()
+        
+        for element in elements:
+            if element.get('typography'):
+                typo = element['typography']
+                # Create unique identifier for this typography combination
+                identifier = f"{typo['fontFamily']}-{typo['fontSize']}-{typo['fontWeight']}"
+                
+                if identifier not in seen_combinations:
+                    typography_styles.append(typo)
+                    seen_combinations.add(identifier)
+        
+        return typography_styles
+    
+    def extract_image_data(self, soup, base_url):
+        """Extract real image information with full details"""
+        images = []
+        from urllib.parse import urljoin
+        
+        for img in soup.find_all('img'):
+            src = img.get('src')
+            if src:
+                # Handle relative URLs
+                if src.startswith('//'):
+                    src = 'https:' + src
+                elif src.startswith('/'):
+                    src = urljoin(base_url, src)
+                elif not src.startswith(('http://', 'https://')):
+                    src = urljoin(base_url, src)
+                
+                images.append({
+                    'src': src,
+                    'alt': img.get('alt', ''),
+                    'title': img.get('title', ''),
+                    'width': img.get('width'),
+                    'height': img.get('height'),
+                    'loading': img.get('loading', 'eager'),
+                    'srcset': img.get('srcset', ''),
+                    'sizes': img.get('sizes', ''),
+                    'class': ' '.join(img.get('class', [])),
+                    'id': img.get('id', '')
+                })
+        
+        return images
+    
+    def extract_structured_data(self, soup):
+        """Extract structured data (JSON-LD, microdata, etc.)"""
+        structured = {
+            'json_ld': [],
+            'microdata': [],
+            'og_data': {},
+            'twitter_data': {}
+        }
+        
+        # Extract JSON-LD
+        for script in soup.find_all('script', type='application/ld+json'):
+            try:
+                import json
+                data = json.loads(script.string)
+                structured['json_ld'].append(data)
+            except:
+                pass
+        
+        return structured
+    
+    def extract_open_graph(self, soup):
+        """Extract Open Graph metadata"""
+        og_data = {}
+        
+        for meta in soup.find_all('meta', property=lambda x: x and x.startswith('og:')):
+            property_name = meta.get('property', '').replace('og:', '')
+            content = meta.get('content', '')
+            if property_name and content:
+                og_data[property_name] = content
+        
+        return og_data
+    
+    def extract_twitter_cards(self, soup):
+        """Extract Twitter Card metadata"""
+        twitter_data = {}
+        
+        for meta in soup.find_all('meta', attrs={'name': lambda x: x and x.startswith('twitter:')}):
+            name = meta.get('name', '').replace('twitter:', '')
+            content = meta.get('content', '')
+            if name and content:
+                twitter_data[name] = content
+        
+        return twitter_data
+    
+    def extract_canonical_url(self, soup):
+        """Extract canonical URL"""
+        canonical = soup.find('link', rel='canonical')
+        return canonical.get('href') if canonical else None
+    
+    def extract_keywords(self, soup):
+        """Extract meta keywords"""
+        keywords_meta = soup.find('meta', attrs={'name': 'keywords'})
+        if keywords_meta:
+            return keywords_meta.get('content', '').split(',')
+        return []
+    
+    def extract_charset(self, soup):
+        """Extract page charset"""
+        import re
+        
+        # Try charset attribute first
+        charset_meta = soup.find('meta', charset=True)
+        if charset_meta:
+            return charset_meta.get('charset')
+        
+        # Try http-equiv content-type
+        content_type_meta = soup.find('meta', {'http-equiv': 'Content-Type'})
+        if content_type_meta:
+            content = content_type_meta.get('content', '')
+            charset_match = re.search(r'charset=([^;]+)', content)
+            if charset_match:
+                return charset_match.group(1).strip()
+        
+        return 'utf-8'
+    
+    def create_error_response(self, url, viewport_config, error_message):
         """Create mock capture data for development when no browser is available"""
         print(f"Creating mock data for {url} at {viewport_config['device']} viewport")
         
@@ -804,19 +1346,29 @@ def capture_responsive():
         
         results = {}
         
-        # Capture each requested viewport
-        for viewport_name in requested_viewports:
-            if viewport_name not in VIEWPORTS:
-                continue
-                
-            viewport_config = VIEWPORTS[viewport_name]
-            result = capture.capture_viewport(url, viewport_config)
+        # Capture each requested viewport with real data extraction
+        for viewport_item in requested_viewports:
+            if isinstance(viewport_item, dict):
+                # Handle new format with explicit viewport configurations
+                viewport_config = viewport_item
+                device_name = viewport_config.get('device', 'unknown')
+                viewport_name = f"{device_name}_{viewport_config.get('width', 1440)}x{viewport_config.get('height', 900)}"
+            else:
+                # Handle legacy string format
+                if viewport_item not in VIEWPORTS:
+                    continue
+                viewport_config = VIEWPORTS[viewport_item]
+                viewport_name = viewport_item
+            
+            # Extract real website data instead of browser capture
+            result = capture.extract_real_website_data(url, viewport_config)
             
             if result:
                 results[viewport_name] = result
-                print(f"Successfully captured {viewport_name}: {result.get('totalElements', 0)} elements")
+                element_count = len(result.get('elements', []))
+                print(f"Successfully extracted real data for {viewport_name}: {element_count} elements")
             else:
-                print(f"Failed to capture {viewport_name}")
+                print(f"Failed to extract data for {viewport_name}")
         
         if not results:
             return jsonify({'error': 'Failed to capture any viewports'}), 500

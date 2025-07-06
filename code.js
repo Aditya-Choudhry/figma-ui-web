@@ -595,6 +595,104 @@ function extractDomainName(url) {
   }
 }
 
+async function applyRealStyling(figmaNode, element) {
+  console.log('Applying real CSS styling to', element.tagName);
+  
+  try {
+    // Apply visual properties from actual CSS
+    if (element.visual) {
+      const visual = element.visual;
+      
+      // Apply background color
+      if (visual.backgroundColor && visual.backgroundColor !== 'transparent') {
+        const bgColor = parseColor(visual.backgroundColor);
+        if (bgColor && figmaNode.fills) {
+          figmaNode.fills = [{
+            type: 'SOLID',
+            color: bgColor
+          }];
+        }
+      }
+      
+      // Apply border radius
+      if (visual.borderRadius && visual.borderRadius !== '0px') {
+        const radius = parsePixelValue(visual.borderRadius);
+        if (radius > 0 && figmaNode.cornerRadius !== undefined) {
+          figmaNode.cornerRadius = radius;
+        }
+      }
+      
+      // Apply opacity
+      if (visual.opacity && visual.opacity !== '1') {
+        const opacityValue = parseFloat(visual.opacity);
+        if (!isNaN(opacityValue) && figmaNode.opacity !== undefined) {
+          figmaNode.opacity = Math.max(0, Math.min(1, opacityValue));
+        }
+      }
+    }
+    
+    // Apply typography for text nodes
+    if (element.typography && figmaNode.fontName) {
+      const typography = element.typography;
+      
+      // Ensure font is loaded
+      await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+      figmaNode.fontName = { family: 'Inter', style: 'Regular' };
+      
+      // Apply font size
+      if (typography.fontSize) {
+        const fontSize = parsePixelValue(typography.fontSize);
+        if (fontSize > 0) {
+          figmaNode.fontSize = Math.max(8, Math.min(200, fontSize));
+        }
+      }
+      
+      // Apply text color
+      if (typography.color) {
+        const textColor = parseColor(typography.color);
+        if (textColor && figmaNode.fills) {
+          figmaNode.fills = [{
+            type: 'SOLID',
+            color: textColor
+          }];
+        }
+      }
+      
+      // Apply line height
+      if (typography.lineHeight && typography.lineHeight !== '1.5') {
+        const lineHeight = parseLineHeight(typography.lineHeight);
+        if (lineHeight > 0) {
+          figmaNode.lineHeight = { value: lineHeight, unit: 'PIXELS' };
+        }
+      }
+      
+      // Apply text alignment
+      if (typography.textAlign) {
+        const alignment = mapTextAlign(typography.textAlign);
+        figmaNode.textAlignHorizontal = alignment;
+      }
+    }
+    
+    // Apply layout properties for containers
+    if (element.layout_detection) {
+      const layout = element.layout_detection;
+      
+      // Apply flex properties if it's a flex container
+      if (layout.isFlexContainer && figmaNode.layoutMode !== undefined) {
+        figmaNode.layoutMode = 'HORIZONTAL'; // Default to horizontal
+        figmaNode.itemSpacing = 10;
+        figmaNode.paddingLeft = 10;
+        figmaNode.paddingRight = 10;
+        figmaNode.paddingTop = 10;
+        figmaNode.paddingBottom = 10;
+      }
+    }
+    
+  } catch (error) {
+    console.error('Error applying real styling:', error);
+  }
+}
+
 // Utility functions for precise styling
 
 function mapWebFontToFigma(webFont) {

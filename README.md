@@ -31,7 +31,7 @@ A Chrome browser extension that captures the visual structure of any live websit
 ## Prerequisites
 
 ### For Local Development
-- **Python 3.6+** (for local file server)
+- **Python 3.6+** (for local file server) - Python 3.9 recommended
 - **Google Chrome** (latest version recommended)
 - **Code Editor** (VS Code, Sublime Text, etc.)
 
@@ -54,11 +54,11 @@ A Chrome browser extension that captures the visual structure of any live websit
 
 2. **Start Local Server** (for development testing)
    ```bash
-   # Using Python 3
+   # Using Python 3.9 (recommended)
    python3 -m http.server 5000
    
-   # Or using Python 2
-   python -m SimpleHTTPServer 5000
+   # Alternative command if python3 is not recognized
+   python -m http.server 5000
    
    # Server will be available at http://localhost:5000
    ```

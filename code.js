@@ -302,110 +302,237 @@ function parseColor(colorString) {
 }
 
 async function createAdvancedNodeFromElement(element) {
-  const { tagName, textContent, figma_node_type, layout, visual, typography } = element;
-
-  let node;
-
   try {
-    // Create appropriate node type based on content and structure
-    if (figma_node_type === 'TEXT' && textContent && textContent.trim()) {
-      node = figma.createText();
-
-      // Load font (with fallback)
-      const fontFamily = element.figma_fonts && element.figma_fonts[0] || 'Inter';
-      const fontWeight = typography.fontWeight || 'normal';
-      const fontStyle = fontWeight === 'bold' || fontWeight === '700' || fontWeight === '800' || fontWeight === '900' ? 'Bold' : 'Regular';
-
-      try {
-        await figma.loadFontAsync({ family: fontFamily, style: fontStyle });
-        node.fontName = { family: fontFamily, style: fontStyle };
-      } catch (fontError) {
-        await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-        node.fontName = { family: 'Inter', style: 'Regular' };
-      }
-
-      node.characters = textContent.trim().substring(0, 500);
-      node.fontSize = element.figma_font_size || 16;
-
-      // Apply text color
-      if (element.figma_text_color) {
-        node.fills = [{ type: 'SOLID', color: element.figma_text_color }];
-      }
-
-      // Set text alignment
-      if (typography && typography.textAlign) {
-        const alignMap = { 'left': 'LEFT', 'center': 'CENTER', 'right': 'RIGHT' };
-        node.textAlignHorizontal = alignMap[typography.textAlign] || 'LEFT';
-      }
-
-    } else if (figma_node_type === 'FRAME' || element.isFlexContainer || element.isGridContainer) {
-      node = figma.createFrame();
-
-      // Apply auto layout for flex containers
-      if (element.isFlexContainer && layout && layout.flexDirection) {
-        node.layoutMode = layout.flexDirection === 'row' ? 'HORIZONTAL' : 'VERTICAL';
-
-        // Apply flex properties
-        if (layout && layout.justifyContent) {
-          const justifyMap = {
-            'flex-start': 'MIN',
-            'center': 'CENTER', 
-            'flex-end': 'MAX',
-            'space-between': 'SPACE_BETWEEN'
-          };
-          node.primaryAxisAlignItems = justifyMap[layout.justifyContent] || 'MIN';
-        }
-
-        if (layout && layout.alignItems) {
-          const alignMap = {
-            'flex-start': 'MIN',
-            'center': 'CENTER',
-            'flex-end': 'MAX'
-          };
-          node.counterAxisAlignItems = alignMap[layout.alignItems] || 'MIN';
-        }
-
-        // Apply gap
-        if (layout && layout.gap) {
-          node.itemSpacing = element.parse_pixel_value ? element.parse_pixel_value(layout.gap) : parseFloat(layout.gap) || 0;
-        }
-      }
-
+    console.log(`Creating precise node for ${element.tagName} with comprehensive styling...`);
+    
+    // Determine the appropriate Figma node type based on enhanced analysis
+    const nodeType = determineAdvancedNodeType(element);
+    
+    if (nodeType === 'TEXT') {
+      return await createPreciseTextNode(element);
+    } else if (nodeType === 'IMAGE') {
+      return await createPreciseImageNode(element);
+    } else if (nodeType === 'COMPONENT') {
+      return await createComponentNode(element);
     } else {
-      node = figma.createRectangle();
+      // Create frame with exact styling and Auto Layout
+      return await createPreciseFrameNode(element);
     }
-
-    // Set node name
-    const className = element.className ? `.${element.className.split(' ')[0]}` : '';
-    node.name = `${tagName}${className}`;
-
-    // Apply positioning and dimensions
-    node.x = element.figma_x || 0;
-    node.y = element.figma_y || 0;
-    node.resize(element.figma_width || 100, element.figma_height || 20);
-
-    // Apply background color
-    if (element.figma_bg_color && node.fills !== undefined) {
-      node.fills = [{ type: 'SOLID', color: element.figma_bg_color }];
-    }
-
-    // Apply border radius
-    if (visual && visual.borderRadius && node.cornerRadius !== undefined) {
-      const radius = element.parse_pixel_value ? element.parse_pixel_value(visual.borderRadius) : parseFloat(visual.borderRadius) || 0;
-      node.cornerRadius = radius;
-    }
-
-    // Apply opacity
-    if (visual && visual.opacity && visual.opacity !== '1') {
-      node.opacity = parseFloat(visual.opacity) || 1;
-    }
-
-    return node;
-
   } catch (error) {
-    console.warn('Error creating advanced node:', error);
+    console.error('Error creating advanced node:', error);
     return null;
   }
+}
+
+function determineAdvancedNodeType(element) {
+  // Enhanced node type determination based on comprehensive analysis
+  const { tagName, layout_detection, visual_hierarchy } = element;
+  
+  // Text nodes - only pure text content
+  if (layout_detection?.isTextNode && element.textContent?.trim()) {
+    return 'TEXT';
+  }
+  
+  // Image nodes
+  if (layout_detection?.isImageElement || element.attributes?.src) {
+    return 'IMAGE';
+  }
+  
+  // Interactive components (buttons, inputs)
+  if (layout_detection?.isInputElement || visual_hierarchy?.isInteractive) {
+    return 'COMPONENT';
+  }
+  
+  // Default to frame for containers and complex elements
+  return 'FRAME';
+}
+
+async function createPreciseTextNode(element) {
+  const textNode = figma.createText();
+  
+  // Load font before setting properties
+  const fontFamily = mapWebFontToFigma(element.typography?.fontFamily || 'Arial');
+  const fontWeight = mapFontWeight(element.typography?.fontWeight || '400');
+  
+  try {
+    await figma.loadFontAsync({ family: fontFamily, style: fontWeight });
+  } catch (error) {
+    console.warn(`Font loading failed for ${fontFamily}, using default:`, error);
+    await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+  }
+  
+  // Set text content
+  textNode.characters = element.textContent?.trim() || element.innerText?.trim() || '';
+  
+  // Apply precise typography
+  textNode.fontName = { family: fontFamily, style: fontWeight };
+  textNode.fontSize = Math.max(element.typography?.fontSize || 16, 8);
+  textNode.lineHeight = parseLineHeight(element.typography?.lineHeight);
+  textNode.letterSpacing = parseLetterSpacing(element.typography?.letterSpacing);
+  
+  // Text alignment
+  const textAlign = element.typography?.textAlign || 'left';
+  textNode.textAlignHorizontal = mapTextAlign(textAlign);
+  
+  // Text color
+  textNode.fills = [{ 
+    type: 'SOLID', 
+    color: parseColor(element.typography?.color || '#000000') 
+  }];
+  
+  // Position and size
+  textNode.x = element.position?.x || 0;
+  textNode.y = element.position?.y || 0;
+  textNode.resize(
+    Math.max(element.position?.width || 100, 20),
+    Math.max(element.position?.height || 20, 10)
+  );
+  
+  // Auto resize
+  textNode.textAutoResize = 'WIDTH_AND_HEIGHT';
+  
+  textNode.name = `${element.tagName} Text: "${textNode.characters.substring(0, 30)}..."`;
+  
+  return textNode;
+}
+
+async function createPreciseImageNode(element) {
+  const frame = figma.createFrame();
+  frame.name = `${element.tagName} Image`;
+  
+  // Set dimensions
+  frame.resize(
+    Math.max(element.position?.width || 100, 20),
+    Math.max(element.position?.height || 100, 20)
+  );
+  
+  // Position
+  frame.x = element.position?.x || 0;
+  frame.y = element.position?.y || 0;
+  
+  // Apply background if it's a background-image
+  if (element.visual?.backgroundImages?.length > 0) {
+    // For now, create a placeholder - in production, you'd fetch and apply the image
+    frame.fills = [{ 
+      type: 'SOLID', 
+      color: { r: 0.9, g: 0.9, b: 0.9 } 
+    }];
+    
+    // Add a text node indicating it's an image
+    const imageLabel = figma.createText();
+    await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+    imageLabel.characters = `🖼️ ${element.attributes?.alt || 'Image'}`;
+    imageLabel.fontSize = 12;
+    imageLabel.fills = [{ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }];
+    imageLabel.textAlignHorizontal = 'CENTER';
+    imageLabel.textAlignVertical = 'CENTER';
+    frame.appendChild(imageLabel);
+  }
+  
+  // Apply border radius if present
+  applyBorderRadius(frame, element.visual);
+  
+  return frame;
+}
+
+async function createComponentNode(element) {
+  const frame = figma.createFrame();
+  frame.name = `${element.tagName} Component`;
+  
+  // Set dimensions
+  frame.resize(
+    Math.max(element.position?.width || 100, 20),
+    Math.max(element.position?.height || 40, 20)
+  );
+  
+  // Position
+  frame.x = element.position?.x || 0;
+  frame.y = element.position?.y || 0;
+  
+  // Apply styling
+  frame.fills = [{ 
+    type: 'SOLID', 
+    color: parseColor(element.visual?.backgroundColor || '#f0f0f0') 
+  }];
+  
+  // Add component indicator
+  if (element.textContent?.trim()) {
+    const componentText = figma.createText();
+    await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+    componentText.characters = element.textContent.trim();
+    componentText.fontSize = element.typography?.fontSize || 14;
+    componentText.fills = [{ 
+      type: 'SOLID', 
+      color: parseColor(element.typography?.color || '#000000') 
+    }];
+    frame.appendChild(componentText);
+  }
+  
+  applyBorderRadius(frame, element.visual);
+  applyBorders(frame, element.visual);
+  
+  return frame;
+}
+
+async function createPreciseFrameNode(element) {
+  const frame = figma.createFrame();
+  frame.name = `${element.tagName}${element.className ? '.' + element.className.split(' ')[0] : ''}`;
+  
+  // Set precise dimensions
+  frame.resize(
+    Math.max(element.position?.width || 100, 1),
+    Math.max(element.position?.height || 20, 1)
+  );
+  
+  // Position
+  frame.x = element.position?.x || 0;
+  frame.y = element.position?.y || 0;
+  
+  // Apply Auto Layout if it's a flex container
+  if (element.layout_detection?.isFlexContainer && element.layout_detection?.flexboxMapping) {
+    const flexMapping = element.layout_detection.flexboxMapping;
+    
+    frame.layoutMode = flexMapping.figmaLayoutMode || 'HORIZONTAL';
+    frame.itemSpacing = Math.max(flexMapping.figmaItemSpacing || 0, 0);
+    
+    // Apply padding
+    if (flexMapping.figmaPadding) {
+      frame.paddingTop = Math.max(flexMapping.figmaPadding.top || 0, 0);
+      frame.paddingRight = Math.max(flexMapping.figmaPadding.right || 0, 0);
+      frame.paddingBottom = Math.max(flexMapping.figmaPadding.bottom || 0, 0);
+      frame.paddingLeft = Math.max(flexMapping.figmaPadding.left || 0, 0);
+    }
+    
+    // Map justify-content to primaryAxisAlignItems
+    frame.primaryAxisAlignItems = mapJustifyContent(flexMapping.figmaPrimaryAxis);
+    frame.counterAxisAlignItems = mapAlignItems(flexMapping.figmaCounterAxis);
+  }
+  
+  // Apply background color
+  if (element.visual?.backgroundColor && element.visual.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+    frame.fills = [{ 
+      type: 'SOLID', 
+      color: parseColor(element.visual.backgroundColor) 
+    }];
+  } else {
+    frame.fills = []; // Transparent
+  }
+  
+  // Apply border radius
+  applyBorderRadius(frame, element.visual);
+  
+  // Apply borders
+  applyBorders(frame, element.visual);
+  
+  // Apply effects (shadows)
+  applyEffects(frame, element.visual);
+  
+  // Apply opacity
+  if (element.visual?.opacity !== undefined && element.visual.opacity < 1) {
+    frame.opacity = Math.max(element.visual.opacity, 0.01);
+  }
+  
+  return frame;
 }
 
 function extractDomainName(url) {
@@ -414,6 +541,220 @@ function extractDomainName(url) {
     return domain.replace('www.', '').split('.')[0];
   } catch {
     return 'Website';
+  }
+}
+
+// Utility functions for precise styling
+
+function mapWebFontToFigma(webFont) {
+  // Enhanced font mapping from web fonts to Figma fonts
+  const fontMap = {
+    'Arial': 'Arial',
+    'Helvetica': 'Arial',
+    'Times': 'Times New Roman',
+    'Times New Roman': 'Times New Roman',
+    'Georgia': 'Georgia',
+    'Verdana': 'Verdana',
+    'Courier': 'Courier New',
+    'Courier New': 'Courier New',
+    'Impact': 'Impact',
+    'Comic Sans MS': 'Comic Sans MS',
+    'Trebuchet MS': 'Trebuchet MS',
+    'Arial Black': 'Arial Black',
+    'Palatino': 'Palatino',
+    'Garamond': 'Garamond',
+    'Bookman': 'Bookman',
+    'Tahoma': 'Tahoma',
+    'Inter': 'Inter',
+    'Roboto': 'Roboto',
+    'Open Sans': 'Open Sans',
+    'Lato': 'Lato',
+    'Montserrat': 'Montserrat',
+    'Source Sans Pro': 'Source Sans Pro',
+    'Poppins': 'Poppins',
+    'sans-serif': 'Inter',
+    'serif': 'Times New Roman',
+    'monospace': 'Courier New'
+  };
+  
+  // Extract first font family
+  const firstFont = webFont.split(',')[0].trim().replace(/['"]/g, '');
+  return fontMap[firstFont] || 'Inter';
+}
+
+function mapFontWeight(weight) {
+  // Map CSS font weights to Figma font styles
+  const weightMap = {
+    '100': 'Thin',
+    '200': 'Extra Light',
+    '300': 'Light',
+    '400': 'Regular',
+    '500': 'Medium',
+    '600': 'Semi Bold',
+    '700': 'Bold',
+    '800': 'Extra Bold',
+    '900': 'Black',
+    'normal': 'Regular',
+    'bold': 'Bold',
+    'lighter': 'Light',
+    'bolder': 'Bold'
+  };
+  
+  return weightMap[weight] || 'Regular';
+}
+
+function parseLineHeight(lineHeight) {
+  if (!lineHeight || lineHeight === 'normal') {
+    return { unit: 'AUTO' };
+  }
+  
+  if (lineHeight.includes('px')) {
+    return { unit: 'PIXELS', value: parseFloat(lineHeight) };
+  }
+  
+  if (lineHeight.includes('%')) {
+    return { unit: 'PERCENT', value: parseFloat(lineHeight) };
+  }
+  
+  // Unitless values are multipliers
+  const numValue = parseFloat(lineHeight);
+  if (!isNaN(numValue)) {
+    return { unit: 'PERCENT', value: numValue * 100 };
+  }
+  
+  return { unit: 'AUTO' };
+}
+
+function parseLetterSpacing(letterSpacing) {
+  if (!letterSpacing || letterSpacing === 'normal') {
+    return { unit: 'PIXELS', value: 0 };
+  }
+  
+  const value = parseFloat(letterSpacing);
+  if (!isNaN(value)) {
+    return { unit: 'PIXELS', value: value };
+  }
+  
+  return { unit: 'PIXELS', value: 0 };
+}
+
+function mapTextAlign(textAlign) {
+  const alignMap = {
+    'left': 'LEFT',
+    'center': 'CENTER',
+    'right': 'RIGHT',
+    'justify': 'JUSTIFIED',
+    'start': 'LEFT',
+    'end': 'RIGHT'
+  };
+  
+  return alignMap[textAlign] || 'LEFT';
+}
+
+function parseColor(colorString) {
+  // Enhanced color parsing for CSS colors
+  if (!colorString) return { r: 0, g: 0, b: 0 };
+  
+  // Handle hex colors
+  if (colorString.startsWith('#')) {
+    const hex = colorString.substring(1);
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+    return { r, g, b };
+  }
+  
+  // Handle rgb/rgba colors
+  const rgbMatch = colorString.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)(?:,\\s*([\\d.]+))?\\)/);
+  if (rgbMatch) {
+    return {
+      r: parseInt(rgbMatch[1]) / 255,
+      g: parseInt(rgbMatch[2]) / 255,
+      b: parseInt(rgbMatch[3]) / 255
+    };
+  }
+  
+  // Handle named colors (basic set)
+  const namedColors = {
+    'black': { r: 0, g: 0, b: 0 },
+    'white': { r: 1, g: 1, b: 1 },
+    'red': { r: 1, g: 0, b: 0 },
+    'green': { r: 0, g: 1, b: 0 },
+    'blue': { r: 0, g: 0, b: 1 },
+    'transparent': { r: 0, g: 0, b: 0 }
+  };
+  
+  return namedColors[colorString.toLowerCase()] || { r: 0, g: 0, b: 0 };
+}
+
+function mapJustifyContent(justifyContent) {
+  const justifyMap = {
+    'flex-start': 'MIN',
+    'start': 'MIN',
+    'center': 'CENTER',
+    'flex-end': 'MAX',
+    'end': 'MAX',
+    'space-between': 'SPACE_BETWEEN',
+    'space-around': 'CENTER', // Approximate
+    'space-evenly': 'CENTER'   // Approximate
+  };
+  
+  return justifyMap[justifyContent] || 'MIN';
+}
+
+function mapAlignItems(alignItems) {
+  const alignMap = {
+    'flex-start': 'MIN',
+    'start': 'MIN',
+    'center': 'CENTER',
+    'flex-end': 'MAX',
+    'end': 'MAX',
+    'stretch': 'MIN', // Approximate
+    'baseline': 'MIN'  // Approximate
+  };
+  
+  return alignMap[alignItems] || 'MIN';
+}
+
+function applyBorderRadius(node, visual) {
+  if (!visual || !node.cornerRadius === undefined) return;
+  
+  const radius = parseFloat(visual.borderTopLeftRadius) || 0;
+  if (radius > 0) {
+    node.cornerRadius = radius;
+  }
+}
+
+function applyBorders(node, visual) {
+  if (!visual || !node.strokes === undefined) return;
+  
+  const borderWidth = visual.borderTopWidth || 0;
+  if (borderWidth > 0) {
+    node.strokeWeight = borderWidth;
+    node.strokes = [{ 
+      type: 'SOLID', 
+      color: parseColor(visual.borderTopColor || '#000000') 
+    }];
+  }
+}
+
+function applyEffects(node, visual) {
+  if (!visual || !visual.boxShadow || visual.boxShadow === 'none') return;
+  
+  // Basic shadow application - in production, you'd parse the shadow string
+  const effects = [];
+  if (visual.boxShadow.includes('rgba') || visual.boxShadow.includes('rgb')) {
+    effects.push({
+      type: 'DROP_SHADOW',
+      color: { r: 0, g: 0, b: 0, a: 0.25 },
+      offset: { x: 2, y: 2 },
+      radius: 4,
+      visible: true
+    });
+  }
+  
+  if (effects.length > 0) {
+    node.effects = effects;
   }
 }
 

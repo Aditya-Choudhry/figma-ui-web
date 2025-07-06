@@ -134,14 +134,16 @@ class WebsiteCapture:
     def extract_page_data(self, viewport_config):
         """Extract comprehensive page data including all elements and styles"""
         
-        # JavaScript to extract all element data
+        # JavaScript to extract all element data - Enhanced for exact replication
         extraction_script = """
         function extractPageData() {
             const elements = [];
             const fonts = new Set();
             const colors = new Set();
+            const images = new Set();
+            const cssRules = [];
             
-            // Get page info
+            // Get comprehensive page info
             const pageInfo = {
                 url: window.location.href,
                 title: document.title,
@@ -152,73 +154,181 @@ class WebsiteCapture:
                 scrollSize: {
                     width: Math.max(document.body.scrollWidth, document.documentElement.scrollWidth),
                     height: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
-                }
+                },
+                devicePixelRatio: window.devicePixelRatio,
+                userAgent: navigator.userAgent
             };
             
-            // Function to get computed styles
+            // Enhanced function to get ALL computed styles for exact replication
             function getComputedStyleData(element) {
                 const style = window.getComputedStyle(element);
                 const rect = element.getBoundingClientRect();
                 
+                // Parse numeric values from CSS
+                const parsePixelValue = (value) => {
+                    if (!value || value === 'auto' || value === 'none') return 0;
+                    const match = value.match(/(-?\\d*\\.?\\d+)/);
+                    return match ? parseFloat(match[1]) : 0;
+                };
+                
+                // Extract background images and IMG src
+                const backgroundImages = [];
+                if (style.backgroundImage && style.backgroundImage !== 'none') {
+                    const matches = style.backgroundImage.match(/url\\([^)]*\\)/g);
+                    if (matches) {
+                        matches.forEach(match => {
+                            const url = match.slice(4, -1).replace(/["']/g, '');
+                            if (url && !url.startsWith('data:')) {
+                                backgroundImages.push(url);
+                                images.add(url);
+                            }
+                        });
+                    }
+                }
+                
+                // Extract IMG element src
+                if (element.tagName === 'IMG' && element.src && !element.src.startsWith('data:')) {
+                    images.add(element.src);
+                }
+                
                 return {
-                    // Position and layout
+                    // Precise position and dimensions
                     position: {
-                        x: rect.left + window.scrollX,
-                        y: rect.top + window.scrollY,
-                        width: rect.width,
-                        height: rect.height
+                        x: Math.round(rect.left + window.scrollX),
+                        y: Math.round(rect.top + window.scrollY),
+                        width: Math.round(rect.width),
+                        height: Math.round(rect.height),
+                        top: Math.round(rect.top),
+                        right: Math.round(rect.right),
+                        bottom: Math.round(rect.bottom),
+                        left: Math.round(rect.left)
                     },
                     
-                    // Layout properties
+                    // Complete layout properties for Figma Auto Layout
                     layout: {
                         display: style.display,
                         position: style.position,
+                        zIndex: style.zIndex,
+                        
+                        // Flexbox properties
                         flexDirection: style.flexDirection,
+                        flexWrap: style.flexWrap,
                         justifyContent: style.justifyContent,
                         alignItems: style.alignItems,
+                        alignContent: style.alignContent,
+                        alignSelf: style.alignSelf,
+                        flex: style.flex,
+                        flexGrow: style.flexGrow,
+                        flexShrink: style.flexShrink,
+                        flexBasis: style.flexBasis,
                         gap: style.gap,
+                        rowGap: style.rowGap,
+                        columnGap: style.columnGap,
+                        
+                        // Grid properties
                         gridTemplateColumns: style.gridTemplateColumns,
                         gridTemplateRows: style.gridTemplateRows,
-                        boxSizing: style.boxSizing
+                        gridTemplateAreas: style.gridTemplateAreas,
+                        gridAutoColumns: style.gridAutoColumns,
+                        gridAutoRows: style.gridAutoRows,
+                        gridAutoFlow: style.gridAutoFlow,
+                        gridColumn: style.gridColumn,
+                        gridRow: style.gridRow,
+                        gridArea: style.gridArea,
+                        
+                        // Box model
+                        boxSizing: style.boxSizing,
+                        overflow: style.overflow,
+                        overflowX: style.overflowX,
+                        overflowY: style.overflowY
                     },
                     
-                    // Visual properties
+                    // Complete visual properties
                     visual: {
                         backgroundColor: style.backgroundColor,
                         backgroundImage: style.backgroundImage,
-                        borderRadius: style.borderRadius,
-                        borderWidth: style.borderWidth,
-                        borderStyle: style.borderStyle,
-                        borderColor: style.borderColor,
-                        opacity: style.opacity,
+                        backgroundSize: style.backgroundSize,
+                        backgroundPosition: style.backgroundPosition,
+                        backgroundRepeat: style.backgroundRepeat,
+                        backgroundAttachment: style.backgroundAttachment,
+                        backgroundClip: style.backgroundClip,
+                        backgroundOrigin: style.backgroundOrigin,
+                        backgroundImages: backgroundImages,
+                        
+                        // Borders (all sides)
+                        borderTopWidth: parsePixelValue(style.borderTopWidth),
+                        borderRightWidth: parsePixelValue(style.borderRightWidth),
+                        borderBottomWidth: parsePixelValue(style.borderBottomWidth),
+                        borderLeftWidth: parsePixelValue(style.borderLeftWidth),
+                        borderTopStyle: style.borderTopStyle,
+                        borderRightStyle: style.borderRightStyle,
+                        borderBottomStyle: style.borderBottomStyle,
+                        borderLeftStyle: style.borderLeftStyle,
+                        borderTopColor: style.borderTopColor,
+                        borderRightColor: style.borderRightColor,
+                        borderBottomColor: style.borderBottomColor,
+                        borderLeftColor: style.borderLeftColor,
+                        
+                        // Border radius (all corners)
+                        borderTopLeftRadius: style.borderTopLeftRadius,
+                        borderTopRightRadius: style.borderTopRightRadius,
+                        borderBottomRightRadius: style.borderBottomRightRadius,
+                        borderBottomLeftRadius: style.borderBottomLeftRadius,
+                        
+                        // Effects
+                        opacity: parseFloat(style.opacity),
                         boxShadow: style.boxShadow,
-                        transform: style.transform
+                        filter: style.filter,
+                        transform: style.transform,
+                        transformOrigin: style.transformOrigin,
+                        transition: style.transition,
+                        animation: style.animation,
+                        
+                        // Visibility
+                        visibility: style.visibility,
+                        clipPath: style.clipPath,
+                        mask: style.mask
                     },
                     
-                    // Typography
+                    // Complete typography properties
                     typography: {
                         fontFamily: style.fontFamily,
-                        fontSize: style.fontSize,
+                        fontSize: parsePixelValue(style.fontSize),
                         fontWeight: style.fontWeight,
                         fontStyle: style.fontStyle,
+                        fontVariant: style.fontVariant,
+                        fontStretch: style.fontStretch,
                         lineHeight: style.lineHeight,
                         textAlign: style.textAlign,
                         textDecoration: style.textDecoration,
+                        textDecorationColor: style.textDecorationColor,
+                        textDecorationLine: style.textDecorationLine,
+                        textDecorationStyle: style.textDecorationStyle,
                         textTransform: style.textTransform,
+                        textIndent: style.textIndent,
+                        textShadow: style.textShadow,
                         color: style.color,
-                        letterSpacing: style.letterSpacing
+                        letterSpacing: parsePixelValue(style.letterSpacing),
+                        wordSpacing: parsePixelValue(style.wordSpacing),
+                        whiteSpace: style.whiteSpace,
+                        wordBreak: style.wordBreak,
+                        wordWrap: style.wordWrap,
+                        textOverflow: style.textOverflow,
+                        verticalAlign: style.verticalAlign,
+                        writingMode: style.writingMode,
+                        direction: style.direction
                     },
                     
-                    // Spacing
+                    // Precise spacing (all values as numbers)
                     spacing: {
-                        marginTop: style.marginTop,
-                        marginRight: style.marginRight,
-                        marginBottom: style.marginBottom,
-                        marginLeft: style.marginLeft,
-                        paddingTop: style.paddingTop,
-                        paddingRight: style.paddingRight,
-                        paddingBottom: style.paddingBottom,
-                        paddingLeft: style.paddingLeft
+                        marginTop: parsePixelValue(style.marginTop),
+                        marginRight: parsePixelValue(style.marginRight),
+                        marginBottom: parsePixelValue(style.marginBottom),
+                        marginLeft: parsePixelValue(style.marginLeft),
+                        paddingTop: parsePixelValue(style.paddingTop),
+                        paddingRight: parsePixelValue(style.paddingRight),
+                        paddingBottom: parsePixelValue(style.paddingBottom),
+                        paddingLeft: parsePixelValue(style.paddingLeft)
                     }
                 };
             }
@@ -261,27 +371,83 @@ class WebsiteCapture:
                     colors.add(styleData.visual.backgroundColor);
                 }
                 
+                // Enhanced element data for exact Figma replication
                 const elementData = {
                     id: elementId,
                     tagName: element.tagName,
                     className: element.className || '',
+                    innerHTML: element.innerHTML ? element.innerHTML.substring(0, 1000) : '',
                     textContent: element.textContent ? element.textContent.trim().substring(0, 500) : '',
+                    innerText: element.innerText ? element.innerText.trim().substring(0, 500) : '',
                     depth: depth,
                     parentId: parentId,
                     ...styleData,
                     
-                    // Additional properties
+                    // Complete attributes for context
                     attributes: {
                         id: element.id || '',
                         href: element.href || '',
                         src: element.src || '',
-                        alt: element.alt || ''
+                        alt: element.alt || '',
+                        title: element.title || '',
+                        role: element.getAttribute('role') || '',
+                        ariaLabel: element.getAttribute('aria-label') || '',
+                        dataAttributes: Array.from(element.attributes)
+                            .filter(attr => attr.name.startsWith('data-'))
+                            .reduce((acc, attr) => {
+                                acc[attr.name] = attr.value;
+                                return acc;
+                            }, {})
                     },
                     
-                    // Auto layout detection
-                    isFlexContainer: style.display === 'flex',
-                    isGridContainer: style.display === 'grid',
-                    hasChildren: element.children.length > 0
+                    // Enhanced layout detection for Figma Auto Layout
+                    layout_detection: {
+                        isFlexContainer: style.display === 'flex',
+                        isGridContainer: style.display === 'grid',
+                        isInlineBlock: style.display === 'inline-block',
+                        isBlock: style.display === 'block',
+                        isInline: style.display === 'inline',
+                        hasChildren: element.children.length > 0,
+                        childrenCount: element.children.length,
+                        isTextNode: element.children.length === 0 && element.textContent.trim().length > 0,
+                        isImageElement: element.tagName === 'IMG',
+                        isInputElement: ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(element.tagName),
+                        isContainerElement: ['DIV', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER', 'NAV', 'MAIN', 'ASIDE'].includes(element.tagName),
+                        
+                        // Flexbox analysis for Auto Layout mapping
+                        flexboxMapping: style.display === 'flex' ? {
+                            figmaLayoutMode: style.flexDirection === 'column' || style.flexDirection === 'column-reverse' ? 'VERTICAL' : 'HORIZONTAL',
+                            figmaPrimaryAxis: style.justifyContent,
+                            figmaCounterAxis: style.alignItems,
+                            figmaItemSpacing: parsePixelValue(style.gap) || parsePixelValue(style.rowGap) || parsePixelValue(style.columnGap),
+                            figmaPadding: {
+                                top: parsePixelValue(style.paddingTop),
+                                right: parsePixelValue(style.paddingRight),
+                                bottom: parsePixelValue(style.paddingBottom),
+                                left: parsePixelValue(style.paddingLeft)
+                            }
+                        } : null,
+                        
+                        // Grid analysis for complex layouts
+                        gridMapping: style.display === 'grid' ? {
+                            columns: style.gridTemplateColumns,
+                            rows: style.gridTemplateRows,
+                            gap: parsePixelValue(style.gap),
+                            areas: style.gridTemplateAreas
+                        } : null
+                    },
+                    
+                    // Visual hierarchy analysis
+                    visual_hierarchy: {
+                        zIndex: parseInt(style.zIndex) || 0,
+                        isPositioned: ['absolute', 'relative', 'fixed', 'sticky'].includes(style.position),
+                        isVisible: style.visibility !== 'hidden' && style.display !== 'none' && parseFloat(style.opacity) > 0,
+                        hasBackground: style.backgroundColor !== 'rgba(0, 0, 0, 0)' && style.backgroundColor !== 'transparent',
+                        hasBorder: parsePixelValue(style.borderWidth) > 0 || parsePixelValue(style.borderTopWidth) > 0 || parsePixelValue(style.borderRightWidth) > 0 || parsePixelValue(style.borderBottomWidth) > 0 || parsePixelValue(style.borderLeftWidth) > 0,
+                        hasShadow: style.boxShadow !== 'none',
+                        hasTransform: style.transform !== 'none',
+                        isInteractive: ['A', 'BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName) || element.getAttribute('onclick') || style.cursor === 'pointer'
+                    }
                 };
                 
                 elements.push(elementData);
@@ -303,7 +469,20 @@ class WebsiteCapture:
                 elements: elements,
                 fonts: Array.from(fonts),
                 colors: Array.from(colors),
-                totalElements: elements.length
+                images: Array.from(images),
+                totalElements: elements.length,
+                
+                // Additional metadata for Figma
+                metadata: {
+                    captureTimestamp: Date.now(),
+                    viewport: pageInfo.viewport,
+                    totalFonts: fonts.size,
+                    totalColors: colors.size,
+                    totalImages: images.size,
+                    hasFlexLayouts: elements.some(el => el.layout_detection?.isFlexContainer),
+                    hasGridLayouts: elements.some(el => el.layout_detection?.isGridContainer),
+                    maxDepth: Math.max(...elements.map(el => el.depth || 0))
+                }
             };
         }
         

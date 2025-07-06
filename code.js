@@ -274,12 +274,13 @@ function createElementsInFrame(parentFrame, elements) {
 
 function createNodeFromElement(element) {
   try {
-    if (!element || !element.layout) {
+    if (!element) {
       return null;
     }
 
-    var layout = element.layout;
-    var visual = element.visual_styles || {};
+    // Handle both layout and position data structures
+    var layout = element.layout || element.position || {};
+    var visual = element.visual_styles || element.visual || {};
     var textContent = element.textContent;
 
     var node;
@@ -305,12 +306,12 @@ function createNodeFromElement(element) {
       node = figma.createRectangle();
     }
 
-    // Set position and size
-    if (layout.x !== undefined) node.x = layout.x;
-    if (layout.y !== undefined) node.y = layout.y;
-    if (layout.width !== undefined && layout.height !== undefined) {
-      node.resize(Math.max(layout.width, 1), Math.max(layout.height, 1));
-    }
+    // Set position and size with safe defaults
+    node.x = layout.x || 0;
+    node.y = layout.y || 0;
+    var width = Math.max(layout.width || 100, 1);
+    var height = Math.max(layout.height || 20, 1);
+    node.resize(width, height);
 
     // Apply basic styling
     if (visual.backgroundColor) {
@@ -318,9 +319,17 @@ function createNodeFromElement(element) {
       node.fills = [{ type: 'SOLID', color: bgColor }];
     }
 
-    // Set name
-    node.name = element.tagName || 'Element';
+    // Set name with more descriptive info
+    var elementName = element.tagName || 'Element';
+    if (element.className) {
+      elementName += '.' + element.className.split(' ')[0];
+    }
+    if (textContent && textContent.trim()) {
+      elementName += ' (' + textContent.trim().substring(0, 20) + ')';
+    }
+    node.name = elementName;
 
+    console.log('Created node: ' + elementName + ' at (' + node.x + ', ' + node.y + ') size ' + width + 'x' + height);
     return node;
     
   } catch (error) {

@@ -834,6 +834,7 @@ class WebsiteCapture:
         print(f"🔍 Processing {element.name} element at depth {depth} - text: '{text_content[:30]}...' children: {len(list(element.children))}")
         
         # Extract comprehensive element data
+        position_data = self.calculate_element_position(element, elements, viewport_config)
         element_data = {
             'tagName': element.name.upper(),
             'className': ' '.join(element.get('class', [])),
@@ -841,8 +842,10 @@ class WebsiteCapture:
             'textContent': text_content,
             'innerHTML': str(element)[:200] if element else '',  # First 200 chars of HTML
             'attributes': self.extract_all_attributes(element),
-            'position': self.calculate_element_position(element, elements, viewport_config),
+            'position': position_data,
+            'layout': position_data,  # Add layout mapping for Figma plugin compatibility
             'visual': self.extract_computed_styles(element),
+            'visual_styles': self.extract_computed_styles(element),  # Add visual_styles mapping for plugin compatibility
             'typography': self.extract_element_typography(element),
             'layout_detection': self.analyze_element_layout(element),
             'visual_hierarchy': {

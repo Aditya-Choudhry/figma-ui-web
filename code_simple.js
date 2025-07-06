@@ -157,12 +157,13 @@ function createElementsInFrame(parentFrame, elements) {
 
 function createNodeFromElement(element) {
   try {
-    if (!element || !element.layout) {
+    if (!element) {
       return null;
     }
 
-    var layout = element.layout;
-    var visual = element.visual_styles || {};
+    // Handle both layout and position data structures
+    var layout = element.layout || element.position || {};
+    var visual = element.visual_styles || element.visual || {};
     var textContent = element.textContent;
 
     var node;

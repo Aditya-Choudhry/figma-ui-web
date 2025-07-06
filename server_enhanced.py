@@ -740,6 +740,9 @@ class WebsiteCapture:
             # Extract structured data
             structured_data = self.extract_structured_data(soup)
             
+            # Create comprehensive design analysis
+            design_analysis = self.create_design_analysis(elements, images, real_colors, typography_styles, css_data)
+            
             return {
                 'device': viewport_config['device'],
                 'viewport': {
@@ -764,6 +767,7 @@ class WebsiteCapture:
                 'colors': real_colors,
                 'images': images,
                 'structured_data': structured_data,
+                'design_analysis': design_analysis,  # New comprehensive design inspector output
                 'meta': {
                     'og_data': self.extract_open_graph(soup),
                     'twitter_data': self.extract_twitter_cards(soup),
@@ -1620,6 +1624,181 @@ class WebsiteCapture:
         
         return 'utf-8'
     
+    def create_design_analysis(self, elements, images, colors, typography_styles, css_data):
+        """Create comprehensive design analysis in the format requested"""
+        
+        # Analyze text elements with detailed font properties
+        text_elements = []
+        shapes = {'lines': [], 'dots': [], 'rectangles': [], 'circles': []}
+        layout_info = {'grid': 'unknown', 'alignment': 'left', 'spacing': []}
+        
+        for element in elements:
+            # Extract text content with full typography details
+            text_content = element.get('textContent') or element.get('text', '')
+            if text_content and text_content.strip():
+                text_info = {
+                    'content': text_content.strip(),
+                    'fontSize': self.parse_pixel_value(element.get('visual', {}).get('fontSize', '16px')),
+                    'fontWeight': element.get('visual', {}).get('fontWeight', 'normal'),
+                    'fontFamily': element.get('visual', {}).get('fontFamily', 'inherit'),
+                    'color': element.get('visual', {}).get('color', '#000000'),
+                    'lineHeight': element.get('visual', {}).get('lineHeight', 'normal'),
+                    'letterSpacing': element.get('visual', {}).get('letterSpacing', 'normal'),
+                    'textAlign': element.get('visual', {}).get('textAlign', 'left'),
+                    'textDecoration': element.get('visual', {}).get('textDecoration', 'none'),
+                    'position': element.get('position', {}),
+                    'tag': element.get('tagName') or element.get('tag', 'unknown')
+                }
+                text_elements.append(text_info)
+            
+            # Detect shapes based on element properties
+            visual = element.get('visual', {})
+            position = element.get('position', {})
+            
+            # Get tag name from correct field
+            tag_name = (element.get('tagName') or element.get('tag', '')).lower()
+            
+            # Detect lines (elements with border or hr tags)
+            if (tag_name == 'hr' or 
+                visual.get('borderTop', 'none') != 'none' or
+                visual.get('borderBottom', 'none') != 'none'):
+                
+                line_info = {
+                    'length': position.get('width', 0),
+                    'thickness': self.parse_pixel_value(visual.get('borderTop', '1px').split()[0] if visual.get('borderTop', 'none') != 'none' else '1px'),
+                    'color': self.extract_border_color(visual.get('borderTop', '#000000')),
+                    'style': 'solid',
+                    'position': position
+                }
+                shapes['lines'].append(line_info)
+            
+            # Detect dots/circles (small elements with border-radius)
+            if (visual.get('borderRadius', '0px') != '0px' and 
+                position.get('width', 0) < 50 and position.get('height', 0) < 50):
+                
+                dot_info = {
+                    'radius': position.get('width', 10) / 2,
+                    'color': visual.get('backgroundColor', 'transparent'),
+                    'position': position,
+                    'borderColor': visual.get('borderColor', 'none'),
+                    'borderWidth': self.parse_pixel_value(visual.get('border', '0px').split()[0] if visual.get('border', 'none') != 'none' else '0px')
+                }
+                shapes['dots'].append(dot_info)
+            
+            # Detect rectangles (div elements with defined dimensions)
+            elif (tag_name in ['div', 'section', 'article'] and 
+                  position.get('width', 0) > 0 and position.get('height', 0) > 0):
+                
+                rect_info = {
+                    'width': position.get('width', 0),
+                    'height': position.get('height', 0),
+                    'backgroundColor': visual.get('backgroundColor', 'transparent'),
+                    'borderRadius': visual.get('borderRadius', '0px'),
+                    'position': position,
+                    'border': visual.get('border', 'none')
+                }
+                shapes['rectangles'].append(rect_info)
+        
+        # Analyze color usage with context
+        color_analysis = []
+        color_usage = {}
+        
+        for color in colors:
+            if color and color != 'transparent':
+                # Count usage across elements
+                usage_count = 0
+                usage_types = set()
+                
+                for element in elements:
+                    visual = element.get('visual', {})
+                    if visual.get('color') == color:
+                        usage_count += 1
+                        usage_types.add('text')
+                    if visual.get('backgroundColor') == color:
+                        usage_count += 1
+                        usage_types.add('background')
+                    if color in str(visual.get('border', '')):
+                        usage_count += 1
+                        usage_types.add('border')
+                
+                color_info = {
+                    'hex': color,
+                    'usage': list(usage_types),
+                    'count': usage_count,
+                    'rgb': self.hex_to_rgb(color) if color.startswith('#') else None
+                }
+                color_analysis.append(color_info)
+        
+        # Enhanced image analysis
+        image_analysis = []
+        for img in images:
+            img_info = {
+                'type': img.get('type', 'img_tag'),
+                'src': img.get('src', ''),
+                'width': self.parse_pixel_value(str(img.get('width', 'auto'))),
+                'height': self.parse_pixel_value(str(img.get('height', 'auto'))),
+                'alt': img.get('alt', ''),
+                'format': img.get('src', '').split('.')[-1] if '.' in img.get('src', '') else 'unknown',
+                'hasResponsive': bool(img.get('srcset', '')),
+                'position': img.get('position', {}),
+                'loading': img.get('loading', 'eager')
+            }
+            image_analysis.append(img_info)
+        
+        # Layout analysis
+        layout_info = {
+            'totalElements': len(elements),
+            'gridDetected': any('grid' in str(el.get('visual', {}).get('display', '')) for el in elements),
+            'flexDetected': any('flex' in str(el.get('visual', {}).get('display', '')) for el in elements),
+            'alignment': 'center' if any('center' in str(el.get('visual', {}).get('textAlign', '')) for el in elements) else 'left',
+            'maxWidth': max([el.get('position', {}).get('width', 0) for el in elements] + [0]),
+            'maxHeight': max([el.get('position', {}).get('height', 0) for el in elements] + [0])
+        }
+        
+        return {
+            'textElements': text_elements,
+            'shapes': shapes,
+            'images': image_analysis,
+            'colors': color_analysis,
+            'layout': layout_info,
+            'summary': {
+                'totalTextElements': len(text_elements),
+                'totalShapes': sum(len(shapes[key]) for key in shapes),
+                'totalImages': len(image_analysis),
+                'totalColors': len(color_analysis),
+                'uniqueFonts': len(set(t.get('fontFamily', 'inherit') for t in text_elements)),
+                'hasInteractiveElements': any((el.get('tagName') or el.get('tag', '')).lower() in ['button', 'a', 'input'] for el in elements)
+            }
+        }
+    
+    def extract_border_color(self, border_style):
+        """Extract color from border style string"""
+        if not border_style or border_style == 'none':
+            return '#000000'
+        
+        # Extract color from border shorthand (e.g., "1px solid #333")
+        import re
+        color_match = re.search(r'#[a-fA-F0-9]{3,6}|rgb\([^)]+\)', border_style)
+        return color_match.group(0) if color_match else '#000000'
+    
+    def hex_to_rgb(self, hex_color):
+        """Convert hex color to RGB values"""
+        if not hex_color.startswith('#'):
+            return None
+        
+        try:
+            hex_color = hex_color.lstrip('#')
+            if len(hex_color) == 3:
+                hex_color = ''.join([c*2 for c in hex_color])
+            
+            return {
+                'r': int(hex_color[0:2], 16),
+                'g': int(hex_color[2:4], 16),
+                'b': int(hex_color[4:6], 16)
+            }
+        except ValueError:
+            return None
+
     def create_error_response(self, url, viewport_config, error_message):
         """Create mock capture data for development when no browser is available"""
         print(f"Creating mock data for {url} at {viewport_config['device']} viewport")

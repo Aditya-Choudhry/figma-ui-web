@@ -1434,10 +1434,11 @@ def index():
         'viewports': VIEWPORTS
     })
 
+# Server can be run directly for development
 if __name__ == '__main__':
     print("Starting Enhanced Website Capture Server...")
     print("Features: Responsive capture, Full CSS extraction, Font mapping")
-    print("Server will be available at: http://localhost:5000")
+    print("Server will be available at: http://0.0.0.0:5000")
     print(f"Supported viewports: {', '.join(VIEWPORTS.keys())}")
     
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)

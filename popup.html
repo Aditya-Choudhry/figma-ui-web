@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website to Figma Exporter</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Website to Figma</h1>
+            <p>Capture and export website structure</p>
+        </header>
+        
+        <main>
+            <div class="button-group">
+                <button id="captureBtn" class="btn btn-primary">
+                    <span class="icon">📷</span>
+                    Capture Page
+                </button>
+                
+                <button id="exportBtn" class="btn btn-secondary" disabled>
+                    <span class="icon">📤</span>
+                    Export to Figma
+                </button>
+            </div>
+            
+            <div class="status" id="status">
+                <p>Ready to capture website structure</p>
+            </div>
+            
+            <div class="progress-container" id="progressContainer" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="progress-text" id="progressText">0%</span>
+            </div>
+            
+            <div class="captured-info" id="capturedInfo" style="display: none;">
+                <h3>Captured Data</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Elements:</span>
+                        <span class="value" id="elementCount">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Images:</span>
+                        <span class="value" id="imageCount">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Text Styles:</span>
+                        <span class="value" id="textStyleCount">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Colors:</span>
+                        <span class="value" id="colorCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p class="version">v1.0.0</p>
+        </footer>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

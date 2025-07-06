@@ -1,0 +1,54 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" rx="20" fill="url(#gradient1)"/>
+  
+  <!-- Main website mockup -->
+  <rect x="20" y="30" width="88" height="68" rx="6" fill="white" opacity="0.98" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+  
+  <!-- Header bar -->
+  <rect x="24" y="34" width="80" height="8" rx="2" fill="#F3F4F6"/>
+  <circle cx="28" cy="38" r="1.5" fill="#EF4444"/>
+  <circle cx="33" cy="38" r="1.5" fill="#F59E0B"/>
+  <circle cx="38" cy="38" r="1.5" fill="#10B981"/>
+  
+  <!-- Content blocks -->
+  <rect x="24" y="46" width="60" height="4" rx="2" fill="#E5E7EB"/>
+  <rect x="24" y="52" width="72" height="3" rx="1.5" fill="#D1D5DB"/>
+  <rect x="24" y="57" width="48" height="3" rx="1.5" fill="#D1D5DB"/>
+  <rect x="24" y="62" width="68" height="3" rx="1.5" fill="#D1D5DB"/>
+  
+  <!-- Image placeholder -->
+  <rect x="24" y="68" width="32" height="20" rx="3" fill="#F3F4F6"/>
+  <path d="M30 74l4 4 8-8" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- More content -->
+  <rect x="60" y="70" width="44" height="3" rx="1.5" fill="#D1D5DB"/>
+  <rect x="60" y="75" width="36" height="3" rx="1.5" fill="#D1D5DB"/>
+  <rect x="60" y="80" width="40" height="3" rx="1.5" fill="#D1D5DB"/>
+  <rect x="60" y="85" width="28" height="3" rx="1.5" fill="#D1D5DB"/>
+  
+  <!-- Export arrow -->
+  <path d="M78 50L90 58L78 66M90 58H70" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+  
+  <!-- Figma-inspired design elements -->
+  <g transform="translate(95, 35)">
+    <circle cx="0" cy="0" r="6" fill="#FF6B6B"/>
+    <circle cx="0" cy="14" r="6" fill="#0ACF83"/>
+    <circle cx="0" cy="28" r="6" fill="#1ABCFE"/>
+    <ellipse cx="0" cy="42" rx="6" ry="6" fill="#FF7262"/>
+    <circle cx="12" cy="14" r="6" fill="#A259FF"/>
+  </g>
+  
+  <!-- Decorative elements -->
+  <circle cx="30" cy="20" r="3" fill="rgba(255,255,255,0.2)"/>
+  <circle cx="98" cy="20" r="2" fill="rgba(255,255,255,0.15)"/>
+  <circle cx="15" cy="110" r="4" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="113" cy="115" r="3" fill="rgba(255,255,255,0.1)"/>
+  
+  <defs>
+    <linearGradient id="gradient1" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#667eea"/>
+      <stop offset="0.5" stop-color="#764ba2"/>
+      <stop offset="1" stop-color="#667eea"/>
+    </linearGradient>
+  </defs>
+</svg>

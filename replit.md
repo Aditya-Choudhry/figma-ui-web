@@ -149,6 +149,9 @@ The plugin follows the standard Figma plugin architecture with two main componen
   - Pseudo-element and pseudo-class style capture
   - Interactivity metadata extraction (links, forms, data attributes)
   - Enhanced capture result with version 2.0 comprehensive data structure
+  - Added intelligent div filtering to remove standalone empty container divs
+  - Preserves meaningful divs with visual styling, semantic value, or layout function
+  - Removes nested empty div containers that add no design value
 
 ## User Preferences
 

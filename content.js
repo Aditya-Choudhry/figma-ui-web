@@ -246,6 +246,9 @@ class DOMCapturer {
         // Skip elements with no dimensions (unless they have children)
         if (rect.width === 0 && rect.height === 0 && element.children.length === 0) return null;
         
+        // Skip standalone empty div containers
+        if (this.shouldSkipStandaloneDiv(element, computedStyle, rect)) return null;
+        
         const elementData = this.extractElementData(element, computedStyle, rect, depth, parent);
         this.elements.push(elementData);
         
@@ -259,6 +262,14 @@ class DOMCapturer {
         }
         
         elementData.children = children;
+        
+        // Post-process: If this div became empty after filtering children, mark it for removal
+        if (element.tagName === 'DIV' && children.length === 0 && 
+            !this.hasVisualStyling(computedStyle) && 
+            !this.hasSemanticValue(element) &&
+            (!elementData.textContent || elementData.textContent.trim().length === 0)) {
+            return null;
+        }
         return elementData;
     }
     
@@ -273,6 +284,88 @@ class DOMCapturer {
                 style.top === '-9999px'
             ))
         );
+    }
+    
+    shouldSkipStandaloneDiv(element, style, rect) {
+        // Only apply to div elements
+        if (element.tagName !== 'DIV') return false;
+        
+        // Check if it's a meaningful container div that should be kept
+        const hasVisualStyling = this.hasVisualStyling(style);
+        const hasSemanticValue = this.hasSemanticValue(element);
+        const hasLayoutFunction = this.hasLayoutFunction(element, style);
+        
+        // Skip if it's an empty div without visual styling, semantic value, or layout function
+        if (!hasVisualStyling && !hasSemanticValue && !hasLayoutFunction) {
+            const textContent = element.textContent ? element.textContent.trim() : '';
+            const hasOnlyWhitespace = !textContent || textContent.length === 0;
+            
+            // Skip empty divs with no meaningful children
+            if (hasOnlyWhitespace && this.hasOnlyDivChildren(element)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    hasVisualStyling(style) {
+        // Check if the element has meaningful visual styling
+        return (
+            style.backgroundColor !== 'rgba(0, 0, 0, 0)' && style.backgroundColor !== 'transparent' ||
+            style.borderWidth !== '0px' ||
+            style.backgroundImage !== 'none' ||
+            style.boxShadow !== 'none' ||
+            parseFloat(style.opacity) < 1 ||
+            style.transform !== 'none' ||
+            this.parsePixelValue(style.borderRadius) > 0
+        );
+    }
+    
+    hasSemanticValue(element) {
+        // Check if the element has semantic meaning
+        return (
+            element.id ||
+            element.className ||
+            element.getAttribute('role') ||
+            element.getAttribute('aria-label') ||
+            element.getAttribute('data-testid') ||
+            Object.keys(this.extractDataAttributes(element)).length > 0
+        );
+    }
+    
+    hasLayoutFunction(element, style) {
+        // Check if the element serves a layout function
+        return (
+            style.display === 'flex' ||
+            style.display === 'grid' ||
+            style.display === 'inline-flex' ||
+            style.display === 'inline-grid' ||
+            style.position === 'absolute' ||
+            style.position === 'fixed' ||
+            style.position === 'sticky' ||
+            style.float !== 'none' ||
+            parseFloat(style.zIndex) > 0
+        );
+    }
+    
+    hasOnlyDivChildren(element) {
+        // Check if element only contains other div elements (nested empty containers)
+        if (element.children.length === 0) return true;
+        
+        for (const child of element.children) {
+            if (child.tagName !== 'DIV') {
+                return false;
+            }
+            
+            // If child div has content or styling, this parent is meaningful
+            const childStyle = window.getComputedStyle(child);
+            if (!this.shouldSkipStandaloneDiv(child, childStyle, child.getBoundingClientRect())) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     extractElementData(element, style, rect, depth, parent) {

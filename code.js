@@ -117,14 +117,14 @@ figma.ui.onmessage = async (msg) => {
 };
 
 async function createResponsiveFigmaLayouts(data) {
-  console.log('Creating responsive Figma layouts...');
+  console.log('Creating pixel-perfect responsive Figma layouts with assets...');
 
   const { url, viewports } = data;
   const mainSectionName = extractDomainName(url);
 
   // Create a main section to organize all responsive layouts
   const mainSection = figma.createSection();
-  mainSection.name = `🌐 ${mainSectionName} - Responsive Layouts`;
+  mainSection.name = `🌐 ${mainSectionName} - Pixel Perfect Layouts`;
   figma.currentPage.appendChild(mainSection);
 
   const frameSpacing = 100; // Space between frames
@@ -132,7 +132,7 @@ async function createResponsiveFigmaLayouts(data) {
 
   // Create layout for each viewport
   for (const [viewportName, viewportData] of Object.entries(viewports)) {
-    console.log(`Creating layout for ${viewportName}...`);
+    console.log(`Creating precise layout for ${viewportName} with assets...`);
     
     // Validate viewport data structure
     if (!viewportData || !viewportData.device) {
@@ -140,76 +140,78 @@ async function createResponsiveFigmaLayouts(data) {
       continue;
     }
 
-    // Extract data with fallbacks for missing properties
+    // Extract data with comprehensive fallbacks
     const page = viewportData.page || {};
     const elements = viewportData.elements || [];
-    const viewport_config = {
-      device: viewportData.device,
-      width: viewportData.viewport ? viewportData.viewport.width : 1440,
-      height: viewportData.viewport ? viewportData.viewport.height : 900
-    };
+    const assets = viewportData.assets || [];
+    const scaleFactor = page.scale_factor || 1;
+    
+    // Ensure 1440px for desktop
+    const isDesktop = viewportData.device === 'Desktop';
+    const frameWidth = isDesktop ? 1440 : (viewportData.viewport?.width || 375);
+    const frameHeight = Math.max(page.viewport_height || 900, 800);
 
-    // Create viewport frame
+    // Create viewport frame with precise dimensions
     const viewportFrame = figma.createFrame();
-    viewportFrame.name = `📱 ${viewport_config.device} (${viewport_config.width}px)`;
-    viewportFrame.resize(viewport_config.width, Math.max(viewport_config.height, 800));
+    viewportFrame.name = `📱 ${viewportData.device} (${frameWidth}px)${scaleFactor !== 1 ? ` - Scaled ${scaleFactor.toFixed(2)}x` : ''}`;
+    viewportFrame.resize(frameWidth, frameHeight);
     viewportFrame.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
     viewportFrame.x = currentX;
     viewportFrame.y = 0;
 
-    // Enable auto layout for better organization
-    viewportFrame.layoutMode = 'VERTICAL';
-    viewportFrame.paddingTop = 20;
-    viewportFrame.paddingBottom = 20;
-    viewportFrame.paddingLeft = 20;
-    viewportFrame.paddingRight = 20;
-    viewportFrame.itemSpacing = 10;
+    // Disable auto layout for precise positioning
+    viewportFrame.layoutMode = 'NONE';
+    viewportFrame.clipsContent = true;
 
     mainSection.appendChild(viewportFrame);
 
-    // Create elements in this viewport
-    await createElementsInFrame(viewportFrame, elements.slice(0, 50)); // Limit for performance
+    // Create elements with asset support
+    await createElementsInFrame(viewportFrame, elements, assets);
+
+    // Add metadata as comments
+    if (assets.length > 0) {
+      const assetComment = `Assets captured: ${assets.length} images\nScale factor: ${scaleFactor}\nOriginal width: ${page.actual_width || frameWidth}px`;
+      // Note: figma.createComment is not available in plugins, but we can add this info to frame name
+      viewportFrame.name += ` (${assets.length} assets)`;
+    }
 
     // Update X position for next frame
-    currentX += viewport_config.width + frameSpacing;
+    currentX += frameWidth + frameSpacing;
 
-    console.log(`Created ${viewportName} layout with ${elements.length} elements`);
+    console.log(`Created ${viewportName} layout: ${elements.length} elements, ${assets.length} assets`);
   }
 
   // Focus on the created section
   figma.viewport.scrollAndZoomIntoView([mainSection]);
 
-  console.log(`Created responsive layouts for ${Object.keys(viewports).length} viewports`);
+  console.log(`Created pixel-perfect layouts for ${Object.keys(viewports).length} viewports with comprehensive asset support`);
 }
 
-async function createElementsInFrame(parentFrame, elements) {
-  // Group elements by depth to maintain hierarchy
-  const elementsByDepth = {};
-  const maxDepth = Math.max(...elements.map(el => el.depth || 0));
+async function createElementsInFrame(parentFrame, elements, assets) {
+  console.log(`Creating ${elements.length} elements with ${assets.length} assets...`);
+  
+  // Sort elements by z-index and depth for proper layering
+  const sortedElements = [...elements].sort((a, b) => {
+    const aZ = a.visual_hierarchy?.zIndex || 0;
+    const bZ = b.visual_hierarchy?.zIndex || 0;
+    if (aZ !== bZ) return aZ - bZ;
+    return (a.visual_hierarchy?.depth || 0) - (b.visual_hierarchy?.depth || 0);
+  });
 
-  for (const element of elements) {
-    const depth = element.depth || 0;
-    if (!elementsByDepth[depth]) {
-      elementsByDepth[depth] = [];
-    }
-    elementsByDepth[depth].push(element);
-  }
-
-  // Create elements starting from top level
-  for (let depth = 0; depth <= Math.min(maxDepth, 5); depth++) { // Limit depth
-    const elementsAtDepth = elementsByDepth[depth] || [];
-
-    for (const element of elementsAtDepth) {
-      try {
-        const node = await createAdvancedNodeFromElement(element);
-        if (node) {
-          parentFrame.appendChild(node);
-        }
-      } catch (error) {
-        console.warn('Failed to create advanced node:', element.tagName, error);
+  // Create elements in proper order
+  for (const element of sortedElements.slice(0, 50)) { // Limit for performance
+    try {
+      const node = await createAdvancedNodeFromElement(element, assets);
+      if (node) {
+        parentFrame.appendChild(node);
+        console.log(`Created node: ${node.name} at (${node.x}, ${node.y})`);
       }
+    } catch (error) {
+      console.warn('Failed to create node for element:', element.tagName, error);
     }
   }
+  
+  console.log(`Successfully created ${parentFrame.children.length} nodes in frame`);
 }
 
 async function createFigmaNodesFromWebData(data) {
@@ -350,9 +352,9 @@ function parseColor(colorString) {
   return { r: 0, g: 0, b: 0 };
 }
 
-async function createAdvancedNodeFromElement(element) {
+async function createAdvancedNodeFromElement(element, assets) {
   try {
-    console.log(`Creating precise node for ${element.tagName} with comprehensive styling...`);
+    console.log(`Creating pixel-perfect node for ${element.tagName} with assets...`);
     
     // Determine the appropriate Figma node type based on enhanced analysis
     const nodeType = determineAdvancedNodeType(element);
@@ -360,7 +362,7 @@ async function createAdvancedNodeFromElement(element) {
     if (nodeType === 'TEXT') {
       return await createPreciseTextNode(element);
     } else if (nodeType === 'IMAGE') {
-      return await createPreciseImageNode(element);
+      return await createPreciseImageNode(element, assets);
     } else if (nodeType === 'COMPONENT') {
       return await createComponentNode(element);
     } else {
@@ -447,43 +449,102 @@ async function createPreciseTextNode(element) {
   return textNode;
 }
 
-async function createPreciseImageNode(element) {
-  const frame = figma.createFrame();
-  frame.name = `${element.tagName} Image`;
-  
-  // Set dimensions
-  frame.resize(
-    Math.max((element.position && element.position.width) || 100, 20),
-    Math.max((element.position && element.position.height) || 100, 20)
-  );
-  
-  // Position
-  frame.x = (element.position && element.position.x) || 0;
-  frame.y = (element.position && element.position.y) || 0;
-  
-  // Apply background if it's a background-image
-  if (element.visual && element.visual.backgroundImages && element.visual.backgroundImages.length > 0) {
-    // For now, create a placeholder - in production, you'd fetch and apply the image
-    frame.fills = [{ 
-      type: 'SOLID', 
-      color: { r: 0.9, g: 0.9, b: 0.9 } 
-    }];
+async function createPreciseImageNode(element, assets) {
+  try {
+    // Find the corresponding asset for this element
+    const elementAsset = assets.find(asset => asset.elementId === element.id);
     
-    // Add a text node indicating it's an image
-    const imageLabel = figma.createText();
-    await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-    imageLabel.characters = '🖼️ ' + ((element.attributes && element.attributes.alt) || 'Image');
-    imageLabel.fontSize = 12;
-    imageLabel.fills = [{ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }];
-    imageLabel.textAlignHorizontal = 'CENTER';
-    imageLabel.textAlignVertical = 'CENTER';
-    frame.appendChild(imageLabel);
+    if (elementAsset && elementAsset.base64) {
+      // Create rectangle for image
+      const imageNode = figma.createRectangle();
+      imageNode.name = `${element.tagName}: ${element.attributes?.alt || 'Image'}`;
+      
+      // Set precise dimensions
+      imageNode.resize(
+        Math.max(element.position?.width || 100, 1),
+        Math.max(element.position?.height || 100, 1)
+      );
+      
+      // Set precise position
+      imageNode.x = element.position?.x || 0;
+      imageNode.y = element.position?.y || 0;
+      
+      try {
+        // Convert base64 to image
+        const base64Data = elementAsset.base64.split(',')[1];
+        const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        const imageHash = figma.createImage(imageBytes).hash;
+        
+        // Apply image fill
+        imageNode.fills = [{
+          type: 'IMAGE',
+          imageHash: imageHash,
+          scaleMode: element.computedStyles?.objectFit === 'cover' ? 'CROP' : 'FIT'
+        }];
+        
+        console.log(`Successfully applied image asset for ${element.id}`);
+        
+      } catch (imageError) {
+        console.warn('Failed to apply image asset, using placeholder:', imageError);
+        // Fallback to placeholder
+        imageNode.fills = [{ 
+          type: 'SOLID', 
+          color: parseColor('#f0f0f0') 
+        }];
+      }
+      
+      // Apply border radius from computed styles
+      if (element.computedStyles?.borderRadius) {
+        const radius = parseFloat(element.computedStyles.borderRadius) || 0;
+        if (radius > 0) {
+          imageNode.cornerRadius = radius;
+        }
+      }
+      
+      // Apply other visual properties
+      if (element.visual?.opacity && element.visual.opacity < 1) {
+        imageNode.opacity = Math.max(element.visual.opacity, 0.01);
+      }
+      
+      return imageNode;
+      
+    } else {
+      // Create placeholder frame when no asset available
+      const frame = figma.createFrame();
+      frame.name = `${element.tagName} Image Placeholder`;
+      
+      frame.resize(
+        Math.max(element.position?.width || 100, 20),
+        Math.max(element.position?.height || 100, 20)
+      );
+      
+      frame.x = element.position?.x || 0;
+      frame.y = element.position?.y || 0;
+      
+      // Placeholder styling
+      frame.fills = [{ 
+        type: 'SOLID', 
+        color: { r: 0.9, g: 0.9, b: 0.9 } 
+      }];
+      
+      // Add placeholder text
+      const placeholderText = figma.createText();
+      await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+      placeholderText.characters = '🖼️ ' + (element.attributes?.alt || 'Image');
+      placeholderText.fontSize = 12;
+      placeholderText.fills = [{ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }];
+      placeholderText.textAlignHorizontal = 'CENTER';
+      placeholderText.textAlignVertical = 'CENTER';
+      
+      frame.appendChild(placeholderText);
+      
+      return frame;
+    }
+    
+  } catch (error) {
+    console.error('Error creating precise image node:', error);
+    return null;
   }
-  
-  // Apply border radius if present
-  applyBorderRadius(frame, element.visual);
-  
-  return frame;
 }
 
 async function createComponentNode(element) {

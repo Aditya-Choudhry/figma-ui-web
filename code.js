@@ -342,11 +342,11 @@ async function createAdvancedNodeFromElement(element) {
       node = figma.createFrame();
 
       // Apply auto layout for flex containers
-      if (element.isFlexContainer && layout?.flexDirection) {
+      if (element.isFlexContainer && layout && layout.flexDirection) {
         node.layoutMode = layout.flexDirection === 'row' ? 'HORIZONTAL' : 'VERTICAL';
 
         // Apply flex properties
-        if (layout.justifyContent) {
+        if (layout && layout.justifyContent) {
           const justifyMap = {
             'flex-start': 'MIN',
             'center': 'CENTER', 
@@ -356,7 +356,7 @@ async function createAdvancedNodeFromElement(element) {
           node.primaryAxisAlignItems = justifyMap[layout.justifyContent] || 'MIN';
         }
 
-        if (layout.alignItems) {
+        if (layout && layout.alignItems) {
           const alignMap = {
             'flex-start': 'MIN',
             'center': 'CENTER',
@@ -366,7 +366,7 @@ async function createAdvancedNodeFromElement(element) {
         }
 
         // Apply gap
-        if (layout.gap) {
+        if (layout && layout.gap) {
           node.itemSpacing = element.parse_pixel_value ? element.parse_pixel_value(layout.gap) : parseFloat(layout.gap) || 0;
         }
       }

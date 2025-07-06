@@ -758,7 +758,7 @@ class WebsiteCapture:
                     'lang': soup.html.get('lang', 'en') if soup.html else 'en',
                     'charset': self.extract_charset(soup)
                 },
-                'elements': elements[:30],  # Include more real elements
+                'elements': elements[:100],  # Include more real elements for comprehensive capture
                 'css_data': css_data,
                 'text_styles': typography_styles,
                 'colors': real_colors,
@@ -914,20 +914,85 @@ class WebsiteCapture:
         }
     
     def extract_computed_styles(self, element):
-        """Extract visual styles from element"""
+        """Extract comprehensive visual styles from element"""
         style_attr = element.get('style', '')
         
         visual = {
+            # Background properties
             'backgroundColor': 'transparent',
+            'backgroundImage': 'none',
+            'backgroundSize': 'auto',
+            'backgroundPosition': '0% 0%',
+            'backgroundRepeat': 'repeat',
+            
+            # Text and color properties
             'color': '#000000',
-            'borderRadius': '0px',
-            'boxShadow': 'none',
+            'fontSize': '16px',
+            'fontFamily': 'inherit',
+            'fontWeight': 'normal',
+            'fontStyle': 'normal',
+            'textAlign': 'left',
+            'textDecoration': 'none',
+            'lineHeight': 'normal',
+            'letterSpacing': 'normal',
+            
+            # Border properties
             'border': 'none',
+            'borderTop': 'none',
+            'borderRight': 'none', 
+            'borderBottom': 'none',
+            'borderLeft': 'none',
+            'borderRadius': '0px',
+            'borderTopLeftRadius': '0px',
+            'borderTopRightRadius': '0px',
+            'borderBottomLeftRadius': '0px',
+            'borderBottomRightRadius': '0px',
+            
+            # Layout properties
+            'display': 'block',
+            'position': 'static',
+            'top': 'auto',
+            'right': 'auto',
+            'bottom': 'auto',
+            'left': 'auto',
+            'width': 'auto',
+            'height': 'auto',
+            'maxWidth': 'none',
+            'maxHeight': 'none',
+            'minWidth': '0',
+            'minHeight': '0',
+            
+            # Spacing properties
+            'margin': '0',
+            'marginTop': '0',
+            'marginRight': '0',
+            'marginBottom': '0',
+            'marginLeft': '0',
+            'padding': '0',
+            'paddingTop': '0',
+            'paddingRight': '0',
+            'paddingBottom': '0',
+            'paddingLeft': '0',
+            
+            # Effects
             'opacity': '1',
-            'display': 'block'
+            'boxShadow': 'none',
+            'filter': 'none',
+            'transform': 'none',
+            'transformOrigin': '50% 50%',
+            'transition': 'none',
+            'animation': 'none',
+            
+            # Visibility
+            'visibility': 'visible',
+            'overflow': 'visible',
+            'overflowX': 'visible',
+            'overflowY': 'visible',
+            'clipPath': 'none',
+            'zIndex': 'auto'
         }
         
-        # Parse inline styles
+        # Enhanced inline style parsing with comprehensive properties
         if style_attr:
             style_rules = style_attr.split(';')
             for rule in style_rules:
@@ -936,20 +1001,15 @@ class WebsiteCapture:
                     prop = prop.strip()
                     value = value.strip()
                     
-                    if prop == 'background-color':
-                        visual['backgroundColor'] = value
-                    elif prop == 'color':
-                        visual['color'] = value
-                    elif prop == 'border-radius':
-                        visual['borderRadius'] = value
-                    elif prop == 'box-shadow':
-                        visual['boxShadow'] = value
-                    elif prop == 'border':
-                        visual['border'] = value
-                    elif prop == 'opacity':
-                        visual['opacity'] = value
-                    elif prop == 'display':
-                        visual['display'] = value
+                    # Normalize CSS property name to camelCase
+                    camel_prop = ''.join(word.capitalize() if i > 0 else word for i, word in enumerate(prop.split('-')))
+                    
+                    # Store all CSS properties
+                    if camel_prop in visual:
+                        visual[camel_prop] = value
+                    else:
+                        # Store additional properties not in the default set
+                        visual[camel_prop] = value
         
         return visual
     
@@ -1385,10 +1445,11 @@ class WebsiteCapture:
         return typography_styles
     
     def extract_image_data(self, soup, base_url):
-        """Extract real image information with full details"""
+        """Extract comprehensive image information from all sources"""
         images = []
         from urllib.parse import urljoin
         
+        # Extract regular img tags with comprehensive data
         for img in soup.find_all('img'):
             src = img.get('src')
             if src:
@@ -1400,7 +1461,23 @@ class WebsiteCapture:
                 elif not src.startswith(('http://', 'https://')):
                     src = urljoin(base_url, src)
                 
+                # Parse srcset for responsive images
+                srcset_urls = []
+                if img.get('srcset'):
+                    srcset_parts = img.get('srcset').split(',')
+                    for part in srcset_parts:
+                        url_part = part.strip().split(' ')[0]
+                        if url_part:
+                            if url_part.startswith('//'):
+                                url_part = 'https:' + url_part
+                            elif url_part.startswith('/'):
+                                url_part = urljoin(base_url, url_part)
+                            elif not url_part.startswith(('http://', 'https://')):
+                                url_part = urljoin(base_url, url_part)
+                            srcset_urls.append(url_part)
+                
                 images.append({
+                    'type': 'img_tag',
                     'src': src,
                     'alt': img.get('alt', ''),
                     'title': img.get('title', ''),
@@ -1408,10 +1485,63 @@ class WebsiteCapture:
                     'height': img.get('height'),
                     'loading': img.get('loading', 'eager'),
                     'srcset': img.get('srcset', ''),
+                    'srcset_urls': srcset_urls,
                     'sizes': img.get('sizes', ''),
                     'class': ' '.join(img.get('class', [])),
-                    'id': img.get('id', '')
+                    'id': img.get('id', ''),
+                    'data_src': img.get('data-src', ''),  # Lazy loading
+                    'data_original': img.get('data-original', '')  # Some lazy loaders
                 })
+        
+        # Extract SVG elements
+        for svg in soup.find_all('svg'):
+            images.append({
+                'type': 'svg_inline',
+                'content': str(svg)[:500],  # Limited content for size
+                'width': svg.get('width'),
+                'height': svg.get('height'),
+                'viewBox': svg.get('viewBox'),
+                'class': ' '.join(svg.get('class', [])),
+                'id': svg.get('id', '')
+            })
+        
+        # Extract background images from style attributes
+        for element in soup.find_all(style=True):
+            style = element.get('style', '')
+            if 'background-image' in style:
+                # Extract URL from background-image
+                import re
+                url_match = re.search(r'background-image:\s*url\(["\']?([^"\']*)["\']?\)', style)
+                if url_match:
+                    bg_url = url_match.group(1)
+                    if bg_url.startswith('//'):
+                        bg_url = 'https:' + bg_url
+                    elif bg_url.startswith('/'):
+                        bg_url = urljoin(base_url, bg_url)
+                    elif not bg_url.startswith(('http://', 'https://')):
+                        bg_url = urljoin(base_url, bg_url)
+                    
+                    images.append({
+                        'type': 'background_image',
+                        'src': bg_url,
+                        'element': element.name,
+                        'class': ' '.join(element.get('class', [])),
+                        'id': element.get('id', ''),
+                        'style': style
+                    })
+        
+        # Extract picture/source elements for responsive images
+        for picture in soup.find_all('picture'):
+            for source in picture.find_all('source'):
+                srcset = source.get('srcset')
+                if srcset:
+                    images.append({
+                        'type': 'picture_source',
+                        'srcset': srcset,
+                        'media': source.get('media', ''),
+                        'type_attr': source.get('type', ''),
+                        'sizes': source.get('sizes', '')
+                    })
         
         return images
     
@@ -1681,17 +1811,206 @@ def health_check():
 
 @app.route('/', methods=['GET'])
 def index():
-    """Root endpoint with API information"""
-    return jsonify({
-        'name': 'Enhanced Website to Figma Capture Server',
-        'version': '2.0.0',
-        'endpoints': {
-            '/api/capture-responsive': 'POST - Capture website across multiple viewports',
-            '/api/capture': 'POST - Single viewport capture',
-            '/health': 'GET - Health check'
-        },
-        'viewports': VIEWPORTS
-    })
+    """Root endpoint with web interface"""
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website to Figma Capture Server</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .status {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .feature h3 {
+            margin-top: 0;
+            color: #FFD700;
+        }
+        .endpoints {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .endpoint {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #result {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Website to Figma Capture Server</h1>
+        
+        <div class="status">
+            <h2>Server Running</h2>
+            <p>Enhanced capture system with comprehensive data extraction</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h3>Multi-Viewport Capture</h3>
+                <p>Captures websites across desktop, tablet, and mobile viewports</p>
+            </div>
+            <div class="feature">
+                <h3>Full CSS Extraction</h3>
+                <p>Extracts all visual styles, colors, fonts, and layout properties</p>
+            </div>
+            <div class="feature">
+                <h3>Image Processing</h3>
+                <p>Captures images, SVGs, backgrounds, and responsive srcsets</p>
+            </div>
+            <div class="feature">
+                <h3>Real-Time Data</h3>
+                <p>Fetches authentic website content with zero mock data</p>
+            </div>
+        </div>
+
+        <div class="endpoints">
+            <h2>API Endpoints</h2>
+            <div class="endpoint">POST /api/capture-responsive - Multi-viewport capture</div>
+            <div class="endpoint">POST /api/capture - Single viewport capture</div>
+            <div class="endpoint">GET /health - Health check</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test the API</h2>
+            <input type="url" id="urlInput" placeholder="Enter website URL (e.g., https://example.com)" value="https://example.com">
+            <br>
+            <button onclick="testSingleCapture()">Test Single Capture</button>
+            <button onclick="testResponsiveCapture()">Test Responsive Capture</button>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testSingleCapture() {
+            const url = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.textContent = 'Testing single capture...';
+            
+            try {
+                const response = await fetch('/api/capture', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: url})
+                });
+                
+                const data = await response.json();
+                resultDiv.textContent = `SUCCESS: Captured ${data.elements?.length || 0} elements, ${data.images?.length || 0} images, ${data.colors?.length || 0} colors`;
+            } catch (error) {
+                resultDiv.textContent = `ERROR: ${error.message}`;
+            }
+        }
+
+        async function testResponsiveCapture() {
+            const url = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.textContent = 'Testing responsive capture...';
+            
+            try {
+                const response = await fetch('/api/capture-responsive', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: url, viewports: ['desktop', 'tablet', 'mobile']})
+                });
+                
+                const data = await response.json();
+                let result = `SUCCESS: Captured ${data.total_viewports} viewports\\n`;
+                
+                for (const [viewport, vdata] of Object.entries(data.viewports)) {
+                    result += `${viewport}: ${vdata.elements?.length || 0} elements, ${vdata.images?.length || 0} images\\n`;
+                }
+                
+                resultDiv.textContent = result;
+            } catch (error) {
+                resultDiv.textContent = `ERROR: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>"""
 
 # Server can be run directly for development
 if __name__ == '__main__':

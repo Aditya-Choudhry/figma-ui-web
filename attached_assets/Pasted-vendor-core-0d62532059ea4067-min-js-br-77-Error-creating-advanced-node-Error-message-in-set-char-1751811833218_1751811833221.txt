@@ -1,0 +1,1080 @@
+vendor-core-0d62532059ea4067.min.js.br:77 Error creating advanced node: Error {message: 'in set_characters: Cannot write to node with unloa…Regular" }) and await the returned promise first.', stack: '    at createPreciseTextNode (PLUGIN_15_SOURCE:414)\n'}
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1042
+deepWrap @ 7982-7f3b8988be551dc8.min.js.br:993
+e.registerPromise.then.e.deepWrap.message @ 7982-7f3b8988be551dc8.min.js.br:1113
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1113
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func294 @ jsvm-cpp.wasm.br:0x33c57
+$jsvm_callFunction @ jsvm-cpp.wasm.br:0xaecb
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1014
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1042
+iframeMessageHandler @ 7982-7f3b8988be551dc8.min.js.br:1000
+T.toplevelWindowMessageChannel.port2.onmessage @ figma_app-f1bcbbd97adc86a8.min.js.br:196
+vendor-core-0d62532059ea4067.min.js.br:77 Creating precise node for H1 with comprehensive styling...
+vendor-core-0d62532059ea4067.min.js.br:77 Error creating advanced node: Error {message: 'in set_characters: Cannot write to node with unloa…Regular" }) and await the returned promise first.', stack: '    at createPreciseTextNode (PLUGIN_15_SOURCE:414)\n'}
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1042
+deepWrap @ 7982-7f3b8988be551dc8.min.js.br:993
+e.registerPromise.then.e.deepWrap.message @ 7982-7f3b8988be551dc8.min.js.br:1113
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1113
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func294 @ jsvm-cpp.wasm.br:0x33c57
+$jsvm_callFunction @ jsvm-cpp.wasm.br:0xaecb
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1014
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1042
+iframeMessageHandler @ 7982-7f3b8988be551dc8.min.js.br:1000
+T.toplevelWindowMessageChannel.port2.onmessage @ figma_app-f1bcbbd97adc86a8.min.js.br:196
+vendor-core-0d62532059ea4067.min.js.br:77 Created desktop layout with 2 elements
+vendor-core-0d62532059ea4067.min.js.br:77 Creating layout for mobile...
+vendor-core-0d62532059ea4067.min.js.br:77 Creating precise node for DIV with comprehensive styling...
+vendor-core-0d62532059ea4067.min.js.br:77 Error creating advanced node: Error {message: 'in set_characters: Cannot write to node with unloa…Regular" }) and await the returned promise first.', stack: '    at createPreciseTextNode (PLUGIN_15_SOURCE:414)\n'}
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1042
+deepWrap @ 7982-7f3b8988be551dc8.min.js.br:993
+e.registerPromise.then.e.deepWrap.message @ 7982-7f3b8988be551dc8.min.js.br:1113
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1113
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func294 @ jsvm-cpp.wasm.br:0x33c57
+$jsvm_callFunction @ jsvm-cpp.wasm.br:0xaecb
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1014
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1042
+iframeMessageHandler @ 7982-7f3b8988be551dc8.min.js.br:1000
+T.toplevelWindowMessageChannel.port2.onmessage @ figma_app-f1bcbbd97adc86a8.min.js.br:196
+vendor-core-0d62532059ea4067.min.js.br:77 Creating precise node for H1 with comprehensive styling...
+vendor-core-0d62532059ea4067.min.js.br:77 Error creating advanced node: Error {message: 'in set_characters: Cannot write to node with unloa…Regular" }) and await the returned promise first.', stack: '    at createPreciseTextNode (PLUGIN_15_SOURCE:414)\n'}message: "in set_characters: Cannot write to node with unloaded font \"Inter Regular\". Please call figma.loadFontAsync({ family: \"Inter\", style: \"Regular\" }) and await the returned promise first."stack: "    at createPreciseTextNode (PLUGIN_15_SOURCE:414)\n"[[Prototype]]: Object
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1042
+deepWrap @ 7982-7f3b8988be551dc8.min.js.br:993
+e.registerPromise.then.e.deepWrap.message @ 7982-7f3b8988be551dc8.min.js.br:1113
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1113
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func294 @ jsvm-cpp.wasm.br:0x33c57
+$jsvm_callFunction @ jsvm-cpp.wasm.br:0xaecb
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1014
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1042
+iframeMessageHandler @ 7982-7f3b8988be551dc8.min.js.br:1000
+T.toplevelWindowMessageChannel.port2.onmessage @ figma_app-f1bcbbd97adc86a8.min.js.br:196
+vendor-core-0d62532059ea4067.min.js.br:77 Created mobile layout with 2 elements
+vendor-core-0d62532059ea4067.min.js.br:77 Creating layout for tablet...
+vendor-core-0d62532059ea4067.min.js.br:77 Creating precise node for DIV with comprehensive styling...
+vendor-core-0d62532059ea4067.min.js.br:77 Error creating advanced node: Error {message: 'in set_characters: Cannot write to node with unloa…Regular" }) and await the returned promise first.', stack: '    at createPreciseTextNode (PLUGIN_15_SOURCE:414)\n'}
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1042
+deepWrap @ 7982-7f3b8988be551dc8.min.js.br:993
+e.registerPromise.then.e.deepWrap.message @ 7982-7f3b8988be551dc8.min.js.br:1113
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1113
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func294 @ jsvm-cpp.wasm.br:0x33c57
+$jsvm_callFunction @ jsvm-cpp.wasm.br:0xaecb
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1014
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1042
+iframeMessageHandler @ 7982-7f3b8988be551dc8.min.js.br:1000
+T.toplevelWindowMessageChannel.port2.onmessage @ figma_app-f1bcbbd97adc86a8.min.js.br:196
+vendor-core-0d62532059ea4067.min.js.br:77 Creating precise node for H1 with comprehensive styling...
+vendor-core-0d62532059ea4067.min.js.br:77 Error creating advanced node: Error {message: 'in set_characters: Cannot write to node with unloa…Regular" }) and await the returned promise first.', stack: '    at createPreciseTextNode (PLUGIN_15_SOURCE:414)\n'}
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1014
+get undefined @ 7982-7f3b8988be551dc8.min.js.br:1042
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+t @ vendor-core-0d62532059ea4067.min.js.br:77
+setTimeout
+(anonymous) @ vendor-core-0d62532059ea4067.min.js.br:77
+cb @ 7982-7f3b8988be551dc8.min.js.br:1014
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+conditionalEditScope @ 7982-7f3b8988be551dc8.min.js.br:1003
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1000
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1143
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x17216
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func203 @ jsvm-cpp.wasm.br:0x29e7e
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func490 @ jsvm-cpp.wasm.br:0x549a5
+$jsvm_runMicrotasksAndAutorelease @ jsvm-cpp.wasm.br:0x6036
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1014
+Promise.then
+o @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1014
+newObject @ 7982-7f3b8988be551dc8.min.js.br:1042
+deepWrap @ 7982-7f3b8988be551dc8.min.js.br:993
+e.registerPromise.then.e.deepWrap.message @ 7982-7f3b8988be551dc8.min.js.br:1113
+Promise.then
+(anonymous) @ 7982-7f3b8988be551dc8.min.js.br:1113
+e.invokeCallback @ 7982-7f3b8988be551dc8.min.js.br:1014
+70556 @ jsvm-cpp.js.br:9
+_emscripten_asm_const_int @ jsvm-cpp.js.br:9
+$func20 @ jsvm-cpp.wasm.br:0x59d8
+$func138 @ jsvm-cpp.wasm.br:0x136e3
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func147 @ jsvm-cpp.wasm.br:0x1709c
+$func369 @ jsvm-cpp.wasm.br:0x3efdc
+$func204 @ jsvm-cpp.wasm.br:0x29fd9
+$func147 @ jsvm-cpp.wasm.br:0x152eb
+$func294 @ jsvm-cpp.wasm.br:0x33c57
+$jsvm_callFunction @ jsvm-cpp.wasm.br:0xaecb
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1014
+callFunction @ 7982-7f3b8988be551dc8.min.js.br:1042
+iframeMessageHandler @ 7982-7f3b8988be551dc8.min.js.br:1000
+T.toplevelWindowMessageChannel.port2.onmessage @ figma_app-f1bcbbd97adc86a8.min.js.br:196
+vendor-core-0d62532059ea4067.min.js.br:77 Created tablet layout with 2 elements
+vendor-core-0d62532059ea4067.min.js.br:77 Created responsive layouts for 3 viewports
+vendor-core-0d62532059ea4067.min.js.br:77 [Local fonts] using agent

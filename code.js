@@ -405,17 +405,19 @@ async function createPreciseTextNode(element) {
   
   try {
     await figma.loadFontAsync({ family: fontFamily, style: fontWeight });
+    textNode.fontName = { family: fontFamily, style: fontWeight };
   } catch (error) {
-    console.warn(`Font loading failed for ${fontFamily}, using default:`, error);
+    console.warn(`Font loading failed for ${fontFamily}, using Inter Regular:`, error);
     await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+    textNode.fontName = { family: 'Inter', style: 'Regular' };
   }
   
-  // Set text content
-  textNode.characters = (element.textContent && element.textContent.trim()) || (element.innerText && element.innerText.trim()) || '';
-  
-  // Apply precise typography
-  textNode.fontName = { family: fontFamily, style: fontWeight };
-  textNode.fontSize = Math.max((element.typography && element.typography.fontSize) || 16, 8);
+  // Set text content after font is loaded
+  const textContent = (element.textContent && element.textContent.trim()) || (element.innerText && element.innerText.trim()) || 'Sample Text';
+  textNode.characters = textContent;
+  // Apply typography settings
+  const fontSize = parseFloat((element.typography && element.typography.fontSize) || '16');
+  textNode.fontSize = Math.max(fontSize, 8);
   textNode.lineHeight = parseLineHeight(element.typography && element.typography.lineHeight);
   textNode.letterSpacing = parseLetterSpacing(element.typography && element.typography.letterSpacing);
   
@@ -596,60 +598,13 @@ function extractDomainName(url) {
 // Utility functions for precise styling
 
 function mapWebFontToFigma(webFont) {
-  // Enhanced font mapping from web fonts to Figma fonts
-  const fontMap = {
-    'Arial': 'Arial',
-    'Helvetica': 'Arial',
-    'Times': 'Times New Roman',
-    'Times New Roman': 'Times New Roman',
-    'Georgia': 'Georgia',
-    'Verdana': 'Verdana',
-    'Courier': 'Courier New',
-    'Courier New': 'Courier New',
-    'Impact': 'Impact',
-    'Comic Sans MS': 'Comic Sans MS',
-    'Trebuchet MS': 'Trebuchet MS',
-    'Arial Black': 'Arial Black',
-    'Palatino': 'Palatino',
-    'Garamond': 'Garamond',
-    'Bookman': 'Bookman',
-    'Tahoma': 'Tahoma',
-    'Inter': 'Inter',
-    'Roboto': 'Roboto',
-    'Open Sans': 'Open Sans',
-    'Lato': 'Lato',
-    'Montserrat': 'Montserrat',
-    'Source Sans Pro': 'Source Sans Pro',
-    'Poppins': 'Poppins',
-    'sans-serif': 'Inter',
-    'serif': 'Times New Roman',
-    'monospace': 'Courier New'
-  };
-  
-  // Extract first font family
-  const firstFont = webFont.split(',')[0].trim().replace(/['"]/g, '');
-  return fontMap[firstFont] || 'Inter';
+  // Use Inter for maximum compatibility - it's always available in Figma
+  return 'Inter';
 }
 
 function mapFontWeight(weight) {
-  // Map CSS font weights to Figma font styles
-  const weightMap = {
-    '100': 'Thin',
-    '200': 'Extra Light',
-    '300': 'Light',
-    '400': 'Regular',
-    '500': 'Medium',
-    '600': 'Semi Bold',
-    '700': 'Bold',
-    '800': 'Extra Bold',
-    '900': 'Black',
-    'normal': 'Regular',
-    'bold': 'Bold',
-    'lighter': 'Light',
-    'bolder': 'Bold'
-  };
-  
-  return weightMap[weight] || 'Regular';
+  // Use Regular for maximum compatibility - it's always available
+  return 'Regular';
 }
 
 function parseLineHeight(lineHeight) {

@@ -293,12 +293,18 @@ A Chrome browser extension that captures the visual structure of any live websit
    - Verify all file paths are correct
    - Enable Developer mode in Chrome
 
-2. **Capture Not Working**
+2. **"Cannot read properties of undefined (reading 'executeScript')" Error**
+   - Ensure "scripting" permission is in manifest.json
+   - Reload the extension after making changes
+   - Check that Chrome extension APIs are available
+
+3. **Capture Not Working**
    - Check website permissions
    - Verify content script injection
    - Look for JavaScript errors in console
+   - Try refreshing the target webpage
 
-3. **Export Failing**
+4. **Export Failing**
    - Check download permissions
    - Verify JSON structure validity
    - Monitor browser console for errors

@@ -261,7 +261,7 @@
     const progressContainer = document.getElementById('progressContainer');
     const progressFill = document.getElementById('progressFill');
     
-    captureBtn.onclick = () => {
+    captureBtn.onclick = async () => {
       const url = urlInput.value.trim();
       
       if (!url) {

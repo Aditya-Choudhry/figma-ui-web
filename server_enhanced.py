@@ -58,17 +58,38 @@ class WebsiteCapture:
         self.driver = None
         
     def setup_driver(self):
-        """Setup Chrome driver with headless configuration"""
+        """Setup Chrome driver with headless configuration for Replit environment"""
         chrome_options = Options()
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--window-size=1920,1080')
+        chrome_options.add_argument('--disable-extensions')
+        chrome_options.add_argument('--disable-web-security')
+        chrome_options.add_argument('--disable-features=VizDisplayCompositor')
+        chrome_options.add_argument('--remote-debugging-port=9222')
+        chrome_options.add_argument('--disable-setuid-sandbox')
         chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
         
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        try:
+            # Try to find chromium binary in Replit environment
+            import subprocess
+            result = subprocess.run(['which', 'chromium'], capture_output=True, text=True)
+            if result.returncode == 0:
+                chrome_options.binary_location = result.stdout.strip()
+            
+            self.driver = webdriver.Chrome(options=chrome_options)
+        except Exception as e:
+            print(f"Error setting up WebDriver with system Chrome: {e}")
+            # Fallback to ChromeDriverManager
+            try:
+                service = Service(ChromeDriverManager().install())
+                self.driver = webdriver.Chrome(service=service, options=chrome_options)
+            except Exception as fallback_error:
+                print(f"Fallback WebDriver setup failed: {fallback_error}")
+                raise Exception("Unable to initialize WebDriver")
+        
         return self.driver
     
     def capture_viewport(self, url, viewport_config):

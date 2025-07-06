@@ -1,0 +1,73 @@
+You are an expert Chrome extension developer and Figma plugin architect.
+
+Your task is to create a browser extension/plugin that:
+
+Captures the full visual structure of any live website (HTML, CSS, text, and images)
+
+Parses the DOM into a layer-based structure
+
+Extracts fonts, colors, positions, paddings, margins, z-index, and styles
+
+Downloads or sends this structure as a JSON/Figma-compatible format
+
+Includes actual images used (as base64 or downloadable URLs)
+
+Allows exporting the structure directly into Figma via plugin, Figma REST API, or .fig compatible import
+
+Key Requirements:
+
+The Chrome extension should have:
+
+A popup interface with "Capture Page" and "Export to Figma" buttons
+
+Content script that traverses the DOM, calculates bounding boxes, z-order, text content, images, etc.
+
+Optionally uses html2canvas, dom-to-image, or similar tools
+
+Handles full-page scroll capture or virtual DOM traversal
+
+The Figma export should:
+
+Maintain correct layer order and grouping
+
+Convert HTML tags to Figma equivalents (div → frame, img → image, span/p → text)
+
+Respect exact spacing and layout (grid, flex, absolute, etc.)
+
+Export color styles and text styles
+
+Provide all assets or image data as base64 or downloadable blobs
+
+Final output:
+
+Either a .json file that a companion Figma plugin can import
+
+Or push data directly into a Figma document via REST API (requires OAuth2 token)
+
+Constraints:
+
+Avoid just screenshotting — you must preserve editable design structure
+
+Must work client-side (user downloads .json and uploads to Figma themselves)
+
+No cloud backend needed — everything runs locally or inside browser
+
+Technologies to use:
+
+Chrome Extensions APIs (MV3)
+
+DOM parsing
+
+JavaScript, HTML, CSS
+
+Optional: Figma Plugin API or REST API
+
+🧪 Optional Extras You Can Add Later:
+Detect font families from Google Fonts or inline CSS
+
+Compress images before export
+
+Allow selection of specific parts of the website
+
+Use machine learning to tag components (navbars, hero sections, CTAs)
+

@@ -1,0 +1,114 @@
+Got it. You're building a **Figma plugin** that parses **HTML/CSS into Figma designs**, and you're using **Python and JavaScript**. You need:
+
+* A **stable Chromium version** for headless rendering (not bleeding edge).
+* Compatible **Python and JS libraries**.
+* Maximum **stability and compatibility**, not just latest features.
+
+---
+
+## ✅ Best Chromium Version for Your Use Case
+
+For **stable rendering, headless browsing, and DOM inspection**, use:
+
+> **Chromium 114.0.5735.90**
+> 📅 Released: June 2023
+> ✅ Stable, widely supported, compatible with `selenium`, `puppeteer`, and `playwright`.
+
+This version avoids breaking changes found in v115+ and still supports:
+
+* Optional chaining
+* Shadow DOM
+* Custom CSS properties
+* Flexbox/grid
+* Fonts
+
+---
+
+## ✅ Python Libraries (Stable & Maintained)
+
+| Library             | Purpose                     | Use This Version |
+| ------------------- | --------------------------- | ---------------- |
+| `selenium`          | Headless browser automation | `v4.12.0`        |
+| `webdriver-manager` | Auto-install ChromeDriver   | `v4.0.1`         |
+| `flask`             | Backend API server          | `v2.2.5`         |
+| `flask-cors`        | CORS support                | `v3.0.10`        |
+| `beautifulsoup4`    | HTML parsing fallback       | `v4.12.2`        |
+| `tinycss2`          | CSS parsing                 | `v1.2.1`         |
+| `Pillow`            | Screenshots/thumbnails      | `v9.5.0`         |
+| `color-thief-py`    | Extract color palettes      | `v0.2.1`         |
+
+> 🧠 Bonus: If you want browser control without Selenium’s overhead, try [`playwright`](https://playwright.dev/python/) (modern and stable).
+
+---
+
+## ✅ JavaScript (for the Figma Plugin Part)
+
+You’ll need to run **TypeScript/JS inside Figma** using the Plugin API. Here's what to use:
+
+| Component         | Library                       | Notes                                  |
+| ----------------- | ----------------------------- | -------------------------------------- |
+| **Bundler**       | `esbuild`                     | Fast, simple for Figma plugins         |
+| **DOM Parser**    | `parse5`                      | For HTML parsing                       |
+| **CSS Parser**    | `css-tree` or `postcss`       | Good balance of support                |
+| **Layout Engine** | `yoga-layout` or `css-layout` | For box model & Flexbox                |
+| **Color tools**   | `color` or `chroma-js`        | For converting and manipulating colors |
+
+---
+
+## ✅ Plugin API Compatibility
+
+Figma Plugin environment:
+
+* Uses **Chrome 110+** under the hood (ES2021+ features supported).
+* **No DOM** access in Figma plugin – use **virtual DOM** with `parse5`.
+* You can’t load websites directly inside Figma – parse them externally (Python) and send the data via REST or messages.
+
+---
+
+## 🔄 Stable Architecture Overview
+
+```text
+┌────────────┐       REST API       ┌─────────────┐        Messaging        ┌──────────────┐
+│ HTML Input │ ────────────────▶ │ Flask Server │ ─────────────────────▶ │ Figma Plugin │
+└────────────┘                    └─────────────┘                        └──────────────┘
+        │                                   │                                      │
+        ▼                                   ▼                                      ▼
+ [Selenium + Chrome 114]       [parse5, css-tree]                  [Virtual DOM + Figma Nodes]
+ [Screenshots, Fonts]          [Layout Mapping]                    [Design Generation]
+```
+
+---
+
+## 🔒 Final Recommendation (Versions & Stack)
+
+* **Python**:
+
+  * `selenium==4.12.0`
+  * `webdriver-manager==4.0.1`
+  * `tinycss2==1.2.1`
+  * `flask==2.2.5`
+  * `flask-cors==3.0.10`
+  * `beautifulsoup4==4.12.2`
+
+* **JavaScript/Plugin**:
+
+  * `parse5`
+  * `css-tree` or `postcss`
+  * `esbuild` for bundling
+  * `yoga-layout` for flexbox
+  * `color` or `chroma-js`
+
+* **Chromium Version**:
+
+  * `v114.0.5735.90` (pair with `chromedriver 114.x`)
+
+---
+
+Let me know if you want:
+
+* `requirements.txt`
+* `package.json`
+* Figma Plugin bundler setup (esbuild + tsconfig)
+* Full end-to-end working template
+
+This way you can build once and run reliably across systems.

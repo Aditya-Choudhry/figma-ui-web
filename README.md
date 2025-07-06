@@ -298,9 +298,14 @@ A Chrome browser extension that captures the visual structure of any live websit
    - Reload the extension after making changes
    - Check that Chrome extension APIs are available
 
-3. **Capture Not Working**
+3. **"Content script not responding" or Service Worker Inactive**
+   - This has been fixed with the simplified popup-simple.js approach
+   - Reload the extension in chrome://extensions/
+   - No need for service worker communication anymore
+
+4. **Capture Not Working**
    - Check website permissions
-   - Verify content script injection
+   - Verify you're not on chrome:// or extension pages
    - Look for JavaScript errors in console
    - Try refreshing the target webpage
 

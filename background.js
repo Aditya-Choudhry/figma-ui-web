@@ -187,7 +187,9 @@ class ExtensionBackground {
 }
 
 // Initialize background script
+console.log('🚀 BACKGROUND: Initializing extension...');
 new ExtensionBackground();
+console.log('🚀 BACKGROUND: Extension initialized successfully');
 
 // Handle extension lifecycle
 chrome.runtime.onSuspend.addListener(() => {

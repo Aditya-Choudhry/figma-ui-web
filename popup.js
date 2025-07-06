@@ -60,6 +60,48 @@ class PopupController {
                 throw new Error('Cannot capture browser internal pages. Please navigate to a regular website.');
             }
             
+            // First, test if content script injection works at all
+            console.log('🧪 POPUP: Testing content script injection...');
+            try {
+                await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    files: ['test-content.js']
+                });
+                
+                // Test basic communication
+                const testResponse = await chrome.tabs.sendMessage(tab.id, { action: 'test' });
+                console.log('🧪 POPUP: Test response:', testResponse);
+                
+                if (testResponse && testResponse.success) {
+                    console.log('✅ POPUP: Content script injection works!');
+                } else {
+                    throw new Error('Content script test failed');
+                }
+            } catch (testError) {
+                console.error('❌ POPUP: Content script test failed:', testError);
+                throw new Error('Cannot inject content scripts on this page. Please try a different website.');
+            }
+            
+            this.updateStatus('Analyzing page structure...', 'loading');
+            this.showProgress(20);
+            
+            console.log('📨 POPUP: Sending message to content script...');
+            
+            if (!tab) {
+                throw new Error('No active tab found');
+            }
+            
+            console.log('✅ POPUP: Active tab found:', {
+                id: tab.id,
+                url: tab.url,
+                title: tab.title
+            });
+            
+            // Check if we can access this tab
+            if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('edge://')) {
+                throw new Error('Cannot capture browser internal pages. Please navigate to a regular website.');
+            }
+            
             this.updateStatus('Analyzing page structure...', 'loading');
             this.showProgress(20);
             
@@ -88,7 +130,44 @@ class PopupController {
                 
             } catch (messageError) {
                 console.error('❌ POPUP: Message sending failed:', messageError);
-                throw new Error('Content script not responding. Try refreshing the webpage and try again.');
+                console.log('🔄 POPUP: Attempting to inject content script manually...');
+                
+                // Try to inject content script manually
+                try {
+                    await chrome.scripting.executeScript({
+                        target: { tabId: tab.id },
+                        files: ['content.js']
+                    });
+                    
+                    console.log('✅ POPUP: Content script injected manually, retrying...');
+                    
+                    // Wait a moment for script to initialize
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Retry the message
+                    const retryResponse = await chrome.tabs.sendMessage(tab.id, {
+                        action: 'captureWebsite'
+                    });
+                    
+                    console.log('📥 POPUP: Retry response:', retryResponse);
+                    
+                    if (!retryResponse || !retryResponse.success) {
+                        throw new Error(retryResponse?.error || 'Failed to capture page data after retry');
+                    }
+                    
+                    this.updateStatus('Processing elements...', 'loading');
+                    this.showProgress(60);
+                    
+                    const capturedData = retryResponse.data;
+                    console.log('✅ POPUP: Captured data received after retry:', {
+                        elements: capturedData?.elements?.length,
+                        images: capturedData?.images?.length
+                    });
+                    
+                } catch (retryError) {
+                    console.error('❌ POPUP: Manual injection also failed:', retryError);
+                    throw new Error('Content script not responding. Please:\n1. Refresh the webpage\n2. Make sure you\'re not on a chrome:// page\n3. Try again');
+                }
             }
             
             this.updateStatus('Converting to Figma format...', 'loading');

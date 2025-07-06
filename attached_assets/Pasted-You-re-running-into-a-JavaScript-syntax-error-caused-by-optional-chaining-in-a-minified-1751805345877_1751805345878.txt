@@ -1,0 +1,104 @@
+You're running into a JavaScript **syntax error** caused by optional chaining (`?.`) in a **minified file** (`vendor-core-...min.js.br`). The browser is failing to parse this because of one of the following reasons:
+
+---
+
+### 🚨 Problem: `Unexpected token .` from Optional Chaining
+
+Line:
+
+```js
+if (element.isFlexContainer && layout?.flexDirection)
+```
+
+Error:
+
+```
+Unexpected token .
+```
+
+---
+
+### 🔍 Root Causes:
+
+1. **Old/Unsupported JavaScript Engine**
+   You're likely running this in an environment or browser that **does not support optional chaining (`?.`)** — a feature introduced in modern JS (ES2020+).
+
+2. **Minified Code Issue**
+   The error is inside a **`.min.js.br` (Brotli-compressed minified JS)** file — debugging this is painful unless you have the **source code or map files**.
+
+3. **Webpack/Babel Misconfiguration**
+   If this is your own codebase, your **Babel config** or **Webpack build** is not transpiling modern JS down to ES5 for browser compatibility.
+
+---
+
+### ✅ Fixes
+
+#### If You're Using Someone Else's Tool (e.g., "Website to Figma" app):
+
+> You can't fix the internal code unless you're the maintainer. Instead:
+
+* 🔁 **Update your browser** to the latest version (e.g., latest Chrome or Firefox).
+* ⚙️ Try a different browser that supports optional chaining.
+* 🧪 Check browser console: `navigator.userAgent` and ensure it's not an outdated environment.
+* 💬 If it's an extension or app, **report it as a bug** to the developer.
+
+---
+
+#### If You're Building This App Yourself:
+
+1. ✅ **Update Babel Config** (`.babelrc` or `babel.config.js`):
+
+   ```json
+   {
+     "presets": ["@babel/preset-env"]
+   }
+   ```
+
+2. ✅ **Install Babel Preset**:
+
+   ```bash
+   npm install --save-dev @babel/preset-env
+   ```
+
+3. ✅ **Transpile with Optional Chaining Support**:
+   Babel will convert:
+
+   ```js
+   layout?.flexDirection
+   ```
+
+   into:
+
+   ```js
+   (layout == null ? void 0 : layout.flexDirection)
+   ```
+
+4. ✅ **Ensure your Webpack is calling Babel on `.js` files** (if using Webpack).
+
+---
+
+### 🧪 Temporary Debug Tip
+
+If you can find the **original unminified file**, open it and replace:
+
+```js
+layout?.flexDirection
+```
+
+with:
+
+```js
+layout && layout.flexDirection
+```
+
+But **you cannot do this** if the `.min.js.br` is part of a production bundle that you don’t control.
+
+---
+
+### TL;DR
+
+* ✅ Update your browser (first thing to try).
+* 🛠️ If you're the developer, fix your Babel config to support modern JS features.
+* 🤷 If it's someone else's app, report the bug or try it in a different, updated browser.
+
+Let me know your exact environment — browser and app setup — and I’ll tell you the most direct fix.

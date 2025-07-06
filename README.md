@@ -1,3 +1,4 @@
+
 # Website to Figma Exporter Plugin
 
 A Figma plugin that captures any website's structure and converts it into native Figma elements with proper hierarchy and styling.
@@ -6,29 +7,31 @@ A Figma plugin that captures any website's structure and converts it into native
 
 - **Live Website Capture**: Fetch any website's HTML structure
 - **Native Figma Integration**: Creates real Figma frames, text, and rectangle nodes
-- **Proper Hierarchy**: Maintains DOM element relationships
-- **Style Preservation**: Captures colors, fonts, and basic styling
-- **Real-time Processing**: Instant conversion from web to Figma
+- **Multi-Viewport Support**: Captures desktop (1440px), tablet (768px), and mobile (375px) layouts
+- **Advanced CSS Extraction**: Complete style preservation with computed styles
+- **Auto Layout Detection**: Automatically applies Figma Auto Layout for flex containers
+- **Font Mapping**: Maps web fonts to Figma-compatible alternatives
 
 ## 🏗️ Architecture
 
 The plugin consists of two main components:
 
 ### 1. Figma Plugin (`code.js` + `ui.html`)
-- **UI Interface**: Clean, modern interface for entering website URLs
-- **Main Code**: Handles Figma API interactions and node creation
-- **Network Access**: Communicates with backend server for website content
+- Clean interface for entering website URLs and selecting viewports
+- Handles Figma API interactions and node creation
+- Communicates with backend server for website content
 
-### 2. Python Backend Server (`server.py`)
-- **Flask Web Server**: RESTful API for website content extraction
-- **BeautifulSoup Parser**: HTML parsing and DOM analysis
-- **CORS Enabled**: Allows Figma plugin to make cross-origin requests
+### 2. Python Backend Server (`server_enhanced.py`)
+- Flask web server with advanced website capture capabilities
+- Selenium WebDriver for complete page rendering
+- Comprehensive CSS parsing and element extraction
+- Multi-viewport responsive capture
 
 ## 🚀 Quick Start
 
 ### 1. Start the Backend Server
 
-The Python server runs on port 5000 and handles website content fetching:
+The enhanced Python server runs on port 5000:
 
 ```bash
 # Server starts automatically via Replit workflow
@@ -49,8 +52,9 @@ The Python server runs on port 5000 and handles website content fetching:
 1. **Open any Figma file**
 2. **Go to Plugins** → **Website to Figma Exporter**
 3. **Enter a website URL** (e.g., https://example.com)
-4. **Click "Capture Website"**
-5. **Watch as Figma elements are created** in real-time
+4. **Select viewport sizes** (desktop, tablet, mobile)
+5. **Click "Capture Website"**
+6. **Watch as Figma elements are created** in real-time
 
 ## 📋 API Endpoints
 
@@ -60,7 +64,8 @@ The Python server runs on port 5000 and handles website content fetching:
 - **POST** `/api/capture` - Capture website content
   ```json
   {
-    "url": "https://example.com"
+    "url": "https://example.com",
+    "viewports": ["desktop", "tablet", "mobile"]
   }
   ```
 
@@ -73,7 +78,7 @@ The plugin is configured to access:
 
 ### Supported Websites
 - Any publicly accessible HTTP/HTTPS website
-- Static and basic dynamic content
+- Static and dynamic content with JavaScript rendering
 - No authentication required sites
 
 ## 📁 Project Structure
@@ -83,20 +88,18 @@ The plugin is configured to access:
 ├── manifest.json          # Figma plugin configuration
 ├── code.js               # Main plugin logic (Figma environment)
 ├── ui.html               # Plugin user interface
-├── server.py             # Python backend server
-├── requirements.txt      # Python dependencies
-└── README.md            # This file
+├── server_enhanced.py    # Enhanced Python backend server
+├── pyproject.toml        # Python dependencies
+├── README.md            # This file
+└── FEATURES.md          # Detailed feature documentation
 ```
 
 ## 🛠️ Development
 
 ### Backend Development
 ```bash
-# Install dependencies
-pip install flask flask-cors requests beautifulsoup4
-
-# Run development server
-python server.py
+# Dependencies install automatically via pyproject.toml
+# Server runs via Enhanced Figma Server workflow
 ```
 
 ### Plugin Development
@@ -113,7 +116,7 @@ curl http://localhost:5000/health
 
 # Test website capture
 curl -X POST -H "Content-Type: application/json" \
-  -d '{"url":"https://example.com"}' \
+  -d '{"url":"https://example.com","viewports":["desktop"]}' \
   http://localhost:5000/api/capture
 ```
 
@@ -129,7 +132,7 @@ curl -X POST -H "Content-Type: application/json" \
 **Server Not Running**
 - Check workflow status in Replit
 - Verify port 5000 is available
-- Restart the "Figma Plugin Server" workflow
+- Restart the "Enhanced Figma Server" workflow
 
 **Plugin Network Error**
 - Ensure server is running on port 5000
@@ -141,25 +144,22 @@ curl -X POST -H "Content-Type: application/json" \
 - Try with `https://example.com` first
 - Look for errors in Figma console
 
-**Permission Denied**
-- Ensure `networkAccess` is properly configured in manifest
-- Check Figma has internet connectivity
-- Verify backend server CORS settings
+**Chrome Driver Issues**
+- Server automatically installs Chrome driver
+- Check console for WebDriver errors
+- Ensure sufficient system resources
 
 ## 📦 Deployment
 
 ### Server Deployment
-The Python server can be deployed to:
-- **Replit** (current setup)
-- **Heroku**
-- **Vercel**
-- **AWS Lambda**
-
-Update `manifest.json` with your deployed server URL.
+The Python server is configured for Replit deployment:
+- Automatic dependency installation
+- Port 5000 forwarding configured
+- Production-ready Flask server
 
 ### Plugin Distribution
 For sharing the plugin:
-1. Package all files in a ZIP
+1. Package `manifest.json`, `code.js`, and `ui.html` in a ZIP
 2. Share the ZIP file
 3. Recipients import via Figma's plugin developer tools
 
@@ -172,16 +172,16 @@ For sharing the plugin:
 
 ## 📈 Performance
 
-- **Server Response**: ~1-3 seconds per website
-- **Element Limit**: Max 100 elements per capture (configurable)
-- **Memory Usage**: Minimal impact on Figma performance
-- **Network**: Only fetches website content when triggered
+- **Server Response**: ~3-5 seconds per viewport
+- **Element Limit**: Max 100 elements per viewport (configurable)
+- **Memory Usage**: Optimized for Figma performance
+- **Multi-Viewport**: Parallel processing for faster capture
 
 ## 🎯 Use Cases
 
-- **Design Research**: Quickly analyze competitor layouts
+- **Design Research**: Analyze competitor layouts across devices
 - **Rapid Prototyping**: Import existing designs as starting points
-- **Layout Studies**: Study design patterns and structures
+- **Responsive Design**: Study how designs adapt to different screen sizes
 - **Design System Creation**: Extract components from live sites
 
 ## 🤝 Contributing
@@ -193,8 +193,4 @@ For sharing the plugin:
 
 ## 📄 License
 
-MIT License - feel free to use and modify for your projects.
-
----
-
-**Built with ❤️ for the Figma design community**
+MIT License - feel free to use and modify

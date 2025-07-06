@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Website to Figma</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-height: 260px;
+    }
+    
+    .container {
+      max-width: 360px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .header h1 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+    .header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 14px;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      backdrop-filter: blur(10px);
+      box-sizing: border-box;
+    }
+    
+    .form-group input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 12px;
+    }
+    
+    .btn-primary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      backdrop-filter: blur(10px);
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      min-height: 20px;
+    }
+    
+    .status.success {
+      background: rgba(76, 175, 80, 0.3);
+    }
+    
+    .status.error {
+      background: rgba(244, 67, 54, 0.3);
+    }
+    
+    .status.loading {
+      background: rgba(255, 193, 7, 0.3);
+    }
+    
+    .progress {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 12px 0;
+      display: none;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🌐 Website to Figma</h1>
+      <p>Capture and convert any website to Figma</p>
+    </div>
+    
+    <div class="form-group">
+      <label for="websiteUrl">Website URL</label>
+      <input 
+        type="url" 
+        id="websiteUrl" 
+        placeholder="https://example.com"
+        value="https://example.com"
+      >
+    </div>
+    
+    <button id="captureBtn" class="btn btn-primary">
+      📷 Capture Website
+    </button>
+    
+    <div class="progress" id="progressContainer">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div id="status" class="status">
+      Enter a website URL and click capture to start
+    </div>
+  </div>
+
+  <script>
+    console.log('UI loaded');
+    
+    const captureBtn = document.getElementById('captureBtn');
+    const urlInput = document.getElementById('websiteUrl');
+    const status = document.getElementById('status');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    
+    captureBtn.onclick = () => {
+      const url = urlInput.value.trim();
+      
+      if (!url) {
+        updateStatus('Please enter a website URL', 'error');
+        return;
+      }
+      
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        updateStatus('Please enter a valid URL (starting with http:// or https://)', 'error');
+        return;
+      }
+      
+      // Start capture process
+      captureBtn.disabled = true;
+      updateStatus('Starting capture...', 'loading');
+      showProgress(10);
+      
+      // Send message to main plugin code
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'captureWebsite', 
+          url: url 
+        } 
+      }, '*');
+    };
+    
+    // Listen for messages from main plugin code
+    window.onmessage = (event) => {
+      const { type, success, message, error } = event.data.pluginMessage || {};
+      
+      if (type === 'captureComplete') {
+        captureBtn.disabled = false;
+        hideProgress();
+        
+        if (success) {
+          updateStatus(message || 'Website captured successfully!', 'success');
+        } else {
+          updateStatus(error || 'Capture failed', 'error');
+        }
+      }
+    };
+    
+    function updateStatus(message, type = 'info') {
+      status.textContent = message;
+      status.className = `status ${type}`;
+    }
+    
+    function showProgress(percentage) {
+      progressContainer.style.display = 'block';
+      progressFill.style.width = percentage + '%';
+    }
+    
+    function hideProgress() {
+      progressContainer.style.display = 'none';
+      progressFill.style.width = '0%';
+    }
+  </script>
+</body>
+</html>

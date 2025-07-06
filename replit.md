@@ -2,22 +2,23 @@
 
 ## Overview
 
-This is a Chrome browser extension that captures the visual structure of any live website and converts it into a Figma-compatible format. The extension analyzes DOM elements, extracts design properties (fonts, colors, positions, spacing), and generates structured JSON data that can be imported into Figma while preserving the editable design structure.
+This is a Figma plugin that captures the visual structure of any live website and converts it into native Figma elements. The plugin uses a Python backend server to fetch and analyze website content, then creates corresponding Figma nodes while preserving the design structure and hierarchy.
 
 ## System Architecture
 
-### Chrome Extension Architecture
-The extension follows the Manifest V3 architecture with three main components:
-- **Background Service Worker** (`background.js`): Handles extension lifecycle, settings management, and message routing
-- **Content Script** (`content.js`): Injected into web pages to perform DOM analysis and capture
-- **Popup Interface** (`popup.html/js/css`): User interface for triggering captures and exports
+### Figma Plugin Architecture
+The plugin follows the standard Figma plugin architecture with two main components:
+- **Main Code** (`code.js`): Runs in Figma environment, handles Figma API interactions and node creation
+- **UI Interface** (`ui.html`): Plugin interface for URL input and capture control
+- **Backend Server** (`server.py`): Python Flask server that fetches and processes website content
 
 ### Data Processing Pipeline
-1. **DOM Traversal**: Content script analyzes page structure and elements
-2. **Style Extraction**: Captures computed CSS properties, fonts, colors, and layout data
-3. **Image Processing**: Extracts and processes images (base64 or downloadable URLs)
-4. **Figma Conversion**: Transforms captured data into Figma-compatible JSON structure
-5. **Export Generation**: Creates downloadable JSON file for Figma import
+1. **URL Input**: User enters website URL in plugin interface
+2. **Server Request**: Plugin sends URL to Python backend server
+3. **Content Fetching**: Server fetches website HTML using requests and BeautifulSoup
+4. **DOM Analysis**: Server parses HTML structure and extracts element data
+5. **Figma Creation**: Plugin receives structured data and creates native Figma nodes
+6. **Layout Application**: Elements are positioned with proper hierarchy and styling
 
 ## Key Components
 

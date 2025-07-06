@@ -1,30 +1,16 @@
 {
-  "manifest_version": 3,
   "name": "Website to Figma Exporter",
-  "version": "1.0.2",
-  "description": "Capture website structure and export as Figma-compatible JSON",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "downloads",
-    "scripting"
-  ],
-  "action": {
-    "default_popup": "popup-ultra-simple.html",
-    "default_title": "Website to Figma Exporter",
-    "default_icon": {
-      "16": "icons/icon16.svg",
-      "48": "icons/icon48.svg",
-      "128": "icons/icon128.svg"
-    }
+  "id": "website-to-figma-exporter",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "networkAccess": {
+    "allowedDomains": [
+      "http://localhost:5000",
+      "https://website-capture-server.replit.app"
+    ],
+    "reasoning": "To fetch website content from an external server for design conversion and layout extraction."
   },
-
-  "background": {
-    "service_worker": "background-simple.js"
-  },
-  "icons": {
-    "16": "icons/icon16.svg",
-    "48": "icons/icon48.svg",
-    "128": "icons/icon128.svg"
-  }
+  "editorType": ["figma"],
+  "capabilities": []
 }

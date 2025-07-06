@@ -99,6 +99,7 @@ The extension follows the Manifest V3 architecture with three main components:
 
 ## Changelog
 - July 06, 2025. Initial setup
+- July 06, 2025. Added comprehensive README.md with setup instructions, testing procedures, and deployment guides
 
 ## User Preferences
 

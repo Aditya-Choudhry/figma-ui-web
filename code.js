@@ -1,6 +1,9 @@
 // Figma plugin main code - handles communication with UI and Figma API
 console.log('Figma plugin loaded');
 
+// Show the plugin UI
+figma.showUI(__html__, { width: 450, height: 700 });
+
 // Listen for messages from the plugin UI
 figma.ui.onmessage = (msg) => {
   console.log('Received message:', msg);

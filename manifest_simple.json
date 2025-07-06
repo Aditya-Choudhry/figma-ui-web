@@ -1,0 +1,20 @@
+{
+  "name": "Website to Figma Converter",
+  "id": "website-to-figma-converter",
+  "api": "1.0.0",
+  "main": "code_simple.js",
+  "ui": "ui_simple.html",
+  "capabilities": [],
+  "enabledViewportSizes": ["DESKTOP", "MOBILE"],
+  "permissions": [
+    "currentuser"
+  ],
+  "editorType": [
+    "figma"
+  ],
+  "networkAccess": {
+    "allowedDomains": [
+      "localhost:5000"
+    ]
+  }
+}

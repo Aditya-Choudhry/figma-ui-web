@@ -261,7 +261,7 @@
     const progressContainer = document.getElementById('progressContainer');
     const progressFill = document.getElementById('progressFill');
     
-    captureBtn.onclick = async () => {
+    captureBtn.onclick = function() {
       const url = urlInput.value.trim();
       
       if (!url) {
@@ -333,7 +333,7 @@
     }
     
     // Enhanced sandbox iframe capture with comprehensive asset and style extraction
-    async function captureWithSandboxIframe(url, viewports) {
+    function captureWithSandboxIframe(url, viewports) {
       try {
         const captureArea = document.getElementById('captureArea');
         const captureFrame = document.getElementById('captureFrame');

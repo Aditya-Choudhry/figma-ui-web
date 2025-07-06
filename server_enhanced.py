@@ -860,6 +860,7 @@ class WebsiteCapture:
         }
         
         elements.append(element_data)
+        print(f"✅ EXTRACTED: {element.name.upper()} | Tag: {element_data['tagName']} | Text: '{text_content[:40]}...' | Position: {element_data['position']} | Depth: {depth}")
         
         # Process children recursively
         for child in element.children:
@@ -1659,6 +1660,7 @@ class WebsiteCapture:
                     'figmaProperties': self.map_css_to_figma_text(element.get('visual', {}))
                 }
                 text_elements.append(text_info)
+                print(f"🔤 CONVERTED TO TEXT: '{text_content[:40]}...' | Font: {text_info['fontSize']}px {text_info['fontFamily']} | Tag: {text_info['tag']}")
             
             # Detect shapes based on element properties
             visual = element.get('visual', {})
@@ -1698,6 +1700,7 @@ class WebsiteCapture:
             if tag_name in ['div', 'section', 'article', 'header', 'footer', 'main', 'nav', 'aside']:
                 figma_rect = self.create_figma_rectangle_section(element, visual, position, tag_name)
                 shapes['rectangles'].append(figma_rect)
+                print(f"🔷 CONVERTED TO RECTANGLE: {figma_rect['name']} | Size: {figma_rect['figmaProperties']['width']}x{figma_rect['figmaProperties']['height']} | Layout: {figma_rect['figmaProperties']['layoutMode']}")
         
         # Analyze color usage with context
         color_analysis = []

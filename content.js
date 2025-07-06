@@ -1,17 +1,34 @@
 // Content script for website capture functionality
+console.log('🚀 CONTENT: Content script loaded on:', window.location.href);
+
 class WebsiteCapture {
     constructor() {
         this.isCapturing = false;
+        console.log('🔧 CONTENT: WebsiteCapture instance created');
         this.setupMessageListener();
     }
     
     setupMessageListener() {
+        console.log('🎧 CONTENT: Setting up message listener...');
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            console.log('📨 CONTENT: Message received:', request);
+            
             if (request.action === 'captureWebsite') {
-                this.captureWebsite().then(sendResponse);
+                console.log('🔄 CONTENT: Starting website capture...');
+                this.captureWebsite().then(result => {
+                    console.log('✅ CONTENT: Capture completed, sending response:', result);
+                    sendResponse(result);
+                }).catch(error => {
+                    console.error('❌ CONTENT: Capture failed:', error);
+                    sendResponse({ success: false, error: error.message });
+                });
                 return true; // Indicates we will send a response asynchronously
             }
+            
+            console.log('❓ CONTENT: Unknown action:', request.action);
         });
+        
+        console.log('✅ CONTENT: Message listener ready');
     }
     
     async captureWebsite() {
@@ -521,4 +538,6 @@ class DOMCapturer {
 }
 
 // Initialize the capture system
-new WebsiteCapture();
+console.log('🔧 CONTENT: Initializing WebsiteCapture...');
+const websiteCapture = new WebsiteCapture();
+console.log('✅ CONTENT: WebsiteCapture initialized successfully');

@@ -1,9 +1,13 @@
 // Background service worker for the extension
+console.log('🔧 BACKGROUND: Service worker starting...');
+
 class ExtensionBackground {
     constructor() {
+        console.log('🔧 BACKGROUND: ExtensionBackground instance created');
         this.setupInstallHandler();
         this.setupMessageHandlers();
         this.setupContextMenus();
+        console.log('✅ BACKGROUND: All handlers setup complete');
     }
     
     setupInstallHandler() {

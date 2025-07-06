@@ -36,33 +36,60 @@ class PopupController {
     
     async captureWebsite() {
         try {
+            console.log('🔄 POPUP: Starting capture process...');
             this.updateStatus('Initializing capture...', 'loading');
             this.showProgress(0);
             this.captureBtn.disabled = true;
             
             // Get active tab
+            console.log('🔍 POPUP: Getting active tab...');
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             
             if (!tab) {
                 throw new Error('No active tab found');
             }
             
+            console.log('✅ POPUP: Active tab found:', {
+                id: tab.id,
+                url: tab.url,
+                title: tab.title
+            });
+            
+            // Check if we can access this tab
+            if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('edge://')) {
+                throw new Error('Cannot capture browser internal pages. Please navigate to a regular website.');
+            }
+            
             this.updateStatus('Analyzing page structure...', 'loading');
             this.showProgress(20);
             
+            console.log('📨 POPUP: Sending message to content script...');
+            
             // Send message to content script to capture page data
-            const response = await chrome.tabs.sendMessage(tab.id, {
-                action: 'captureWebsite'
-            });
-            
-            if (!response || !response.success) {
-                throw new Error(response?.error || 'Failed to capture page data');
+            try {
+                const response = await chrome.tabs.sendMessage(tab.id, {
+                    action: 'captureWebsite'
+                });
+                
+                console.log('📥 POPUP: Received response from content script:', response);
+                
+                if (!response || !response.success) {
+                    throw new Error(response?.error || 'Failed to capture page data');
+                }
+                
+                this.updateStatus('Processing elements...', 'loading');
+                this.showProgress(60);
+                
+                const capturedData = response.data;
+                console.log('✅ POPUP: Captured data received:', {
+                    elements: capturedData?.elements?.length,
+                    images: capturedData?.images?.length
+                });
+                
+            } catch (messageError) {
+                console.error('❌ POPUP: Message sending failed:', messageError);
+                throw new Error('Content script not responding. Try refreshing the webpage and try again.');
             }
-            
-            this.updateStatus('Processing elements...', 'loading');
-            this.showProgress(60);
-            
-            const capturedData = response.data;
             
             this.updateStatus('Converting to Figma format...', 'loading');
             this.showProgress(80);

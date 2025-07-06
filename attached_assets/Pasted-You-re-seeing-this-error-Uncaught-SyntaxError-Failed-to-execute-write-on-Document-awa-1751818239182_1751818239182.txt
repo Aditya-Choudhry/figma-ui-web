@@ -1,0 +1,77 @@
+You're seeing this error:
+
+```
+Uncaught SyntaxError: Failed to execute 'write' on 'Document': await is only valid in async functions and the top level bodies of modules
+```
+
+Because you're trying to use `await` **outside an `async` function** and **not in an ES module context**.
+
+### 🔥 The Problem:
+
+Figma plugin code runs in an `iframe` or `sandbox` environment. If you're injecting code using `document.write()` and that code contains `await` **outside of an `async function` or a `<script type="module">`**, it will throw a syntax error.
+
+In your case, it seems you're doing something like:
+
+```javascript
+document.write(`
+  <script>
+    await someAsyncFunction(); // ❌ Invalid here
+  </script>
+`);
+```
+
+### ✅ The Fix:
+
+**Option 1: Wrap `await` inside an `async` function.**
+
+Instead of using `await` at the top level, define and immediately call an async function:
+
+```javascript
+document.write(`
+  <script>
+    (async () => {
+      await someAsyncFunction();
+    })();
+  </script>
+`);
+```
+
+**Option 2: Use `<script type="module">` (only works if your Figma environment allows it)**
+
+If Figma supports module scripts (rare), you could write:
+
+```javascript
+document.write(`
+  <script type="module">
+    await someAsyncFunction();
+  </script>
+`);
+```
+
+But **most plugin environments (like Figma)** don’t allow `type="module"` due to CSP (Content Security Policy) restrictions.
+
+---
+
+### 🔧 Best Practice for Figma Plugins
+
+Instead of injecting entire script blobs with `document.write`, define your script as a **string or file** and insert it cleanly like this:
+
+```javascript
+const script = document.createElement('script');
+script.textContent = `
+  (async () => {
+    await doSomethingAsync();
+  })();
+`;
+document.body.appendChild(script);
+```
+
+### 🔍 Summary
+
+* You can't use `await` outside an async function or a module script.
+* Wrap your logic in an `(async () => { ... })();` IIFE.
+* Avoid `document.write()` if you can; it's brittle and outdated for dynamic scripting.
+
+---
+
+If you show me the exact section of code you're injecting with `document.write`, I’ll rewrite it for you with a safe and clean fix.

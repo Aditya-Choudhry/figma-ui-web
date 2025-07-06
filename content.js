@@ -157,6 +157,11 @@ class DOMCapturer {
         this.colors = new Set();
         this.fonts = new Set();
         this.processedElements = new Set();
+        this.gradients = new Set();
+        this.shadows = new Set();
+        this.animations = new Set();
+        this.transforms = new Set();
+        this.mediaQueries = new Set();
     }
     
     async capture() {
@@ -178,7 +183,14 @@ class DOMCapturer {
             textStyles: Array.from(this.textStyles.entries()),
             colors: Array.from(this.colors),
             fonts: Array.from(this.fonts),
-            capturedAt: new Date().toISOString()
+            gradients: Array.from(this.gradients),
+            shadows: Array.from(this.shadows),
+            animations: Array.from(this.animations),
+            transforms: Array.from(this.transforms),
+            mediaQueries: Array.from(this.mediaQueries),
+            capturedAt: new Date().toISOString(),
+            comprehensiveCapture: true,
+            captureVersion: '2.0'
         };
         
         console.log('Capture completed:', result);
@@ -274,48 +286,74 @@ class DOMCapturer {
             height: rect.height
         };
         
-        // Extract layout properties
-        const layout = {
-            ...absolutePosition,
-            zIndex: this.getZIndex(style, depth),
-            position: style.position,
-            display: style.display,
-            float: style.float,
-            clear: style.clear
-        };
-        
-        // Extract spacing
-        const spacing = this.extractSpacing(style);
-        
-        // Extract visual properties
-        const visual = this.extractVisualProperties(style);
-        
-        // Extract typography
-        const typography = this.extractTypography(style);
-        
-        // Extract flex/grid properties
-        const flexGrid = this.extractFlexGridProperties(style);
-        
-        // Get text content
-        const textContent = this.getElementTextContent(element);
-        
-        // Collect styles for export
-        this.collectStylesForExport(visual, typography);
-        
+        // Extract comprehensive element data based on the document requirements
         const elementData = {
-            id,
-            tagName: element.tagName.toLowerCase(),
-            className: element.className || '',
-            layout,
-            spacing,
-            visual,
-            typography,
-            flexGrid,
-            textContent,
-            depth,
+            // 1. Structural & Semantic Info
+            id: id,
+            tagName: element.tagName,
+            className: element.className,
+            elementId: element.id,
+            attributes: this.extractAllAttributes(element),
+            role: element.getAttribute('role'),
+            ariaLabel: element.getAttribute('aria-label'),
+            ariaDescribedBy: element.getAttribute('aria-describedby'),
+            textContent: element.textContent ? element.textContent.trim().substring(0, 200) : '',
+            innerHTML: element.innerHTML ? element.innerHTML.substring(0, 500) : '',
+            
+            // 2. Geometry & Layout
+            position: absolutePosition,
+            boundingRect: {
+                x: rect.left,
+                y: rect.top,
+                width: rect.width,
+                height: rect.height,
+                top: rect.top,
+                right: rect.right,
+                bottom: rect.bottom,
+                left: rect.left
+            },
+            boxModel: this.extractBoxModel(style),
+            layout: this.extractLayoutProperties(style),
+            
+            // 3. Typography
+            typography: this.extractTypographyData(style),
+            
+            // 4. Color & Visual Styles
+            colors: this.extractColorData(style),
+            visual: this.extractVisualStyles(style),
+            
+            // 5. Backgrounds & Images
+            backgrounds: this.extractBackgroundData(style, element),
+            
+            // 6. Transforms & Animations
+            transforms: this.extractTransformData(style),
+            animations: this.extractAnimationData(style),
+            
+            // 7. Responsive & Media Queries
+            responsive: this.extractResponsiveData(style),
+            
+            // 8. Fonts & Icon Sets
+            fonts: this.extractFontData(style),
+            
+            // 9. Pseudo-Elements & Pseudo-Classes
+            pseudoElements: this.extractPseudoElementData(element),
+            
+            // 10. Interactivity Metadata
+            interactivity: this.extractInteractivityData(element),
+            
+            // Hierarchy information
+            depth: depth,
             parent: parent ? parent.id : null,
-            attributes: this.extractRelevantAttributes(element),
-            children: [] // Will be populated later
+            zIndex: this.parseNumericValue(style.zIndex),
+            
+            // Element type classification
+            elementType: this.classifyElementType(element),
+            isContainer: this.isContainerElement(element, style),
+            hasChildren: element.children.length > 0,
+            
+            // Additional metadata
+            computedStyles: this.extractComputedStyles(style),
+            capturedAt: new Date().toISOString()
         };
         
         return elementData;
@@ -328,20 +366,49 @@ class DOMCapturer {
         return `${tagName}_${timestamp}_${random}`;
     }
     
-    getZIndex(style, depth) {
-        if (style.zIndex !== 'auto') {
-            return parseInt(style.zIndex) || 0;
+    // Helper methods for comprehensive data extraction
+    extractAllAttributes(element) {
+        const attributes = {};
+        for (let i = 0; i < element.attributes.length; i++) {
+            const attr = element.attributes[i];
+            attributes[attr.name] = attr.value;
         }
-        return depth;
+        return attributes;
     }
     
-    extractSpacing(style) {
+    extractBoxModel(style) {
         return {
             margin: {
                 top: this.parsePixelValue(style.marginTop),
                 right: this.parsePixelValue(style.marginRight),
                 bottom: this.parsePixelValue(style.marginBottom),
                 left: this.parsePixelValue(style.marginLeft)
+            },
+            border: {
+                width: {
+                    top: this.parsePixelValue(style.borderTopWidth),
+                    right: this.parsePixelValue(style.borderRightWidth),
+                    bottom: this.parsePixelValue(style.borderBottomWidth),
+                    left: this.parsePixelValue(style.borderLeftWidth)
+                },
+                style: {
+                    top: style.borderTopStyle,
+                    right: style.borderRightStyle,
+                    bottom: style.borderBottomStyle,
+                    left: style.borderLeftStyle
+                },
+                color: {
+                    top: style.borderTopColor,
+                    right: style.borderRightColor,
+                    bottom: style.borderBottomColor,
+                    left: style.borderLeftColor
+                },
+                radius: {
+                    topLeft: this.parsePixelValue(style.borderTopLeftRadius),
+                    topRight: this.parsePixelValue(style.borderTopRightRadius),
+                    bottomLeft: this.parsePixelValue(style.borderBottomLeftRadius),
+                    bottomRight: this.parsePixelValue(style.borderBottomRightRadius)
+                }
             },
             padding: {
                 top: this.parsePixelValue(style.paddingTop),
@@ -352,44 +419,20 @@ class DOMCapturer {
         };
     }
     
-    extractVisualProperties(style) {
+    extractLayoutProperties(style) {
         return {
-            backgroundColor: style.backgroundColor,
-            color: style.color,
-            opacity: parseFloat(style.opacity) || 1,
-            border: {
-                width: style.borderWidth,
-                style: style.borderStyle,
-                color: style.borderColor,
-                radius: style.borderRadius
-            },
-            boxShadow: style.boxShadow,
-            background: style.background,
-            backgroundImage: style.backgroundImage,
-            backgroundSize: style.backgroundSize,
-            backgroundPosition: style.backgroundPosition,
-            backgroundRepeat: style.backgroundRepeat
-        };
-    }
-    
-    extractTypography(style) {
-        return {
-            fontFamily: style.fontFamily,
-            fontSize: style.fontSize,
-            fontWeight: style.fontWeight,
-            fontStyle: style.fontStyle,
-            lineHeight: style.lineHeight,
-            textAlign: style.textAlign,
-            textDecoration: style.textDecoration,
-            textTransform: style.textTransform,
-            letterSpacing: style.letterSpacing,
-            wordSpacing: style.wordSpacing,
-            whiteSpace: style.whiteSpace
-        };
-    }
-    
-    extractFlexGridProperties(style) {
-        return {
+            display: style.display,
+            position: style.position,
+            top: style.top,
+            left: style.left,
+            right: style.right,
+            bottom: style.bottom,
+            float: style.float,
+            clear: style.clear,
+            overflow: style.overflow,
+            overflowX: style.overflowX,
+            overflowY: style.overflowY,
+            zIndex: style.zIndex,
             // Flexbox properties
             flexDirection: style.flexDirection,
             flexWrap: style.flexWrap,
@@ -401,60 +444,342 @@ class DOMCapturer {
             flexShrink: style.flexShrink,
             flexBasis: style.flexBasis,
             alignSelf: style.alignSelf,
-            
             // Grid properties
             gridTemplateColumns: style.gridTemplateColumns,
             gridTemplateRows: style.gridTemplateRows,
             gridGap: style.gridGap,
+            gridColumnGap: style.gridColumnGap,
+            gridRowGap: style.gridRowGap,
+            gridColumn: style.gridColumn,
+            gridRow: style.gridRow,
             gridArea: style.gridArea,
-            justifyItems: style.justifyItems,
-            alignItems: style.alignItems
+            justifySelf: style.justifySelf,
+            alignSelf: style.alignSelf
         };
     }
     
-    getElementTextContent(element) {
-        // Get direct text content, not from children
-        let textContent = '';
-        for (const node of element.childNodes) {
-            if (node.nodeType === Node.TEXT_NODE) {
-                textContent += node.textContent;
-            }
+    extractTypographyData(style) {
+        const typography = {
+            fontFamily: style.fontFamily,
+            fontSize: style.fontSize,
+            fontWeight: style.fontWeight,
+            fontStyle: style.fontStyle,
+            lineHeight: style.lineHeight,
+            letterSpacing: style.letterSpacing,
+            wordSpacing: style.wordSpacing,
+            textAlign: style.textAlign,
+            textDecoration: style.textDecoration,
+            textTransform: style.textTransform,
+            color: style.color,
+            textShadow: style.textShadow,
+            whiteSpace: style.whiteSpace,
+            wordBreak: style.wordBreak,
+            textOverflow: style.textOverflow
+        };
+        
+        // Add to fonts collection
+        if (style.fontFamily) {
+            this.fonts.add(style.fontFamily);
         }
-        return textContent.trim();
+        
+        return typography;
     }
     
-    collectStylesForExport(visual, typography) {
-        // Collect colors
-        if (visual.backgroundColor && visual.backgroundColor !== 'rgba(0, 0, 0, 0)') {
-            this.colors.add(visual.backgroundColor);
-        }
-        if (visual.color && visual.color !== 'rgba(0, 0, 0, 0)') {
-            this.colors.add(visual.color);
-        }
-        if (visual.border.color && visual.border.color !== 'rgba(0, 0, 0, 0)') {
-            this.colors.add(visual.border.color);
+    extractColorData(style) {
+        const colors = {
+            color: style.color,
+            backgroundColor: style.backgroundColor,
+            borderColor: style.borderColor,
+            outlineColor: style.outlineColor
+        };
+        
+        // Add colors to collection
+        Object.values(colors).forEach(color => {
+            if (color && color !== 'transparent' && color !== 'rgba(0, 0, 0, 0)') {
+                this.colors.add(color);
+            }
+        });
+        
+        return colors;
+    }
+    
+    extractVisualStyles(style) {
+        const visual = {
+            opacity: parseFloat(style.opacity) || 1,
+            visibility: style.visibility,
+            boxShadow: style.boxShadow,
+            textShadow: style.textShadow,
+            outline: style.outline,
+            filter: style.filter,
+            backdropFilter: style.backdropFilter,
+            mixBlendMode: style.mixBlendMode,
+            clipPath: style.clipPath,
+            mask: style.mask,
+            cursor: style.cursor,
+            pointerEvents: style.pointerEvents
+        };
+        
+        // Collect shadows for analysis
+        if (style.boxShadow && style.boxShadow !== 'none') {
+            this.shadows.add(style.boxShadow);
         }
         
-        // Collect fonts
-        if (typography.fontFamily) {
-            this.fonts.add(typography.fontFamily);
+        return visual;
+    }
+    
+    extractBackgroundData(style, element) {
+        const background = {
+            backgroundColor: style.backgroundColor,
+            backgroundImage: style.backgroundImage,
+            backgroundPosition: style.backgroundPosition,
+            backgroundSize: style.backgroundSize,
+            backgroundRepeat: style.backgroundRepeat,
+            backgroundAttachment: style.backgroundAttachment,
+            backgroundClip: style.backgroundClip,
+            backgroundOrigin: style.backgroundOrigin
+        };
+        
+        // Collect gradients
+        if (style.backgroundImage && style.backgroundImage.includes('gradient')) {
+            this.gradients.add(style.backgroundImage);
         }
         
-        // Collect text styles
-        const textStyleKey = `${typography.fontFamily}_${typography.fontSize}_${typography.fontWeight}_${visual.color}`;
-        if (!this.textStyles.has(textStyleKey)) {
-            this.textStyles.set(textStyleKey, {
-                fontFamily: typography.fontFamily,
-                fontSize: typography.fontSize,
-                fontWeight: typography.fontWeight,
-                fontStyle: typography.fontStyle,
-                color: visual.color,
-                lineHeight: typography.lineHeight,
-                textAlign: typography.textAlign,
-                count: 0
-            });
+        // Handle image elements
+        if (element.tagName === 'IMG' && element.src) {
+            background.imageSrc = element.src;
+            background.imageAlt = element.alt;
+            background.imageNaturalWidth = element.naturalWidth;
+            background.imageNaturalHeight = element.naturalHeight;
         }
-        this.textStyles.get(textStyleKey).count++;
+        
+        return background;
+    }
+    
+    extractTransformData(style) {
+        const transform = {
+            transform: style.transform,
+            transformOrigin: style.transformOrigin,
+            transformStyle: style.transformStyle,
+            perspective: style.perspective,
+            perspectiveOrigin: style.perspectiveOrigin,
+            backfaceVisibility: style.backfaceVisibility
+        };
+        
+        // Collect transforms
+        if (style.transform && style.transform !== 'none') {
+            this.transforms.add(style.transform);
+        }
+        
+        return transform;
+    }
+    
+    extractAnimationData(style) {
+        const animation = {
+            animationName: style.animationName,
+            animationDuration: style.animationDuration,
+            animationTimingFunction: style.animationTimingFunction,
+            animationDelay: style.animationDelay,
+            animationIterationCount: style.animationIterationCount,
+            animationDirection: style.animationDirection,
+            animationFillMode: style.animationFillMode,
+            animationPlayState: style.animationPlayState,
+            transition: style.transition,
+            transitionProperty: style.transitionProperty,
+            transitionDuration: style.transitionDuration,
+            transitionTimingFunction: style.transitionTimingFunction,
+            transitionDelay: style.transitionDelay
+        };
+        
+        // Collect animations
+        if (style.animationName && style.animationName !== 'none') {
+            this.animations.add(style.animationName);
+        }
+        
+        return animation;
+    }
+    
+    extractResponsiveData(style) {
+        return {
+            width: style.width,
+            height: style.height,
+            minWidth: style.minWidth,
+            minHeight: style.minHeight,
+            maxWidth: style.maxWidth,
+            maxHeight: style.maxHeight,
+            aspectRatio: style.aspectRatio,
+            objectFit: style.objectFit,
+            objectPosition: style.objectPosition
+        };
+    }
+    
+    extractFontData(style) {
+        return {
+            fontFamily: style.fontFamily,
+            fontSize: style.fontSize,
+            fontWeight: style.fontWeight,
+            fontStyle: style.fontStyle,
+            fontVariant: style.fontVariant,
+            fontStretch: style.fontStretch,
+            fontSizeAdjust: style.fontSizeAdjust,
+            fontKerning: style.fontKerning,
+            fontFeatureSettings: style.fontFeatureSettings,
+            fontVariationSettings: style.fontVariationSettings
+        };
+    }
+    
+    extractPseudoElementData(element) {
+        const pseudoData = {};
+        
+        try {
+            // Try to get pseudo-element styles (limited by browser security)
+            const beforeStyle = window.getComputedStyle(element, '::before');
+            const afterStyle = window.getComputedStyle(element, '::after');
+            
+            if (beforeStyle.content !== 'none') {
+                pseudoData.before = {
+                    content: beforeStyle.content,
+                    display: beforeStyle.display,
+                    position: beforeStyle.position,
+                    width: beforeStyle.width,
+                    height: beforeStyle.height
+                };
+            }
+            
+            if (afterStyle.content !== 'none') {
+                pseudoData.after = {
+                    content: afterStyle.content,
+                    display: afterStyle.display,
+                    position: afterStyle.position,
+                    width: afterStyle.width,
+                    height: afterStyle.height
+                };
+            }
+        } catch (e) {
+            // Pseudo-element access may be restricted
+        }
+        
+        return pseudoData;
+    }
+    
+    extractInteractivityData(element) {
+        const interactivity = {
+            href: element.href,
+            target: element.target,
+            type: element.type,
+            value: element.value,
+            placeholder: element.placeholder,
+            disabled: element.disabled,
+            checked: element.checked,
+            selected: element.selected,
+            tabIndex: element.tabIndex,
+            contentEditable: element.contentEditable,
+            draggable: element.draggable,
+            clickable: this.isClickableElement(element),
+            focusable: this.isFocusableElement(element),
+            formElement: this.isFormElement(element),
+            dataAttributes: this.extractDataAttributes(element)
+        };
+        
+        return interactivity;
+    }
+    
+    extractComputedStyles(style) {
+        // Extract essential computed styles for Figma compatibility
+        const computedStyles = {};
+        const importantProperties = [
+            'display', 'position', 'float', 'clear', 'overflow', 'visibility',
+            'width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight',
+            'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
+            'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+            'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth',
+            'borderTopStyle', 'borderRightStyle', 'borderBottomStyle', 'borderLeftStyle',
+            'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
+            'borderRadius', 'color', 'backgroundColor', 'backgroundImage',
+            'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'lineHeight',
+            'textAlign', 'textDecoration', 'textTransform', 'letterSpacing',
+            'opacity', 'zIndex', 'transform', 'boxShadow', 'textShadow'
+        ];
+        
+        importantProperties.forEach(prop => {
+            if (style[prop]) {
+                computedStyles[prop] = style[prop];
+            }
+        });
+        
+        return computedStyles;
+    }
+    
+    classifyElementType(element) {
+        const tagName = element.tagName.toLowerCase();
+        
+        if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
+            return 'heading';
+        } else if (['p', 'span', 'em', 'strong', 'i', 'b'].includes(tagName)) {
+            return 'text';
+        } else if (['img', 'svg', 'canvas', 'video', 'audio'].includes(tagName)) {
+            return 'media';
+        } else if (['button', 'input', 'select', 'textarea', 'form'].includes(tagName)) {
+            return 'interactive';
+        } else if (['div', 'section', 'article', 'header', 'footer', 'nav', 'main', 'aside'].includes(tagName)) {
+            return 'container';
+        } else if (['ul', 'ol', 'li', 'dl', 'dt', 'dd'].includes(tagName)) {
+            return 'list';
+        } else if (['table', 'tr', 'td', 'th', 'thead', 'tbody', 'tfoot'].includes(tagName)) {
+            return 'table';
+        } else if (tagName === 'a') {
+            return 'link';
+        } else {
+            return 'other';
+        }
+    }
+    
+    isContainerElement(element, style) {
+        const containerTags = ['div', 'section', 'article', 'header', 'footer', 'nav', 'main', 'aside'];
+        const isFlexOrGrid = style.display === 'flex' || style.display === 'grid' || style.display === 'inline-flex' || style.display === 'inline-grid';
+        
+        return containerTags.includes(element.tagName.toLowerCase()) || isFlexOrGrid || element.children.length > 0;
+    }
+    
+    isClickableElement(element) {
+        const clickableTags = ['a', 'button', 'input', 'select', 'textarea'];
+        return clickableTags.includes(element.tagName.toLowerCase()) || 
+               element.onclick || 
+               element.getAttribute('onclick') || 
+               element.style.cursor === 'pointer';
+    }
+    
+    isFocusableElement(element) {
+        const focusableTags = ['a', 'button', 'input', 'select', 'textarea'];
+        return focusableTags.includes(element.tagName.toLowerCase()) || 
+               element.tabIndex >= 0 || 
+               element.contentEditable === 'true';
+    }
+    
+    isFormElement(element) {
+        const formTags = ['form', 'input', 'select', 'textarea', 'button', 'fieldset', 'legend', 'label'];
+        return formTags.includes(element.tagName.toLowerCase());
+    }
+    
+    extractDataAttributes(element) {
+        const dataAttributes = {};
+        for (let i = 0; i < element.attributes.length; i++) {
+            const attr = element.attributes[i];
+            if (attr.name.startsWith('data-')) {
+                dataAttributes[attr.name] = attr.value;
+            }
+        }
+        return dataAttributes;
+    }
+    
+    parsePixelValue(value) {
+        if (!value || value === 'auto') return 0;
+        const match = value.match(/^(\d+(?:\.\d+)?)/);
+        return match ? parseFloat(match[1]) : 0;
+    }
+    
+    parseNumericValue(value) {
+        if (!value || value === 'auto') return 0;
+        return parseFloat(value) || 0;
     }
     
     extractRelevantAttributes(element) {

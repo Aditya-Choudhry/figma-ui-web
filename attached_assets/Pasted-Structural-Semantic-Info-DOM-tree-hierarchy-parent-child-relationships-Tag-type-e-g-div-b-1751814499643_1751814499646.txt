@@ -1,0 +1,156 @@
+Structural & Semantic Info
+DOM tree hierarchy (parent/child relationships)
+
+Tag/type (e.g. <div>, <button>, headings, paragraphs, lists)
+
+Roles/ARIA attributes (for semantics and naming layers)
+
+2. Geometry & Layout
+Bounding boxes (getBoundingClientRect()): x, y, width, height
+
+Box model:
+
+Margin (outside spacing)
+
+Border (border-width, border-style, border-color, radii)
+
+Padding (inner spacing)
+
+Display & positioning:
+
+display (block, inline, flex, grid…)
+
+position (static, relative, absolute, fixed, sticky)
+
+top/left/right/bottom offsets
+
+Flex/Grid details:
+
+flex-direction, justify-content, align-items
+
+grid-template-rows/columns, gap
+
+3. Typography
+Font properties:
+
+font-family
+
+font-size
+
+font-weight
+
+line-height
+
+letter-spacing
+
+text-transform
+
+font-style (italic, normal)
+
+Text alignment (text-align)
+
+Color and opacity for text
+
+Decoration (text-decoration, underline, strikethrough)
+
+4. Color & Visual Styles
+Colors:
+
+color (text)
+
+background-color
+
+border-color
+
+fill / stroke for SVGs
+
+Gradients (background-image: linear-gradient(...))
+
+Opacity and mix-blend-mode
+
+Box shadows (box-shadow)
+
+CSS filters (blur, brightness, etc.)
+
+5. Backgrounds & Images
+Background images and properties:
+
+background-image, background-position, background-size
+
+Image elements:
+
+src URLs or Base64 blobs
+
+Intrinsic width/height (natural dimensions)
+
+SVGs:
+
+Inline SVG code or file data
+
+viewBox, aspect ratio
+
+6. Transforms & Animations
+Transforms:
+
+transform (translate, scale, rotate, skew)
+
+transform-origin
+
+CSS animations & transitions:
+
+animation-name, animation-duration, animation-timing-function
+
+transition-property, transition-duration
+
+Keyframes (you can snapshot start/end states or capture the keyframe data)
+
+7. Responsive & Media Queries
+Viewport breakpoints (width thresholds)
+
+Media query rules and their overridden style values
+
+Percentage vs. absolute units—capture whether widths/heights are %, vw, vh, rem, em, etc.
+
+8. Fonts & Icon Sets
+Web fonts:
+
+URLs and @font-face declarations
+
+Weights and styles loaded
+
+Icon fonts or SVG icon libraries
+
+9. Pseudo‑Elements & Pseudo‑Classes
+Content and styles from ::before / ::after
+
+Styles for states (:hover, :active, :focus)—either capture default state or all states if you want interactive prototypes
+
+10. Interactivity Metadata (for prototyping)
+Link URLs (<a href>)
+
+Button actions (onClick handlers)
+
+Form fields (placeholders, input types)
+
+Data attributes for JS-driven components
+
+Putting It All Together
+When you walk the DOM in your sandboxed iframe:
+
+For each element, record:
+
+Geometry (x,y,w,h, box‑model values)
+
+Computed style object (all CSS properties—filter out defaults if you like)
+
+Assets (img.src, background‑image URLs, inline SVG code)
+
+Transform & Animation info
+
+Collect the raw assets:
+
+Download images/SVGs as blobs/Base64
+
+Fetch font files or record their URLs
+
+Capture responsive variants by resizing the iframe to your target widths (e.g., 1440 px, 768 px, 375 px) and repeating steps 1–2 for each breakpoint.

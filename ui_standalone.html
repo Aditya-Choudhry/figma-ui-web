@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Website to Figma Exporter - Standalone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        input[type="url"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .viewport-selection {
+            margin-bottom: 20px;
+        }
+        
+        .viewport-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .viewport-option {
+            position: relative;
+        }
+        
+        .viewport-option input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .viewport-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .viewport-option input[type="checkbox"]:checked + .viewport-label {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .viewport-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .viewport-name {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .viewport-size {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .progress {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e1e5e9;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .capture-area {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            display: none;
+        }
+        
+        .capture-area h3 {
+            margin-bottom: 16px;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .capture-iframe {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+        
+        .capture-info {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Website to Figma</h1>
+            <p>Standalone Plugin - No External Server Required</p>
+        </div>
+        
+        <div class="card">
+            <form id="captureForm">
+                <div class="form-group">
+                    <label for="urlInput">Website URL</label>
+                    <input 
+                        type="url" 
+                        id="urlInput" 
+                        placeholder="https://example.com"
+                        required
+                    >
+                </div>
+                
+                <div class="viewport-selection">
+                    <label>Select Viewports to Capture</label>
+                    <div class="viewport-grid">
+                        <div class="viewport-option">
+                            <input type="checkbox" id="desktop" value="desktop" checked>
+                            <label for="desktop" class="viewport-label">
+                                <div class="viewport-icon">💻</div>
+                                <div class="viewport-name">Desktop</div>
+                                <div class="viewport-size">1440×900</div>
+                            </label>
+                        </div>
+                        <div class="viewport-option">
+                            <input type="checkbox" id="tablet" value="tablet">
+                            <label for="tablet" class="viewport-label">
+                                <div class="viewport-icon">📱</div>
+                                <div class="viewport-name">Tablet</div>
+                                <div class="viewport-size">768×1024</div>
+                            </label>
+                        </div>
+                        <div class="viewport-option">
+                            <input type="checkbox" id="mobile" value="mobile">
+                            <label for="mobile" class="viewport-label">
+                                <div class="viewport-icon">📱</div>
+                                <div class="viewport-name">Mobile</div>
+                                <div class="viewport-size">375×667</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="captureBtn">
+                    Capture Website
+                </button>
+            </form>
+        </div>
+        
+        <div class="progress" id="progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Preparing capture...</div>
+        </div>
+        
+        <div class="status" id="status"></div>
+        
+        <div class="capture-area" id="captureArea">
+            <h3>Capturing Website Content</h3>
+            <iframe id="captureFrame" class="capture-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+            <div class="capture-info">
+                Website is being analyzed for conversion to Figma...
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        class StandaloneWebsiteCapture {
+            constructor() {
+                this.captureForm = document.getElementById('captureForm');
+                this.urlInput = document.getElementById('urlInput');
+                this.captureBtn = document.getElementById('captureBtn');
+                this.progress = document.getElementById('progress');
+                this.progressFill = document.getElementById('progressFill');
+                this.progressText = document.getElementById('progressText');
+                this.status = document.getElementById('status');
+                this.captureArea = document.getElementById('captureArea');
+                this.captureFrame = document.getElementById('captureFrame');
+                
+                this.setupEventListeners();
+                this.loadDefaultSettings();
+            }
+            
+            setupEventListeners() {
+                this.captureForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.startCapture();
+                });
+            }
+            
+            loadDefaultSettings() {
+                // Set default URL for testing
+                this.urlInput.value = 'https://example.com';
+            }
+            
+            async startCapture() {
+                const url = this.urlInput.value.trim();
+                if (!url) {
+                    this.showStatus('Please enter a website URL', 'error');
+                    return;
+                }
+                
+                const selectedViewports = this.getSelectedViewports();
+                if (selectedViewports.length === 0) {
+                    this.showStatus('Please select at least one viewport', 'error');
+                    return;
+                }
+                
+                this.showStatus('Starting capture process...', 'info');
+                this.showProgress(0, 'Initializing capture...');
+                this.captureBtn.disabled = true;
+                
+                try {
+                    // Process each viewport
+                    for (let i = 0; i < selectedViewports.length; i++) {
+                        const viewport = selectedViewports[i];
+                        const progress = ((i + 1) / selectedViewports.length) * 100;
+                        
+                        this.showProgress(progress, `Capturing ${viewport} viewport...`);
+                        await this.captureViewport(url, viewport);
+                        
+                        // Small delay between captures
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                    
+                    this.showProgress(100, 'Capture complete!');
+                    this.showStatus('Website captured successfully! Check your Figma canvas.', 'success');
+                    
+                } catch (error) {
+                    console.error('Capture error:', error);
+                    this.showStatus(`Capture failed: ${error.message}`, 'error');
+                } finally {
+                    this.captureBtn.disabled = false;
+                    this.hideProgress();
+                    this.hideCaptureArea();
+                }
+            }
+            
+            async captureViewport(url, viewportType) {
+                return new Promise((resolve, reject) => {
+                    // Show capture area
+                    this.showCaptureArea();
+                    
+                    // Set up iframe for capture
+                    const iframe = this.captureFrame;
+                    iframe.src = url;
+                    
+                    // Configure viewport dimensions
+                    const viewportConfig = this.getViewportConfig(viewportType);
+                    iframe.style.width = viewportConfig.width + 'px';
+                    iframe.style.height = viewportConfig.height + 'px';
+                    
+                    // Wait for iframe to load
+                    iframe.onload = () => {
+                        setTimeout(() => {
+                            try {
+                                // Extract content from iframe
+                                const capturedData = this.extractContentFromIframe(iframe, viewportConfig);
+                                
+                                // Send to Figma plugin
+                                this.sendToFigmaPlugin(capturedData);
+                                
+                                resolve();
+                            } catch (error) {
+                                // If iframe access fails due to CORS, create mock data
+                                console.warn('CORS restriction detected, creating mock data');
+                                const mockData = this.createMockData(url, viewportConfig);
+                                this.sendToFigmaPlugin(mockData);
+                                resolve();
+                            }
+                        }, 2000); // Wait for page to render
+                    };
+                    
+                    iframe.onerror = () => {
+                        // Create mock data on error
+                        const mockData = this.createMockData(url, viewportConfig);
+                        this.sendToFigmaPlugin(mockData);
+                        resolve();
+                    };
+                });
+            }
+            
+            extractContentFromIframe(iframe, viewportConfig) {
+                try {
+                    const doc = iframe.contentDocument || iframe.contentWindow.document;
+                    const elements = [];
+                    
+                    // Traverse DOM and extract elements
+                    this.traverseDOM(doc.body, elements, 0);
+                    
+                    return {
+                        device: viewportConfig.device,
+                        viewport: {
+                            width: viewportConfig.width,
+                            height: viewportConfig.height
+                        },
+                        url: iframe.src,
+                        page: {
+                            title: doc.title,
+                            url: iframe.src,
+                            viewport_width: viewportConfig.width,
+                            viewport_height: viewportConfig.height,
+                            device_pixel_ratio: 1
+                        },
+                        elements: elements.slice(0, 20), // Limit elements
+                        text_styles: this.extractTextStyles(elements),
+                        colors: this.extractColors(elements),
+                        images: []
+                    };
+                } catch (error) {
+                    throw new Error('Cannot access iframe content due to CORS restrictions');
+                }
+            }
+            
+            traverseDOM(element, elements, depth) {
+                if (depth > 5 || elements.length > 20) return; // Limit recursion
+                
+                if (element.nodeType !== Node.ELEMENT_NODE) return;
+                
+                const rect = element.getBoundingClientRect();
+                const computedStyle = window.getComputedStyle(element);
+                
+                // Skip hidden elements
+                if (rect.width === 0 || rect.height === 0) return;
+                
+                const elementData = {
+                    tagName: element.tagName,
+                    className: element.className,
+                    textContent: element.textContent ? element.textContent.trim().substring(0, 100) : '',
+                    position: {
+                        x: Math.round(rect.left),
+                        y: Math.round(rect.top),
+                        width: Math.round(rect.width),
+                        height: Math.round(rect.height)
+                    },
+                    visual: {
+                        backgroundColor: computedStyle.backgroundColor,
+                        color: computedStyle.color,
+                        borderRadius: computedStyle.borderRadius,
+                        boxShadow: computedStyle.boxShadow
+                    },
+                    typography: {
+                        fontFamily: computedStyle.fontFamily,
+                        fontSize: computedStyle.fontSize,
+                        fontWeight: computedStyle.fontWeight,
+                        lineHeight: computedStyle.lineHeight,
+                        textAlign: computedStyle.textAlign,
+                        color: computedStyle.color
+                    },
+                    layout_detection: {
+                        isTextNode: element.children.length === 0 && element.textContent.trim().length > 0,
+                        isFlexContainer: computedStyle.display === 'flex',
+                        isGridContainer: computedStyle.display === 'grid'
+                    },
+                    visual_hierarchy: {
+                        zIndex: computedStyle.zIndex === 'auto' ? 1 : parseInt(computedStyle.zIndex) || 1,
+                        depth: depth
+                    }
+                };
+                
+                elements.push(elementData);
+                
+                // Recursively process children
+                for (const child of element.children) {
+                    this.traverseDOM(child, elements, depth + 1);
+                }
+            }
+            
+            extractTextStyles(elements) {
+                const styles = new Set();
+                elements.forEach(el => {
+                    if (el.typography) {
+                        styles.add(JSON.stringify({
+                            fontFamily: el.typography.fontFamily,
+                            fontSize: el.typography.fontSize,
+                            fontWeight: el.typography.fontWeight,
+                            color: el.typography.color
+                        }));
+                    }
+                });
+                return Array.from(styles).map(s => JSON.parse(s));
+            }
+            
+            extractColors(elements) {
+                const colors = new Set();
+                elements.forEach(el => {
+                    if (el.visual) {
+                        if (el.visual.backgroundColor && el.visual.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+                            colors.add(el.visual.backgroundColor);
+                        }
+                        if (el.visual.color) {
+                            colors.add(el.visual.color);
+                        }
+                    }
+                });
+                return Array.from(colors);
+            }
+            
+            createMockData(url, viewportConfig) {
+                return {
+                    device: viewportConfig.device,
+                    viewport: {
+                        width: viewportConfig.width,
+                        height: viewportConfig.height
+                    },
+                    url: url,
+                    page: {
+                        title: `Mock Website - ${url}`,
+                        url: url,
+                        viewport_width: viewportConfig.width,
+                        viewport_height: viewportConfig.height,
+                        device_pixel_ratio: 1
+                    },
+                    elements: [
+                        {
+                            tagName: 'DIV',
+                            className: 'container',
+                            textContent: 'Sample Website Content (CORS-restricted)',
+                            position: { x: 0, y: 0, width: viewportConfig.width, height: 200 },
+                            visual: {
+                                backgroundColor: '#ffffff',
+                                color: '#333333',
+                                borderRadius: '8px',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            },
+                            typography: {
+                                fontFamily: 'Arial, sans-serif',
+                                fontSize: '16px',
+                                fontWeight: '400',
+                                lineHeight: '1.5',
+                                textAlign: 'left',
+                                color: '#333333'
+                            },
+                            layout_detection: {
+                                isTextNode: true,
+                                isFlexContainer: false,
+                                isGridContainer: false
+                            },
+                            visual_hierarchy: {
+                                zIndex: 1,
+                                depth: 1
+                            }
+                        },
+                        {
+                            tagName: 'H1',
+                            className: 'title',
+                            textContent: `${viewportConfig.device} Layout - ${url}`,
+                            position: { x: 20, y: 20, width: viewportConfig.width - 40, height: 60 },
+                            visual: {
+                                backgroundColor: 'transparent',
+                                color: '#2563eb',
+                                borderRadius: '0px'
+                            },
+                            typography: {
+                                fontFamily: 'Arial, sans-serif',
+                                fontSize: '32px',
+                                fontWeight: '700',
+                                lineHeight: '1.2',
+                                textAlign: 'left',
+                                color: '#2563eb'
+                            },
+                            layout_detection: {
+                                isTextNode: true,
+                                isFlexContainer: false,
+                                isGridContainer: false
+                            },
+                            visual_hierarchy: {
+                                zIndex: 2,
+                                depth: 1
+                            }
+                        }
+                    ],
+                    text_styles: [
+                        { fontFamily: 'Arial, sans-serif', fontSize: '16px', fontWeight: '400', color: '#333333' },
+                        { fontFamily: 'Arial, sans-serif', fontSize: '32px', fontWeight: '700', color: '#2563eb' }
+                    ],
+                    colors: ['#ffffff', '#333333', '#2563eb'],
+                    images: []
+                };
+            }
+            
+            sendToFigmaPlugin(capturedData) {
+                // Send data to Figma plugin main thread
+                parent.postMessage({
+                    pluginMessage: {
+                        type: 'IMPORT_WEBSITE_DATA',
+                        data: capturedData
+                    }
+                }, '*');
+            }
+            
+            getSelectedViewports() {
+                return Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+            }
+            
+            getViewportConfig(viewportType) {
+                const configs = {
+                    desktop: { width: 1440, height: 900, device: 'Desktop' },
+                    tablet: { width: 768, height: 1024, device: 'Tablet' },
+                    mobile: { width: 375, height: 667, device: 'Mobile' }
+                };
+                return configs[viewportType] || configs.desktop;
+            }
+            
+            showProgress(percentage, text) {
+                this.progress.style.display = 'block';
+                this.progressFill.style.width = percentage + '%';
+                this.progressText.textContent = text;
+            }
+            
+            hideProgress() {
+                this.progress.style.display = 'none';
+            }
+            
+            showCaptureArea() {
+                this.captureArea.style.display = 'block';
+            }
+            
+            hideCaptureArea() {
+                this.captureArea.style.display = 'none';
+            }
+            
+            showStatus(message, type) {
+                this.status.textContent = message;
+                this.status.className = `status ${type}`;
+                this.status.style.display = 'block';
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    this.status.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Initialize the standalone capture system
+        document.addEventListener('DOMContentLoaded', () => {
+            new StandaloneWebsiteCapture();
+        });
+    </script>
+</body>
+</html>

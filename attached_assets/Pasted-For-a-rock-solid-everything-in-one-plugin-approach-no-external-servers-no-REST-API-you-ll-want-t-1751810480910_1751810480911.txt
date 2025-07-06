@@ -1,0 +1,74 @@
+For a rock‑solid, “everything‑in‑one‑plugin” approach—no external servers, no REST API—you’ll want to lean almost entirely on **built‑in browser capabilities** plus a couple of battle‑tested, zero‑dependency JS libraries that bundle cleanly into a Figma plugin. Here’s the **most stable, widely compatible stack**:
+
+---
+
+## 1. Core Strategy: Sandbox + Browser APIs
+
+* **Embed the target site** in a `<iframe sandbox="allow-same-origin allow-scripts">` inside your plugin UI.
+* **Use standard DOM APIs** inside that iframe to:
+
+  * Traverse nodes (`element.querySelectorAll`)
+  * Read computed styles (`getComputedStyle(element)`)
+  * Measure positions and sizes (`element.getBoundingClientRect()`)
+  * Capture images via `<canvas>` if needed
+
+Because it’s all **native browser code**, you’ll never run into transpilation or compatibility headaches.
+
+---
+
+## 2. Lightweight Parsing Libraries
+
+If you need a bit more power (e.g. robust CSS parsing) without dragging in huge toolchains, include:
+
+| Library                    | Purpose                         | Why It’s Stable                                            |
+| -------------------------- | ------------------------------- | ---------------------------------------------------------- |
+| **css-tree**               | Parse & walk complex CSS values | Pure JS, zero dependencies, bundles with esbuild in <10 kB |
+| **html2canvas** (optional) | Rasterize DOM → canvas image    | Widely used, zero dependencies                             |
+
+You bundle these via **esbuild** (the standard for Figma plugins) and they’ll run in your sandboxed iframe just like in any modern browser.
+
+---
+
+## 3. Figma‑Side Code (code.js)
+
+No libraries needed here—use the **Figma Plugin API** directly:
+
+```ts
+figma.showUI(__html__, { width: 400, height: 600 });
+figma.ui.onmessage = async msg => {
+  if (msg.type === 'IMPORT_SPEC') {
+    const { nodes } = msg.spec;
+    for (const n of nodes) {
+      let f;
+      if (n.type === 'FRAME')         f = figma.createFrame();
+      else if (n.type === 'TEXT')     f = figma.createText();
+      else if (n.type === 'RECTANGLE')f = figma.createRectangle();
+      // …set x/y/width/height, styles, fills…
+    }
+  }
+};
+```
+
+Everything here works in **Desktop**, **Web**, and soon **Mobile**.
+
+---
+
+## 4. Packaging & Compatibility
+
+* **Bundler:** `esbuild` (zero‑config, supports modern JS, tree‑shaking, outputs a single bundle)
+* **Target:** ES2019 (supported by the Figma plugin runtime)
+* **No polyfills** needed—your code runs in a Chromium 110+ environment under the hood.
+
+Your **UI code** (the sandbox iframe) is just normal browser JS + those tiny libs. Your **plugin code** is just Figma’s API.
+
+---
+
+## TL;DR
+
+1. **Sandbox the page** in an iframe.
+2. **Use built‑in DOM & CSSOM APIs** to extract everything you need.
+3. **Optionally bundle** `css-tree` for CSS parsing and `html2canvas` for images.
+4. **Bundle with esbuild** targeting ES2019—no extra polyfills.
+5. **Figma plugin code** uses only the Figma Plugin API.
+
+That’s the **most stable, least‑friction** way to build your HTML→Figma converter entirely in‑plugin, without ever touching the Figma REST API.

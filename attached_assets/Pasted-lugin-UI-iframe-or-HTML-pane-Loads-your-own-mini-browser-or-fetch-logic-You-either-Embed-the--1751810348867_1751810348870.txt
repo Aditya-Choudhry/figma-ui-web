@@ -1,0 +1,72 @@
+lugin UI (iframe or HTML pane)
+
+Loads your own mini‑browser or fetch logic.
+
+You either:
+
+Embed the target site in a <iframe sandbox="allow-scripts allow-same-origin">, or
+
+fetch() the page HTML (via a public CORS proxy or your own server), then use DOMParser to get its DOM.
+
+You traverse that DOM, extract node info (type, bounds, styles, images as base64).
+
+Post the design spec from the UI to the plugin’s code entrypoint:
+
+js
+Copy
+Edit
+// in ui.html / ui.ts
+parent.postMessage({ pluginMessage: { type: 'IMPORT_SPEC', spec: mySpec } }, '*');
+Plugin Main Thread
+
+ts
+Copy
+Edit
+// code.ts
+figma.showUI(__html__, { width: 400, height: 600 });
+figma.ui.onmessage = async msg => {
+  if (msg.type === 'IMPORT_SPEC') {
+    const { spec } = msg;
+    for (const node of spec.nodes) {
+      // e.g. if node.type === 'TEXT'
+      const textNode = figma.createText();
+      await figma.loadFontAsync({ family: node.fontFamily, style: node.fontStyle });
+      textNode.characters = node.content;
+      textNode.x = node.x; textNode.y = node.y;
+      // …and so on for frames, rectangles, images…
+    }
+  }
+};
+No REST calls—you’re fully within the Figma plugin sandbox. All you need is:
+
+A CORS‑friendly way to fetch the page HTML (or an iframe).
+
+A parser in your UI (DOMParser, window.getComputedStyle, HTMLCanvasElement for snapshots).
+
+A message bridge to your code.js that uses only the Plugin API to create nodes.
+
+Pros & Cons
+Pros	Cons
+• No external servers or OAuth flows	• CORS restrictions may force a proxy layer
+• Works in Desktop, Web, (and future Mobile)	• You must implement all parsing yourself
+• Keeps everything in one installable plugin	• Heavier plugin UI if you embed full pages
+
+TL;DR Steps
+UI: fetch or embed target site in an iframe.
+
+UI: traverse DOM + styles → build a simplified JSON spec.
+
+UI → code: postMessage your spec.
+
+code.js: read spec, call figma.create* methods to instantiate frames, text, images.
+
+That’s your fully sandboxed, no‑REST, self‑contained HTML‑to‑Figma converter.
+
+
+
+
+
+
+
+
+Ask ChatGPT

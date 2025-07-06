@@ -274,31 +274,52 @@ async function createNodeFromElement(element) {
 }
 
 function parseColor(colorString) {
-  if (!colorString) return null;
-
-  // Handle rgb/rgba colors
-  const rgbaMatch = colorString.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-  if (rgbaMatch) {
-    const [, r, g, b, a] = rgbaMatch;
-    return {
-      r: parseInt(r) / 255,
-      g: parseInt(g) / 255,
-      b: parseInt(b) / 255
-    };
-  }
-
+  // Enhanced color parsing for CSS colors (compatible version)
+  if (!colorString) return { r: 0, g: 0, b: 0 };
+  
   // Handle hex colors
-  const hexMatch = colorString.match(/^#([a-f\d]{6})$/i);
-  if (hexMatch) {
-    const hex = hexMatch[1];
-    return {
-      r: parseInt(hex.substr(0, 2), 16) / 255,
-      g: parseInt(hex.substr(2, 2), 16) / 255,
-      b: parseInt(hex.substr(4, 2), 16) / 255
-    };
+  if (colorString.indexOf('#') === 0) {
+    const hex = colorString.substring(1);
+    if (hex.length === 6) {
+      const r = parseInt(hex.substring(0, 2), 16) / 255;
+      const g = parseInt(hex.substring(2, 4), 16) / 255;
+      const b = parseInt(hex.substring(4, 6), 16) / 255;
+      return { r: r, g: g, b: b };
+    }
   }
-
-  return null;
+  
+  // Handle rgb/rgba colors - use indexOf instead of modern regex
+  if (colorString.indexOf('rgb') === 0) {
+    const start = colorString.indexOf('(');
+    const end = colorString.indexOf(')');
+    if (start !== -1 && end !== -1) {
+      const values = colorString.substring(start + 1, end).split(',');
+      if (values.length >= 3) {
+        return {
+          r: parseInt(values[0].trim()) / 255,
+          g: parseInt(values[1].trim()) / 255,
+          b: parseInt(values[2].trim()) / 255
+        };
+      }
+    }
+  }
+  
+  // Handle named colors (basic set)
+  const namedColors = {
+    'black': { r: 0, g: 0, b: 0 },
+    'white': { r: 1, g: 1, b: 1 },
+    'red': { r: 1, g: 0, b: 0 },
+    'green': { r: 0, g: 1, b: 0 },
+    'blue': { r: 0, g: 0, b: 1 },
+    'transparent': { r: 0, g: 0, b: 0 }
+  };
+  
+  const lowerColor = colorString.toLowerCase();
+  if (namedColors[lowerColor]) {
+    return namedColors[lowerColor];
+  }
+  
+  return { r: 0, g: 0, b: 0 };
 }
 
 async function createAdvancedNodeFromElement(element) {
@@ -539,7 +560,7 @@ function extractDomainName(url) {
   try {
     const domain = new URL(url).hostname;
     return domain.replace('www.', '').split('.')[0];
-  } catch {
+  } catch (error) {
     return 'Website';
   }
 }
@@ -651,41 +672,7 @@ function mapTextAlign(textAlign) {
   return alignMap[textAlign] || 'LEFT';
 }
 
-function parseColor(colorString) {
-  // Enhanced color parsing for CSS colors
-  if (!colorString) return { r: 0, g: 0, b: 0 };
-  
-  // Handle hex colors
-  if (colorString.startsWith('#')) {
-    const hex = colorString.substring(1);
-    const r = parseInt(hex.substring(0, 2), 16) / 255;
-    const g = parseInt(hex.substring(2, 4), 16) / 255;
-    const b = parseInt(hex.substring(4, 6), 16) / 255;
-    return { r, g, b };
-  }
-  
-  // Handle rgb/rgba colors
-  const rgbMatch = colorString.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)(?:,\\s*([\\d.]+))?\\)/);
-  if (rgbMatch) {
-    return {
-      r: parseInt(rgbMatch[1]) / 255,
-      g: parseInt(rgbMatch[2]) / 255,
-      b: parseInt(rgbMatch[3]) / 255
-    };
-  }
-  
-  // Handle named colors (basic set)
-  const namedColors = {
-    'black': { r: 0, g: 0, b: 0 },
-    'white': { r: 1, g: 1, b: 1 },
-    'red': { r: 1, g: 0, b: 0 },
-    'green': { r: 0, g: 1, b: 0 },
-    'blue': { r: 0, g: 0, b: 1 },
-    'transparent': { r: 0, g: 0, b: 0 }
-  };
-  
-  return namedColors[colorString.toLowerCase()] || { r: 0, g: 0, b: 0 };
-}
+
 
 function mapJustifyContent(justifyContent) {
   const justifyMap = {

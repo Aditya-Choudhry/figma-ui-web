@@ -9,15 +9,12 @@ class PopupController {
         this.capturedInfo = document.getElementById('capturedInfo');
         
         this.capturedData = null;
-        
         this.init();
     }
     
     init() {
         this.captureBtn.addEventListener('click', () => this.captureWebsite());
         this.exportBtn.addEventListener('click', () => this.exportToFigma());
-        
-        // Check if we have previously captured data
         this.loadCapturedData();
     }
     
@@ -36,21 +33,19 @@ class PopupController {
     
     async captureWebsite() {
         try {
-            console.log('🔄 POPUP: Starting capture process...');
+            console.log('Starting capture process...');
             this.updateStatus('Initializing capture...', 'loading');
             this.showProgress(0);
             this.captureBtn.disabled = true;
             
-            // Get active tab
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             
             if (!tab) {
                 throw new Error('No active tab found');
             }
             
-            console.log('✅ POPUP: Active tab found:', tab.url);
+            console.log('Active tab found:', tab.url);
             
-            // Check if we can access this tab
             if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
                 throw new Error('Cannot capture browser internal pages. Please navigate to a regular website.');
             }
@@ -58,14 +53,13 @@ class PopupController {
             this.updateStatus('Analyzing page structure...', 'loading');
             this.showProgress(20);
             
-            // Inject capture script directly
-            console.log('🔄 POPUP: Injecting capture function...');
+            console.log('Injecting capture function...');
             const results = await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 func: this.capturePageFunction
             });
             
-            console.log('📋 POPUP: Script execution results:', results);
+            console.log('Script execution results:', results);
             
             if (!results || !results[0]) {
                 throw new Error('Script injection failed - no results returned');
@@ -85,7 +79,6 @@ class PopupController {
             const rawData = results[0].result;
             this.capturedData = this.processCapturedData(rawData);
             
-            // Save to storage
             await chrome.storage.local.set({ capturedData: this.capturedData });
             
             this.showProgress(100);
@@ -101,144 +94,142 @@ class PopupController {
         }
     }
     
-    // This function will be injected directly into the page
     capturePageFunction() {
         try {
-            console.log('🔄 Capture function executing...');
+            console.log('Capture function executing...');
             
             class PageCapture {
-            constructor() {
-                this.elements = [];
-                this.images = [];
-                this.textStyles = new Map();
-                this.colors = new Set();
-                this.fonts = new Set();
-            }
-            
-            capture() {
-                try {
-                    const body = document.body;
-                    const html = document.documentElement;
+                constructor() {
+                    this.elements = [];
+                    this.images = [];
+                    this.textStyles = new Map();
+                    this.colors = new Set();
+                    this.fonts = new Set();
+                }
+                
+                capture() {
+                    try {
+                        const body = document.body;
+                        const html = document.documentElement;
+                        
+                        const pageData = {
+                            url: window.location.href,
+                            title: document.title,
+                            viewport: {
+                                width: window.innerWidth,
+                                height: window.innerHeight
+                            },
+                            scrollSize: {
+                                width: Math.max(body.scrollWidth, html.scrollWidth),
+                                height: Math.max(body.scrollHeight, html.scrollHeight)
+                            }
+                        };
+                        
+                        this.traverseElement(body, 0);
+                        
+                        return {
+                            page: pageData,
+                            elements: this.elements,
+                            images: this.images,
+                            textStyles: Array.from(this.textStyles.entries()),
+                            colors: Array.from(this.colors),
+                            fonts: Array.from(this.fonts)
+                        };
+                    } catch (error) {
+                        console.error('Capture error:', error);
+                        throw error;
+                    }
+                }
+                
+                traverseElement(element, depth) {
+                    if (!element || element.nodeType !== Node.ELEMENT_NODE) return;
                     
-                    const pageData = {
-                        url: window.location.href,
-                        title: document.title,
-                        viewport: {
-                            width: window.innerWidth,
-                            height: window.innerHeight
-                        },
-                        scrollSize: {
-                            width: Math.max(body.scrollWidth, html.scrollWidth),
-                            height: Math.max(body.scrollHeight, html.scrollHeight)
-                        }
+                    const skipTags = ['SCRIPT', 'STYLE', 'META', 'LINK', 'TITLE', 'HEAD'];
+                    if (skipTags.includes(element.tagName)) return;
+                    
+                    const computedStyle = window.getComputedStyle(element);
+                    if (computedStyle.display === 'none' || 
+                        computedStyle.visibility === 'hidden' ||
+                        computedStyle.opacity === '0') return;
+                    
+                    const rect = element.getBoundingClientRect();
+                    if (rect.width === 0 && rect.height === 0) return;
+                    
+                    const elementData = this.extractElementData(element, computedStyle, rect, depth);
+                    this.elements.push(elementData);
+                    
+                    for (const child of element.children) {
+                        this.traverseElement(child, depth + 1);
+                    }
+                }
+                
+                extractElementData(element, style, rect, depth) {
+                    const id = `element_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    
+                    const layout = {
+                        x: rect.left + window.scrollX,
+                        y: rect.top + window.scrollY,
+                        width: rect.width,
+                        height: rect.height,
+                        zIndex: style.zIndex !== 'auto' ? parseInt(style.zIndex) : depth
                     };
                     
-                    this.traverseElement(body, 0);
+                    const visual = {
+                        backgroundColor: style.backgroundColor,
+                        color: style.color,
+                        borderRadius: style.borderRadius,
+                        border: {
+                            width: style.borderWidth,
+                            style: style.borderStyle,
+                            color: style.borderColor
+                        },
+                        opacity: parseFloat(style.opacity) || 1
+                    };
+                    
+                    const typography = {
+                        fontFamily: style.fontFamily,
+                        fontSize: style.fontSize,
+                        fontWeight: style.fontWeight,
+                        lineHeight: style.lineHeight,
+                        textAlign: style.textAlign
+                    };
+                    
+                    // Collect styles
+                    if (visual.backgroundColor && visual.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+                        this.colors.add(visual.backgroundColor);
+                    }
+                    if (visual.color) {
+                        this.colors.add(visual.color);
+                    }
+                    if (typography.fontFamily) {
+                        this.fonts.add(typography.fontFamily);
+                    }
                     
                     return {
-                        page: pageData,
-                        elements: this.elements,
-                        images: this.images,
-                        textStyles: Array.from(this.textStyles.entries()),
-                        colors: Array.from(this.colors),
-                        fonts: Array.from(this.fonts)
+                        id,
+                        tagName: element.tagName.toLowerCase(),
+                        className: element.className || '',
+                        textContent: element.textContent ? element.textContent.trim().substring(0, 200) : '',
+                        layout,
+                        visual,
+                        typography,
+                        depth
                     };
-                } catch (error) {
-                    console.error('Capture error:', error);
-                    throw error;
                 }
             }
             
-            traverseElement(element, depth) {
-                if (!element || element.nodeType !== Node.ELEMENT_NODE) return;
-                
-                const skipTags = ['SCRIPT', 'STYLE', 'META', 'LINK', 'TITLE', 'HEAD'];
-                if (skipTags.includes(element.tagName)) return;
-                
-                const computedStyle = window.getComputedStyle(element);
-                if (computedStyle.display === 'none' || 
-                    computedStyle.visibility === 'hidden' ||
-                    computedStyle.opacity === '0') return;
-                
-                const rect = element.getBoundingClientRect();
-                if (rect.width === 0 && rect.height === 0) return;
-                
-                const elementData = this.extractElementData(element, computedStyle, rect, depth);
-                this.elements.push(elementData);
-                
-                for (const child of element.children) {
-                    this.traverseElement(child, depth + 1);
-                }
-            }
+            const capture = new PageCapture();
+            const result = capture.capture();
+            console.log('Capture completed successfully:', result);
+            return result;
             
-            extractElementData(element, style, rect, depth) {
-                const id = `element_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                
-                const layout = {
-                    x: rect.left + window.scrollX,
-                    y: rect.top + window.scrollY,
-                    width: rect.width,
-                    height: rect.height,
-                    zIndex: style.zIndex !== 'auto' ? parseInt(style.zIndex) : depth
-                };
-                
-                const visual = {
-                    backgroundColor: style.backgroundColor,
-                    color: style.color,
-                    borderRadius: style.borderRadius,
-                    border: {
-                        width: style.borderWidth,
-                        style: style.borderStyle,
-                        color: style.borderColor
-                    },
-                    opacity: parseFloat(style.opacity) || 1
-                };
-                
-                const typography = {
-                    fontFamily: style.fontFamily,
-                    fontSize: style.fontSize,
-                    fontWeight: style.fontWeight,
-                    lineHeight: style.lineHeight,
-                    textAlign: style.textAlign
-                };
-                
-                // Collect styles
-                if (visual.backgroundColor && visual.backgroundColor !== 'rgba(0, 0, 0, 0)') {
-                    this.colors.add(visual.backgroundColor);
-                }
-                if (visual.color) {
-                    this.colors.add(visual.color);
-                }
-                if (typography.fontFamily) {
-                    this.fonts.add(typography.fontFamily);
-                }
-                
-                return {
-                    id,
-                    tagName: element.tagName.toLowerCase(),
-                    className: element.className || '',
-                    textContent: element.textContent ? element.textContent.trim().substring(0, 200) : '',
-                    layout,
-                    visual,
-                    typography,
-                    depth
-                };
-            }
-        }
-        
-        const capture = new PageCapture();
-        const result = capture.capture();
-        console.log('✅ Capture completed successfully:', result);
-        return result;
-        
         } catch (error) {
-            console.error('❌ Capture function error:', error);
+            console.error('Capture function error:', error);
             throw new Error(`DOM capture failed: ${error.message}`);
         }
     }
     
     processCapturedData(rawData) {
-        // Simple Figma format conversion
         return {
             name: rawData.page.title || 'Captured Website',
             type: 'FRAME',

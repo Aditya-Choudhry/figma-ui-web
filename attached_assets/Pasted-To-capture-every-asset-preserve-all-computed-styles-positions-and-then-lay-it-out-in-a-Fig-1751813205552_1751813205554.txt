@@ -1,0 +1,124 @@
+To capture **every asset**, preserve **all computed styles/positions**, and then lay it out in a Figma frame exactly as it appears on a 1440 px‑wide desktop, you need to do three things:
+
+1. **In your sandboxed iframe**:
+
+   * Traverse the DOM, for each element
+
+     * Compute its bounding rect (`getBoundingClientRect()`)
+     * Read its computed style (`getComputedStyle()`)
+     * If it’s an `<img>` (or background‑image), fetch that URL as a blob/Base64
+   * Build a JSON spec like:
+
+     ```js
+     {
+       tag: "DIV",
+       x: 120, y: 80,
+       width: 300, height: 200,
+       styles: {
+         backgroundColor: "#fff",
+         borderRadius: "8px",
+         transform: "rotate(3deg)",
+         /* …all other computed style props… */
+       },
+       assets: [
+         { type: "image", src: "data:image/png;base64,..." }
+       ],
+       children: [ /* nested specs */ ]
+     }
+     ```
+
+2. **Scale coordinates/css to your target frame width** (1440 px):
+
+   ```js
+   const desktopWidth = 1440;
+   const actualPageWidth = document.documentElement.scrollWidth;
+   const scale = desktopWidth / actualPageWidth;
+
+   function scaleSpec(node) {
+     node.x *= scale;
+     node.y *= scale;
+     node.width  *= scale;
+     node.height *= scale;
+     // If you have translate/rotate in styles, you can apply scale there too.
+     node.children.forEach(scaleSpec);
+   }
+   scaleSpec(rootSpec);
+   ```
+
+3. **In your plugin’s main thread**:
+
+   ```ts
+   figma.showUI(__html__);
+   figma.ui.onmessage = async msg => {
+     if (msg.type === 'IMPORT_SPEC') {
+       const spec = msg.spec;
+
+       // 1) Create a top‑level frame at 0,0 with width=1440, height=scaledPageHeight
+       const desktopFrame = figma.createFrame();
+       desktopFrame.resize(1440, spec.height * scale); 
+       desktopFrame.name = 'Desktop – 1440px';
+       
+       // 2) Recursively build children
+       async function build(nodeSpec, parent) {
+         let node;
+         if (nodeSpec.tag === 'IMG' && nodeSpec.assets.length) {
+           const imgBytes = await fetch(nodeSpec.assets[0].src).then(r => r.arrayBuffer());
+           const paint = figma.createImage(new Uint8Array(imgBytes)).hash;
+           node = figma.createRectangle();
+           node.fills = [{ type: 'IMAGE', scaleMode: 'FILL', imageHash: paint }];
+         } else if (nodeSpec.tag.match(/^H[1-6]$/) || nodeSpec.tag === 'P') {
+           await figma.loadFontAsync({ family: nodeSpec.styles.fontFamily, style: nodeSpec.styles.fontWeight.toString() });
+           node = figma.createText();
+           node.characters = nodeSpec.content || '';
+           Object.assign(node, {
+             fontSize: parseFloat(nodeSpec.styles.fontSize),
+             fontName: { family: nodeSpec.styles.fontFamily, style: nodeSpec.styles.fontWeight }
+           });
+         } else {
+           node = figma.createRectangle(); // fallback container
+           node.fills = [{ type: 'SOLID', color: hexToRgb(nodeSpec.styles.backgroundColor) }];
+         }
+
+         node.x = nodeSpec.x;
+         node.y = nodeSpec.y;
+         node.resize(nodeSpec.width, nodeSpec.height);
+
+         // Apply other styles: borderRadius, rotation, etc.
+         if (nodeSpec.styles.borderRadius)
+           node.cornerRadius = parseFloat(nodeSpec.styles.borderRadius);
+         if (nodeSpec.styles.transform) {
+           const match = /rotate\(([-\d.]+)deg\)/.exec(nodeSpec.styles.transform);
+           if (match) node.rotation = parseFloat(match[1]);
+         }
+
+         parent.appendChild(node);
+
+         // Recurse
+         for (const child of nodeSpec.children || []) {
+           await build(child, node);
+         }
+       }
+
+       await build(spec, desktopFrame);
+       figma.viewport.scrollAndZoomIntoView([desktopFrame]);
+     }
+   };
+   ```
+
+---
+
+### Summary of the flow
+
+1. **Sandbox UI**
+
+   * Load a page in `<iframe>`
+   * Walk its DOM → produce a fully‑detailed JSON spec (coords, styles, assets in base64)
+   * Scale all coordinates by `(1440 / actualPageWidth)`
+
+2. **Figma Plugin Code**
+
+   * Receive that JSON
+   * Create a `Frame` sized to 1440 px wide
+   * Recursively instantiate nodes (`createRectangle`, `createText`, etc.), setting `.x, .y, .resize()`, `.fills`, `.cornerRadius`, `.rotation`— exactly as on the site
+
+That gives you a **pixel‑perfect recreation** of the desktop design at 1440 px, with all images and animations (if you capture transforms) faithfully reproduced.

@@ -1,0 +1,21 @@
+Figma plugin loaded
+VM1493:2 UI loaded
+2
+vendor-core-0d625320…ea4067.min.js.br:77 [Local fonts] using agent
+Refused to frame 'https://example.com/' because it violates the following Content Security Policy directive: "default-src data: blob: http://localhost:5000 https://website-capture-server.replit.app". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+VM1489:75 Failed to load resource from https://example.com since it is not in the list of allowed domains. Please add "https://example.com" to the networkAccess > allowedDomains field in your manifest.json.
+VM1493:168 CORS restriction, using mock data: SecurityError: Failed to read a named property 'document' from 'Window': Blocked a frame with origin "null" from accessing a cross-origin frame.
+Refused to frame 'https://example.com/' because it violates the following Content Security Policy directive: "default-src data: blob: http://localhost:5000 https://website-capture-server.replit.app". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+VM1489:75 Failed to load resource from https://example.com since it is not in the list of allowed domains. Please add "https://example.com" to the networkAccess > allowedDomains field in your manifest.json.
+VM1493:168 CORS restriction, using mock data: SecurityError: Failed to read a named property 'document' from 'Window': Blocked a frame with origin "null" from accessing a cross-origin frame.
+Refused to frame 'https://example.com/' because it violates the following Content Security Policy directive: "default-src data: blob: http://localhost:5000 https://website-capture-server.replit.app". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+VM1489:75 Failed to load resource from https://example.com since it is not in the list of allowed domains. Please add "https://example.com" to the networkAccess > allowedDomains field in your manifest.json.
+VM1493:168 CORS restriction, using mock data: SecurityError: Failed to read a named property 'document' from 'Window': Blocked a frame with origin "null" from accessing a cross-origin frame.
+vendor-core-0d625320…ea4067.min.js.br:77 Received message: 
+{type: 'sandboxCaptureComplete', data: {…}}
+vendor-core-0d625320…ea4067.min.js.br:77 Received sandbox capture data: 
+{url: 'https://example.com', capture_time: 1751811570.267, total_viewports: 3, viewports: {…}}
+vendor-core-0d625320…ea4067.min.js.br:77 Creating responsive Figma layouts...
+vendor-core-0d625320…ea4067.min.js.br:77 Creating layout for desktop...
+vendor-core-0d625320…ea4067.min.js.br:77 Sandbox capture processing error: 
+TypeError {message: "cannot read property 'device' of undefined", stack: '    at createResponsiveFigmaLayouts (PLUGIN_13_SOURCE:141)\n    at <anonymous> (PLUGIN_13_SOURCE:16)\n'}

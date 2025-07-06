@@ -133,8 +133,21 @@ async function createResponsiveFigmaLayouts(data) {
   // Create layout for each viewport
   for (const [viewportName, viewportData] of Object.entries(viewports)) {
     console.log(`Creating layout for ${viewportName}...`);
+    
+    // Validate viewport data structure
+    if (!viewportData || !viewportData.device) {
+      console.warn(`Skipping invalid viewport data for ${viewportName}:`, viewportData);
+      continue;
+    }
 
-    const { page, elements, viewport_config } = viewportData;
+    // Extract data with fallbacks for missing properties
+    const page = viewportData.page || {};
+    const elements = viewportData.elements || [];
+    const viewport_config = {
+      device: viewportData.device,
+      width: viewportData.viewport ? viewportData.viewport.width : 1440,
+      height: viewportData.viewport ? viewportData.viewport.height : 900
+    };
 
     // Create viewport frame
     const viewportFrame = figma.createFrame();

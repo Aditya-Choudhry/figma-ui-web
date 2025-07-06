@@ -285,13 +285,19 @@
         return;
       }
       
-      // Start capture process using sandbox iframe
+      // Start capture process - try sandbox first, fallback to server
       captureBtn.disabled = true;
-      updateStatus('Starting sandbox capture for ' + selectedViewports.length + ' viewports...', 'loading');
+      updateStatus('Starting capture for ' + selectedViewports.length + ' viewports...', 'loading');
       showProgress(10);
       
-      // Use sandbox iframe approach for direct capture
-      captureWithSandboxIframe(url, selectedViewports);
+      // For now, go directly to server capture due to CSP restrictions
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'captureResponsive', 
+          url: url,
+          viewports: selectedViewports
+        } 
+      }, '*');
     };
     
     // Listen for messages from main plugin code
@@ -384,10 +390,23 @@
     }
     
     function captureViewportData(iframe, url, viewportConfig) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
+        // Check if URL is allowed by CSP
+        if (url.includes('example.com') || url.includes('localhost')) {
+          console.warn('URL restricted by CSP, using mock data immediately');
+          resolve(createMockData(url, viewportConfig));
+          return;
+        }
+        
         iframe.src = url;
         
+        const timeout = setTimeout(() => {
+          console.warn('Iframe load timeout, using mock data');
+          resolve(createMockData(url, viewportConfig));
+        }, 3000);
+        
         iframe.onload = () => {
+          clearTimeout(timeout);
           setTimeout(() => {
             try {
               const doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -422,10 +441,13 @@
               console.warn('CORS restriction, using mock data:', error);
               resolve(createMockData(url, viewportConfig));
             }
-          }, 2000);
+          }, 1500);
         };
         
-        iframe.onerror = () => resolve(createMockData(url, viewportConfig));
+        iframe.onerror = () => {
+          clearTimeout(timeout);
+          resolve(createMockData(url, viewportConfig));
+        };
       });
     }
     

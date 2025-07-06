@@ -5,11 +5,8 @@
   "main": "code.js",
   "ui": "ui.html",
   "networkAccess": {
-    "allowedDomains": [
-      "http://localhost:5000",
-      "https://website-capture-server.replit.app"
-    ],
-    "reasoning": "To fetch website content from an external server for design conversion and layout extraction."
+    "allowedDomains": ["*"],
+    "reasoning": "To capture any website content for conversion to Figma designs using sandbox iframe approach."
   },
   "editorType": ["figma"],
   "capabilities": []

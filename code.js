@@ -329,17 +329,17 @@ function determineAdvancedNodeType(element) {
   const { tagName, layout_detection, visual_hierarchy } = element;
   
   // Text nodes - only pure text content
-  if (layout_detection?.isTextNode && element.textContent?.trim()) {
+  if (layout_detection && layout_detection.isTextNode && element.textContent && element.textContent.trim()) {
     return 'TEXT';
   }
   
   // Image nodes
-  if (layout_detection?.isImageElement || element.attributes?.src) {
+  if ((layout_detection && layout_detection.isImageElement) || (element.attributes && element.attributes.src)) {
     return 'IMAGE';
   }
   
   // Interactive components (buttons, inputs)
-  if (layout_detection?.isInputElement || visual_hierarchy?.isInteractive) {
+  if ((layout_detection && layout_detection.isInputElement) || (visual_hierarchy && visual_hierarchy.isInteractive)) {
     return 'COMPONENT';
   }
   
@@ -351,8 +351,8 @@ async function createPreciseTextNode(element) {
   const textNode = figma.createText();
   
   // Load font before setting properties
-  const fontFamily = mapWebFontToFigma(element.typography?.fontFamily || 'Arial');
-  const fontWeight = mapFontWeight(element.typography?.fontWeight || '400');
+  const fontFamily = mapWebFontToFigma((element.typography && element.typography.fontFamily) || 'Arial');
+  const fontWeight = mapFontWeight((element.typography && element.typography.fontWeight) || '400');
   
   try {
     await figma.loadFontAsync({ family: fontFamily, style: fontWeight });
@@ -362,30 +362,30 @@ async function createPreciseTextNode(element) {
   }
   
   // Set text content
-  textNode.characters = element.textContent?.trim() || element.innerText?.trim() || '';
+  textNode.characters = (element.textContent && element.textContent.trim()) || (element.innerText && element.innerText.trim()) || '';
   
   // Apply precise typography
   textNode.fontName = { family: fontFamily, style: fontWeight };
-  textNode.fontSize = Math.max(element.typography?.fontSize || 16, 8);
-  textNode.lineHeight = parseLineHeight(element.typography?.lineHeight);
-  textNode.letterSpacing = parseLetterSpacing(element.typography?.letterSpacing);
+  textNode.fontSize = Math.max((element.typography && element.typography.fontSize) || 16, 8);
+  textNode.lineHeight = parseLineHeight(element.typography && element.typography.lineHeight);
+  textNode.letterSpacing = parseLetterSpacing(element.typography && element.typography.letterSpacing);
   
   // Text alignment
-  const textAlign = element.typography?.textAlign || 'left';
+  const textAlign = (element.typography && element.typography.textAlign) || 'left';
   textNode.textAlignHorizontal = mapTextAlign(textAlign);
   
   // Text color
   textNode.fills = [{ 
     type: 'SOLID', 
-    color: parseColor(element.typography?.color || '#000000') 
+    color: parseColor((element.typography && element.typography.color) || '#000000') 
   }];
   
   // Position and size
-  textNode.x = element.position?.x || 0;
-  textNode.y = element.position?.y || 0;
+  textNode.x = (element.position && element.position.x) || 0;
+  textNode.y = (element.position && element.position.y) || 0;
   textNode.resize(
-    Math.max(element.position?.width || 100, 20),
-    Math.max(element.position?.height || 20, 10)
+    Math.max((element.position && element.position.width) || 100, 20),
+    Math.max((element.position && element.position.height) || 20, 10)
   );
   
   // Auto resize
@@ -402,16 +402,16 @@ async function createPreciseImageNode(element) {
   
   // Set dimensions
   frame.resize(
-    Math.max(element.position?.width || 100, 20),
-    Math.max(element.position?.height || 100, 20)
+    Math.max((element.position && element.position.width) || 100, 20),
+    Math.max((element.position && element.position.height) || 100, 20)
   );
   
   // Position
-  frame.x = element.position?.x || 0;
-  frame.y = element.position?.y || 0;
+  frame.x = (element.position && element.position.x) || 0;
+  frame.y = (element.position && element.position.y) || 0;
   
   // Apply background if it's a background-image
-  if (element.visual?.backgroundImages?.length > 0) {
+  if (element.visual && element.visual.backgroundImages && element.visual.backgroundImages.length > 0) {
     // For now, create a placeholder - in production, you'd fetch and apply the image
     frame.fills = [{ 
       type: 'SOLID', 
@@ -421,7 +421,7 @@ async function createPreciseImageNode(element) {
     // Add a text node indicating it's an image
     const imageLabel = figma.createText();
     await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-    imageLabel.characters = `🖼️ ${element.attributes?.alt || 'Image'}`;
+    imageLabel.characters = '🖼️ ' + ((element.attributes && element.attributes.alt) || 'Image');
     imageLabel.fontSize = 12;
     imageLabel.fills = [{ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }];
     imageLabel.textAlignHorizontal = 'CENTER';
@@ -441,29 +441,29 @@ async function createComponentNode(element) {
   
   // Set dimensions
   frame.resize(
-    Math.max(element.position?.width || 100, 20),
-    Math.max(element.position?.height || 40, 20)
+    Math.max((element.position && element.position.width) || 100, 20),
+    Math.max((element.position && element.position.height) || 40, 20)
   );
   
   // Position
-  frame.x = element.position?.x || 0;
-  frame.y = element.position?.y || 0;
+  frame.x = (element.position && element.position.x) || 0;
+  frame.y = (element.position && element.position.y) || 0;
   
   // Apply styling
   frame.fills = [{ 
     type: 'SOLID', 
-    color: parseColor(element.visual?.backgroundColor || '#f0f0f0') 
+    color: parseColor((element.visual && element.visual.backgroundColor) || '#f0f0f0') 
   }];
   
   // Add component indicator
-  if (element.textContent?.trim()) {
+  if (element.textContent && element.textContent.trim()) {
     const componentText = figma.createText();
     await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
     componentText.characters = element.textContent.trim();
-    componentText.fontSize = element.typography?.fontSize || 14;
+    componentText.fontSize = (element.typography && element.typography.fontSize) || 14;
     componentText.fills = [{ 
       type: 'SOLID', 
-      color: parseColor(element.typography?.color || '#000000') 
+      color: parseColor((element.typography && element.typography.color) || '#000000') 
     }];
     frame.appendChild(componentText);
   }
@@ -480,16 +480,16 @@ async function createPreciseFrameNode(element) {
   
   // Set precise dimensions
   frame.resize(
-    Math.max(element.position?.width || 100, 1),
-    Math.max(element.position?.height || 20, 1)
+    Math.max((element.position && element.position.width) || 100, 1),
+    Math.max((element.position && element.position.height) || 20, 1)
   );
   
   // Position
-  frame.x = element.position?.x || 0;
-  frame.y = element.position?.y || 0;
+  frame.x = (element.position && element.position.x) || 0;
+  frame.y = (element.position && element.position.y) || 0;
   
   // Apply Auto Layout if it's a flex container
-  if (element.layout_detection?.isFlexContainer && element.layout_detection?.flexboxMapping) {
+  if (element.layout_detection && element.layout_detection.isFlexContainer && element.layout_detection.flexboxMapping) {
     const flexMapping = element.layout_detection.flexboxMapping;
     
     frame.layoutMode = flexMapping.figmaLayoutMode || 'HORIZONTAL';
@@ -509,7 +509,7 @@ async function createPreciseFrameNode(element) {
   }
   
   // Apply background color
-  if (element.visual?.backgroundColor && element.visual.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+  if (element.visual && element.visual.backgroundColor && element.visual.backgroundColor !== 'rgba(0, 0, 0, 0)') {
     frame.fills = [{ 
       type: 'SOLID', 
       color: parseColor(element.visual.backgroundColor) 
@@ -528,7 +528,7 @@ async function createPreciseFrameNode(element) {
   applyEffects(frame, element.visual);
   
   // Apply opacity
-  if (element.visual?.opacity !== undefined && element.visual.opacity < 1) {
+  if (element.visual && element.visual.opacity !== undefined && element.visual.opacity < 1) {
     frame.opacity = Math.max(element.visual.opacity, 0.01);
   }
   
@@ -717,7 +717,7 @@ function mapAlignItems(alignItems) {
 }
 
 function applyBorderRadius(node, visual) {
-  if (!visual || !node.cornerRadius === undefined) return;
+  if (!visual || node.cornerRadius === undefined) return;
   
   const radius = parseFloat(visual.borderTopLeftRadius) || 0;
   if (radius > 0) {
@@ -726,7 +726,7 @@ function applyBorderRadius(node, visual) {
 }
 
 function applyBorders(node, visual) {
-  if (!visual || !node.strokes === undefined) return;
+  if (!visual || node.strokes === undefined) return;
   
   const borderWidth = visual.borderTopWidth || 0;
   if (borderWidth > 0) {

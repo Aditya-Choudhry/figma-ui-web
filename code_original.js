@@ -166,15 +166,15 @@ function createResponsiveFigmaLayouts(data) {
 
     mainSection.appendChild(viewportFrame);
 
-    // Create elements with asset support
-    return createElementsInFrame(viewportFrame, elements, assets);
-
     // Add metadata as comments
     if (assets.length > 0) {
       const assetComment = `Assets captured: ${assets.length} images\nScale factor: ${scaleFactor}\nOriginal width: ${page.actual_width || frameWidth}px`;
       // Note: figma.createComment is not available in plugins, but we can add this info to frame name
       viewportFrame.name += ` (${assets.length} assets)`;
     }
+
+    // Create elements with asset support
+    createElementsInFrame(viewportFrame, elements, assets);
 
     // Update X position for next frame
     currentX += frameWidth + frameSpacing;
@@ -186,6 +186,9 @@ function createResponsiveFigmaLayouts(data) {
   figma.viewport.scrollAndZoomIntoView([mainSection]);
 
   console.log(`Created pixel-perfect layouts for ${Object.keys(viewports).length} viewports with comprehensive asset support`);
+  
+  resolve();
+  });
 }
 
 async function createElementsInFrame(parentFrame, elements, assets) {

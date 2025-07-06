@@ -287,7 +287,7 @@
       
       // Start capture process using sandbox iframe
       captureBtn.disabled = true;
-      updateStatus(`Starting sandbox capture for ${selectedViewports.length} viewports...`, 'loading');
+      updateStatus('Starting sandbox capture for ' + selectedViewports.length + ' viewports...', 'loading');
       showProgress(10);
       
       // Use sandbox iframe approach for direct capture
@@ -345,7 +345,7 @@
           const progress = ((i + 1) / viewports.length) * 80 + 10;
           
           showProgress(progress);
-          updateStatus(\`Capturing \${viewport} viewport...\`, 'loading');
+          updateStatus('Capturing ' + viewport + ' viewport...', 'loading');
           
           const viewportConfig = getViewportConfig(viewport);
           captureFrame.style.width = viewportConfig.width + 'px';
@@ -371,7 +371,7 @@
         setTimeout(() => {
           hideProgress();
           captureBtn.disabled = false;
-          updateStatus(\`Sandbox capture complete! Created \${viewports.length} layouts.\`, 'success');
+          updateStatus('Sandbox capture complete! Created ' + viewports.length + ' layouts.', 'success');
         }, 1000);
         
       } catch (error) {
@@ -478,10 +478,10 @@
         device: viewportConfig.device,
         viewport: { width: viewportConfig.width, height: viewportConfig.height },
         url: url,
-        page: { title: \`\${viewportConfig.device} - \${url}\`, url: url, viewport_width: viewportConfig.width, viewport_height: viewportConfig.height, device_pixel_ratio: 1 },
+        page: { title: viewportConfig.device + ' - ' + url, url: url, viewport_width: viewportConfig.width, viewport_height: viewportConfig.height, device_pixel_ratio: 1 },
         elements: [
-          { tagName: 'DIV', className: 'container', textContent: \`Sandbox capture for \${viewportConfig.device}\`, position: { x: 0, y: 0, width: viewportConfig.width, height: 100 }, visual: { backgroundColor: '#ffffff', color: '#333333', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }, typography: { fontFamily: 'Arial, sans-serif', fontSize: '16px', fontWeight: '400', lineHeight: '1.5', textAlign: 'left', color: '#333333' }, layout_detection: { isTextNode: true, isFlexContainer: false, isGridContainer: false }, visual_hierarchy: { zIndex: 1, depth: 1 } },
-          { tagName: 'H1', className: 'title', textContent: \`\${viewportConfig.device} Title\`, position: { x: 20, y: 20, width: viewportConfig.width - 40, height: 40 }, visual: { backgroundColor: 'transparent', color: '#2563eb', borderRadius: '0px' }, typography: { fontFamily: 'Arial, sans-serif', fontSize: '24px', fontWeight: '700', lineHeight: '1.2', textAlign: 'left', color: '#2563eb' }, layout_detection: { isTextNode: true, isFlexContainer: false, isGridContainer: false }, visual_hierarchy: { zIndex: 2, depth: 2 } }
+          { tagName: 'DIV', className: 'container', textContent: 'Sandbox capture for ' + viewportConfig.device, position: { x: 0, y: 0, width: viewportConfig.width, height: 100 }, visual: { backgroundColor: '#ffffff', color: '#333333', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }, typography: { fontFamily: 'Arial, sans-serif', fontSize: '16px', fontWeight: '400', lineHeight: '1.5', textAlign: 'left', color: '#333333' }, layout_detection: { isTextNode: true, isFlexContainer: false, isGridContainer: false }, visual_hierarchy: { zIndex: 1, depth: 1 } },
+          { tagName: 'H1', className: 'title', textContent: viewportConfig.device + ' Title', position: { x: 20, y: 20, width: viewportConfig.width - 40, height: 40 }, visual: { backgroundColor: 'transparent', color: '#2563eb', borderRadius: '0px' }, typography: { fontFamily: 'Arial, sans-serif', fontSize: '24px', fontWeight: '700', lineHeight: '1.2', textAlign: 'left', color: '#2563eb' }, layout_detection: { isTextNode: true, isFlexContainer: false, isGridContainer: false }, visual_hierarchy: { zIndex: 2, depth: 2 } }
         ],
         text_styles: [{ fontFamily: 'Arial, sans-serif', fontSize: '16px', fontWeight: '400', color: '#333333' }, { fontFamily: 'Arial, sans-serif', fontSize: '24px', fontWeight: '700', color: '#2563eb' }],
         colors: ['#ffffff', '#333333', '#2563eb'],

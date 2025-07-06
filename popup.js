@@ -116,7 +116,7 @@ class PopupController {
                 console.log('📥 POPUP: Received response from content script:', response);
                 
                 if (!response || !response.success) {
-                    throw new Error(response?.error || 'Failed to capture page data');
+                    throw new Error((response && response.error) || 'Failed to capture page data');
                 }
                 
                 this.updateStatus('Processing elements...', 'loading');
@@ -124,8 +124,8 @@ class PopupController {
                 
                 const capturedData = response.data;
                 console.log('✅ POPUP: Captured data received:', {
-                    elements: capturedData?.elements?.length,
-                    images: capturedData?.images?.length
+                    elements: (capturedData && capturedData.elements && capturedData.elements.length) || 0,
+                    images: (capturedData && capturedData.images && capturedData.images.length) || 0
                 });
                 
             } catch (messageError) {
@@ -152,7 +152,7 @@ class PopupController {
                     console.log('📥 POPUP: Retry response:', retryResponse);
                     
                     if (!retryResponse || !retryResponse.success) {
-                        throw new Error(retryResponse?.error || 'Failed to capture page data after retry');
+                        throw new Error((retryResponse && retryResponse.error) || 'Failed to capture page data after retry');
                     }
                     
                     this.updateStatus('Processing elements...', 'loading');
@@ -160,8 +160,8 @@ class PopupController {
                     
                     const capturedData = retryResponse.data;
                     console.log('✅ POPUP: Captured data received after retry:', {
-                        elements: capturedData?.elements?.length,
-                        images: capturedData?.images?.length
+                        elements: (capturedData && capturedData.elements && capturedData.elements.length) || 0,
+                        images: (capturedData && capturedData.images && capturedData.images.length) || 0
                     });
                     
                 } catch (retryError) {

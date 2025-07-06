@@ -148,7 +148,7 @@ async function createResponsiveFigmaLayouts(data) {
     
     // Ensure 1440px for desktop
     const isDesktop = viewportData.device === 'Desktop';
-    const frameWidth = isDesktop ? 1440 : (viewportData.viewport?.width || 375);
+    const frameWidth = isDesktop ? 1440 : (viewportData.viewport && viewportData.viewport.width ? viewportData.viewport.width : 375);
     const frameHeight = Math.max(page.viewport_height || 900, 800);
 
     // Create viewport frame with precise dimensions
@@ -192,10 +192,10 @@ async function createElementsInFrame(parentFrame, elements, assets) {
   
   // Sort elements by z-index and depth for proper layering
   const sortedElements = [...elements].sort((a, b) => {
-    const aZ = a.visual_hierarchy?.zIndex || 0;
-    const bZ = b.visual_hierarchy?.zIndex || 0;
+    const aZ = (a.visual_hierarchy && a.visual_hierarchy.zIndex) || 0;
+    const bZ = (b.visual_hierarchy && b.visual_hierarchy.zIndex) || 0;
     if (aZ !== bZ) return aZ - bZ;
-    return (a.visual_hierarchy?.depth || 0) - (b.visual_hierarchy?.depth || 0);
+    return ((a.visual_hierarchy && a.visual_hierarchy.depth) || 0) - ((b.visual_hierarchy && b.visual_hierarchy.depth) || 0);
   });
 
   // Create elements in proper order
@@ -457,17 +457,17 @@ async function createPreciseImageNode(element, assets) {
     if (elementAsset && elementAsset.base64) {
       // Create rectangle for image
       const imageNode = figma.createRectangle();
-      imageNode.name = `${element.tagName}: ${element.attributes?.alt || 'Image'}`;
+      imageNode.name = `${element.tagName}: ${(element.attributes && element.attributes.alt) || 'Image'}`;
       
       // Set precise dimensions
       imageNode.resize(
-        Math.max(element.position?.width || 100, 1),
-        Math.max(element.position?.height || 100, 1)
+        Math.max((element.position && element.position.width) || 100, 1),
+        Math.max((element.position && element.position.height) || 100, 1)
       );
       
       // Set precise position
-      imageNode.x = element.position?.x || 0;
-      imageNode.y = element.position?.y || 0;
+      imageNode.x = (element.position && element.position.x) || 0;
+      imageNode.y = (element.position && element.position.y) || 0;
       
       try {
         // Convert base64 to image
@@ -479,7 +479,7 @@ async function createPreciseImageNode(element, assets) {
         imageNode.fills = [{
           type: 'IMAGE',
           imageHash: imageHash,
-          scaleMode: element.computedStyles?.objectFit === 'cover' ? 'CROP' : 'FIT'
+          scaleMode: (element.computedStyles && element.computedStyles.objectFit === 'cover') ? 'CROP' : 'FIT'
         }];
         
         console.log(`Successfully applied image asset for ${element.id}`);
@@ -494,7 +494,7 @@ async function createPreciseImageNode(element, assets) {
       }
       
       // Apply border radius from computed styles
-      if (element.computedStyles?.borderRadius) {
+      if (element.computedStyles && element.computedStyles.borderRadius) {
         const radius = parseFloat(element.computedStyles.borderRadius) || 0;
         if (radius > 0) {
           imageNode.cornerRadius = radius;
@@ -502,7 +502,7 @@ async function createPreciseImageNode(element, assets) {
       }
       
       // Apply other visual properties
-      if (element.visual?.opacity && element.visual.opacity < 1) {
+      if (element.visual && element.visual.opacity && element.visual.opacity < 1) {
         imageNode.opacity = Math.max(element.visual.opacity, 0.01);
       }
       
@@ -514,12 +514,12 @@ async function createPreciseImageNode(element, assets) {
       frame.name = `${element.tagName} Image Placeholder`;
       
       frame.resize(
-        Math.max(element.position?.width || 100, 20),
-        Math.max(element.position?.height || 100, 20)
+        Math.max((element.position && element.position.width) || 100, 20),
+        Math.max((element.position && element.position.height) || 100, 20)
       );
       
-      frame.x = element.position?.x || 0;
-      frame.y = element.position?.y || 0;
+      frame.x = (element.position && element.position.x) || 0;
+      frame.y = (element.position && element.position.y) || 0;
       
       // Placeholder styling
       frame.fills = [{ 
@@ -530,7 +530,7 @@ async function createPreciseImageNode(element, assets) {
       // Add placeholder text
       const placeholderText = figma.createText();
       await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-      placeholderText.characters = '🖼️ ' + (element.attributes?.alt || 'Image');
+      placeholderText.characters = '🖼️ ' + ((element.attributes && element.attributes.alt) || 'Image');
       placeholderText.fontSize = 12;
       placeholderText.fills = [{ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }];
       placeholderText.textAlignHorizontal = 'CENTER';

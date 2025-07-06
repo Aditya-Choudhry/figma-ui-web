@@ -139,7 +139,7 @@ class ExtensionBackground {
             
             // Clean up URL after download
             chrome.downloads.onChanged.addListener(function cleanup(delta) {
-                if (delta.id === downloadId && delta.state?.current === 'complete') {
+                if (delta.id === downloadId && delta.state && delta.state.current === 'complete') {
                     URL.revokeObjectURL(url);
                     chrome.downloads.onChanged.removeListener(cleanup);
                 }

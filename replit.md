@@ -99,8 +99,15 @@ The plugin follows the standard Figma plugin architecture with two main componen
 - Export format preferences
 
 ## Changelog
-- July 06, 2025. Initial setup
-- July 06, 2025. Added comprehensive README.md with setup instructions, testing procedures, and deployment guides
+- July 06, 2025: Initial setup
+- July 06, 2025: Added comprehensive README.md with setup instructions, testing procedures, and deployment guides  
+- July 06, 2025: Major architectural upgrade - Enhanced responsive capture with headless browser support
+  - Added Selenium WebDriver integration for full page rendering
+  - Implemented multi-viewport capture (desktop, tablet, mobile)
+  - Enhanced CSS extraction with computed styles and layout properties
+  - Added font mapping system for Figma compatibility
+  - Created responsive Figma layout generation with proper Auto Layout
+  - Improved element hierarchy preservation and flex/grid container detection
 
 ## User Preferences
 

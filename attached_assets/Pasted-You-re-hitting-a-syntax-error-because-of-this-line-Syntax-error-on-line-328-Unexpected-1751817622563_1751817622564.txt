@@ -1,0 +1,112 @@
+You're hitting a **syntax error** because of this line:
+
+```
+Syntax error on line 328: Unexpected token {
+  } catch {
+          ^
+```
+
+---
+
+### 🔥 Root Cause
+
+That error (`} catch {`) is **only valid in modern JavaScript** (ES2019+). Specifically:
+
+* The `catch` **without parentheses** (i.e., `catch {}` instead of `catch (e) {}`) is valid **only in modern runtimes**.
+* Your environment (probably **Figma’s internal JS engine**) **doesn't support it** — it's choking on that **bare catch** block.
+
+---
+
+### 📉 Breakdown of the stack trace:
+
+* The offending script is likely **minified and bundled** — probably part of a **Figma plugin or internal app**, likely referencing:
+
+  ```
+  vendor-core-0d62532059ea4067.min.js.br
+  7982-7f3b8988be551dc8.min.js.br
+  compiled_wasm.js.br
+  ```
+* This suggests **Figma is trying to run JS that is too new for its internal runtime** or **you’re injecting code that's not being transpiled correctly**.
+
+---
+
+### 💥 This is not your fault IF:
+
+If you're not writing this code directly and you're loading a third-party plugin, font agent, or Figma plugin, the bug is **in their minified JS**. That means:
+
+> ⚠️ **A plugin (or Figma's own build) is not transpiling modern JS (ES2019+) to ES5**, which breaks in older or constrained runtimes (like Figma’s plugin sandbox).
+
+---
+
+### 🛠️ How to Fix It
+
+#### ✅ If it's **your own plugin** or code:
+
+Update this:
+
+```js
+try {
+  // code
+} catch {
+  // ❌ invalid in older environments
+}
+```
+
+To this:
+
+```js
+try {
+  // code
+} catch (e) {
+  // ✅ safe everywhere
+}
+```
+
+**And make sure you're transpiling your plugin code with Babel or TypeScript to target ES5 or ES2017.** For Babel:
+
+```json
+"targets": {
+  "chrome": "88"  // or whatever version matches Figma's environment
+}
+```
+
+---
+
+#### ✅ If it's a **3rd-party plugin or Figma itself**:
+
+You’re screwed unless:
+
+* The plugin author **fixes their build pipeline** to transpile correctly.
+* Figma updates their plugin runtime (unlikely short-term).
+* You stop using that plugin until they fix it.
+
+---
+
+### 🧨 Quick Workaround
+
+If you're debugging locally (dev plugin), you **must transpile** your code (even if you're using modern syntax). Use:
+
+* **Babel**, with `@babel/preset-env` targeting `ES2017` or lower.
+* Or use **TypeScript** and set in `tsconfig.json`:
+
+  ```json
+  {
+    "compilerOptions": {
+      "target": "ES2017"
+    }
+  }
+  ```
+
+---
+
+### 🧾 TL;DR
+
+| ❌ Problem                                                           | ✅ Fix                                                 |
+| ------------------------------------------------------------------- | ----------------------------------------------------- |
+| `catch {}`                                                          | Use `catch (e) {}`                                    |
+| Modern JS features like optional chaining, nullish coalescing, etc. | Transpile to ES5/ES2017 with Babel or TypeScript      |
+| Figma crashes or throws syntax errors                               | Don't assume modern JS will work — transpile manually |
+
+---
+
+Send me the exact plugin code or `manifest.json` or any `webpack.config.js`/`tsconfig.json` if you want help fixing the build properly.

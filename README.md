@@ -1,196 +1,326 @@
+# Enhanced Website to Figma Exporter
 
-# Website to Figma Exporter Plugin
+A comprehensive Figma plugin that captures websites and converts them into exact replicas in Figma. The system includes a Python Flask backend server for website capture using Selenium and Chrome WebDriver, plus an advanced Figma plugin for converting captured data into precise Figma designs with multi-viewport support.
 
-A Figma plugin that captures any website's structure and converts it into native Figma elements with proper hierarchy and styling.
+## Features
 
-## ✨ Features
+### Advanced Website Capture
+- **Multi-Viewport Responsive Capture**: Desktop (1440x900), Tablet (768x1024), Mobile (375x667)
+- **Comprehensive CSS Extraction**: Captures ALL computed styles, layout properties, and visual effects
+- **Flexbox/Grid to Auto Layout Mapping**: Converts modern web layouts to Figma Auto Layout
+- **Font Consistency**: Maps typography across all viewports with precise font matching
+- **Visual Hierarchy Preservation**: Maintains DOM relationships and Z-index ordering
 
-- **Live Website Capture**: Fetch any website's HTML structure
-- **Native Figma Integration**: Creates real Figma frames, text, and rectangle nodes
-- **Multi-Viewport Support**: Captures desktop (1440px), tablet (768px), and mobile (375px) layouts
-- **Advanced CSS Extraction**: Complete style preservation with computed styles
-- **Auto Layout Detection**: Automatically applies Figma Auto Layout for flex containers
-- **Font Mapping**: Maps web fonts to Figma-compatible alternatives
+### Precise Figma Replication
+- **Smart Node Type Detection**: Text, Image, Component, and Frame nodes with intelligent classification
+- **Exact Auto Layout Application**: Perfect Flexbox container replication with proper spacing
+- **Comprehensive Typography**: Font-weight, line-height, letter-spacing, and text alignment
+- **Pixel-Perfect Colors**: Hex, RGB, RGBA, and named color parsing with exact reproduction
+- **Border Radius & Shadows**: Complete visual effect replication including box-shadows
+- **Interactive Element Detection**: Buttons, inputs, and components with proper styling
 
-## 🏗️ Architecture
+### Enhanced Data Structure
+- **Layout Detection**: Identifies flex containers, grid layouts, and text nodes
+- **Visual Hierarchy Assessment**: Z-index handling and depth analysis
+- **Background Image Extraction**: Captures and processes background images and IMG elements
+- **Component Recognition**: Interactive element identification for component creation
 
-The plugin consists of two main components:
+## Installation & Setup
 
-### 1. Figma Plugin (`code.js` + `ui.html`)
-- Clean interface for entering website URLs and selecting viewports
-- Handles Figma API interactions and node creation
-- Communicates with backend server for website content
+### Prerequisites
 
-### 2. Python Backend Server (`server_enhanced.py`)
-- Flask web server with advanced website capture capabilities
-- Selenium WebDriver for complete page rendering
-- Comprehensive CSS parsing and element extraction
-- Multi-viewport responsive capture
+- **Figma Desktop App** (latest version)
+- **Python 3.8+** with pip
+- **Chrome/Chromium browser** (for headless rendering)
+- **System Dependencies** (automatically installed in Replit)
 
-## 🚀 Quick Start
+### 1. Backend Server Setup
 
-### 1. Start the Backend Server
-
-The enhanced Python server runs on port 5000:
-
+#### Install Python Dependencies:
 ```bash
-# Server starts automatically via Replit workflow
-# Access at: http://localhost:5000
+# Core dependencies
+pip install flask flask-cors selenium webdriver-manager beautifulsoup4 requests
+
+# Optional: Enhanced parsing
+pip install tinycss2 Pillow
 ```
 
-**Health Check**: Visit `http://localhost:5000/health` to verify server status
+#### System Dependencies (for local development):
+```bash
+# Ubuntu/Debian
+sudo apt install chromium-browser glib2.0 nss nspr libxcb1 libx11-6 libxcomposite1 libxdamage1 libxrandr2
 
-### 2. Install the Figma Plugin
+# macOS
+brew install chromium
+
+# Windows
+# Download Chrome from official website
+```
+
+### 2. Start the Enhanced Server
+
+#### In Replit Environment:
+The server runs automatically via the "Enhanced Figma Server" workflow on port 5000.
+
+#### For Local Development:
+```bash
+python server_enhanced.py
+```
+
+The enhanced server runs on `http://localhost:5000` with the following endpoints:
+- `GET /health` - Server status and feature list
+- `POST /api/capture-responsive` - Multi-viewport capture
+- `POST /api/capture` - Single viewport capture (legacy)
+
+### 3. Figma Plugin Installation
 
 1. **Open Figma Desktop App**
-2. **Go to Plugins** → **Development** → **Import plugin from manifest**
+2. **Navigate to** Plugins → Development → Import plugin from manifest
 3. **Select** the `manifest.json` file from this project
-4. **Plugin will appear** in your plugins list
+4. **The plugin** will appear in your plugins list as "Website to Figma Exporter"
 
-### 3. Use the Plugin
+## Usage Guide
 
-1. **Open any Figma file**
-2. **Go to Plugins** → **Website to Figma Exporter**
-3. **Enter a website URL** (e.g., https://example.com)
-4. **Select viewport sizes** (desktop, tablet, mobile)
-5. **Click "Capture Website"**
-6. **Watch as Figma elements are created** in real-time
+### Multi-Viewport Capture Workflow
 
-## 📋 API Endpoints
+1. **Start the Backend Server**:
+   - In Replit: Ensure "Enhanced Figma Server" workflow is running
+   - Locally: Run `python server_enhanced.py`
 
-### Backend Server (http://localhost:5000)
+2. **Open Figma** and run the "Website to Figma Exporter" plugin
 
-- **GET** `/health` - Health check
-- **POST** `/api/capture` - Capture website content
-  ```json
-  {
-    "url": "https://example.com",
-    "viewports": ["desktop", "tablet", "mobile"]
-  }
-  ```
+3. **Configure Capture Settings**:
+   - Enter the website URL (must include http:// or https://)
+   - Select viewports: Desktop, Tablet, and/or Mobile
+   - Click "Capture Website"
 
-## 🔧 Configuration
+4. **Processing Steps**:
+   - Server launches headless Chrome browser
+   - Captures website at each selected viewport
+   - Extracts comprehensive CSS and layout data
+   - Plugin creates precise Figma layouts with Auto Layout
+   - Elements positioned with exact styling and typography
 
-### Network Access
-The plugin is configured to access:
-- `http://localhost:5000` (local development)
-- `https://website-capture-server.replit.app` (cloud deployment)
+### Advanced Capture Features
 
-### Supported Websites
-- Any publicly accessible HTTP/HTTPS website
-- Static and dynamic content with JavaScript rendering
-- No authentication required sites
+#### Responsive Layout Generation
+- **Desktop Layout**: 1440x900 viewport with full desktop styling
+- **Tablet Layout**: 768x1024 viewport with responsive adjustments  
+- **Mobile Layout**: 375x667 viewport with mobile-optimized styling
 
-## 📁 Project Structure
+#### Auto Layout Mapping
+- **Flexbox Containers** → Figma Auto Layout frames
+- **CSS Grid** → Organized frame structures
+- **Spacing** → Proper padding and item spacing
+- **Alignment** → Precise justify-content and align-items mapping
 
+#### Typography Replication
+- **Font Mapping**: Web fonts to Figma font families
+- **Weight Matching**: CSS font-weights to Figma font styles
+- **Line Height**: Exact line-height preservation
+- **Letter Spacing**: Precise character spacing
+- **Text Alignment**: Perfect text alignment replication
+
+## System Architecture
+
+### Enhanced Backend (Python)
 ```
-/
-├── manifest.json          # Figma plugin configuration
-├── code.js               # Main plugin logic (Figma environment)
-├── ui.html               # Plugin user interface
-├── server_enhanced.py    # Enhanced Python backend server
-├── pyproject.toml        # Python dependencies
-├── README.md            # This file
-└── FEATURES.md          # Detailed feature documentation
+├── server_enhanced.py          # Main Flask server with Selenium
+├── WebsiteCapture class        # Chrome WebDriver management
+├── Multi-viewport capture      # Responsive design processing
+├── CSS extraction engine       # Comprehensive style analysis
+├── Font mapping system         # Web-to-Figma font conversion
+└── Layout detection logic      # Flexbox/Grid analysis
 ```
 
-## 🛠️ Development
-
-### Backend Development
-```bash
-# Dependencies install automatically via pyproject.toml
-# Server runs via Enhanced Figma Server workflow
+### Advanced Figma Plugin (JavaScript)
+```
+├── code.js                     # Main plugin logic with enhanced node creation
+├── createResponsiveFigmaLayouts # Multi-viewport layout generation
+├── createAdvancedNodeFromElement # Sophisticated node creation
+├── determineAdvancedNodeType   # Intelligent node type detection
+├── Font mapping utilities      # Typography conversion functions
+└── Color parsing system        # Advanced color handling
 ```
 
-### Plugin Development
-1. Make changes to `code.js` or `ui.html`
-2. In Figma: **Plugins** → **Development** → **Reload plugin**
-3. Test changes immediately
+### Data Flow Architecture
+```
+Website URL → Chrome WebDriver → DOM Analysis → CSS Extraction → 
+Layout Detection → Figma Plugin → Node Creation → Auto Layout Application → 
+Precise Figma Replica
+```
 
-## 🧪 Testing
+## Supported Elements & Conversions
 
-### Test Backend Server
+### Element Type Mapping
+| Web Element | Figma Node | Features |
+|-------------|------------|----------|
+| **Text Content** | Text Node | Font mapping, sizing, alignment, color |
+| **IMG Elements** | Frame + Image | Background images, alt text, dimensions |
+| **Flexbox Containers** | Auto Layout Frame | Direction, spacing, alignment, padding |
+| **CSS Grid** | Organized Frames | Grid structure preservation |
+| **Buttons/Inputs** | Component Frame | Interactive styling, hover states |
+| **Divs/Containers** | Frames | Background, borders, shadows, radius |
+
+### CSS Property Support
+- **Layout**: Flexbox, Grid, positioning, dimensions, spacing
+- **Typography**: Font family, size, weight, line-height, letter-spacing
+- **Visual**: Colors, backgrounds, borders, border-radius, box-shadow
+- **Effects**: Opacity, transforms, filters
+
+### Font Mapping System
+```javascript
+Web Font → Figma Font
+Arial/Helvetica → Arial
+Georgia → Georgia  
+Times → Times New Roman
+Roboto → Roboto
+Inter → Inter
+Custom fonts → Closest available match
+```
+
+## Troubleshooting
+
+### Common Issues & Solutions
+
+#### Server Issues
+1. **ChromeDriver Compatibility Error**:
+   ```bash
+   # Update ChromeDriver
+   pip install --upgrade webdriver-manager
+   ```
+
+2. **Port 5000 Already in Use**:
+   ```bash
+   # Kill existing process
+   lsof -ti:5000 | xargs kill -9
+   ```
+
+3. **Missing System Dependencies**:
+   ```bash
+   # Install required libraries (Ubuntu/Debian)
+   sudo apt install libglib2.0-0 libnss3 libatk-bridge2.0-0 libxcb1
+   ```
+
+#### Plugin Issues
+1. **JavaScript Syntax Errors**:
+   - Check browser console in Figma
+   - All modern JavaScript syntax has been made compatible
+
+2. **Font Loading Failures**:
+   - Fonts fallback to Inter automatically
+   - Check Figma's available fonts list
+
+3. **Layout Positioning Issues**:
+   - Complex CSS may need manual adjustment
+   - Check Auto Layout settings in Figma
+
+### Debug Mode
+
+Enable enhanced logging:
+```python
+# In server_enhanced.py
+import logging
+logging.basicConfig(level=logging.DEBUG)
+```
+
+```javascript
+// In code.js
+console.log('Debug info:', data);
+figma.notify('Debug: ' + message);
+```
+
+## API Testing
+
+Test the server endpoints:
+
 ```bash
 # Health check
 curl http://localhost:5000/health
 
-# Test website capture
+# Multi-viewport capture
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com","viewports":["desktop","tablet","mobile"]}' \
+  http://localhost:5000/api/capture-responsive
+
+# Single viewport capture  
 curl -X POST -H "Content-Type: application/json" \
   -d '{"url":"https://example.com","viewports":["desktop"]}' \
   http://localhost:5000/api/capture
 ```
 
-### Test Plugin
-1. Use `https://example.com` for reliable testing
-2. Check Figma console for debugging information
-3. Verify elements are created in current page
+## Project Structure
 
-## 🚨 Troubleshooting
+```
+/
+├── manifest.json          # Figma plugin configuration
+├── code.js               # Enhanced plugin logic with precise node creation
+├── ui.html               # Modern plugin user interface
+├── popup.html            # Alternative interface
+├── popup.js              # Popup interface logic  
+├── popup.css             # Interface styling
+├── server_enhanced.py    # Advanced Python backend server
+├── main.py              # Entry point for deployment
+├── pyproject.toml       # Python dependencies
+├── replit.md            # Project documentation and preferences
+├── FEATURES.md          # Detailed feature documentation
+└── README.md            # This file
+```
 
-### Common Issues
+## Performance & Limitations
 
-**Server Not Running**
-- Check workflow status in Replit
-- Verify port 5000 is available
-- Restart the "Enhanced Figma Server" workflow
+### Performance Characteristics
+- **Capture Time**: 5-15 seconds per viewport
+- **Element Limit**: 50 elements per viewport (configurable)
+- **Memory Usage**: ~200MB per active capture
+- **Concurrent Captures**: 1 (WebDriver limitation)
 
-**Plugin Network Error**
-- Ensure server is running on port 5000
-- Check `manifest.json` has correct allowed domains
-- Verify CORS is enabled on server
+### Current Limitations
+- Large websites may require element limiting
+- Complex CSS animations not captured
+- Some modern CSS features may need manual adjustment
+- Single concurrent capture due to WebDriver constraints
 
-**No Elements Created**
-- Check website is publicly accessible
-- Try with `https://example.com` first
-- Look for errors in Figma console
+## Deployment
 
-**Chrome Driver Issues**
-- Server automatically installs Chrome driver
-- Check console for WebDriver errors
-- Ensure sufficient system resources
+### Replit Deployment
+1. The project is ready for Replit deployment
+2. Start the "Enhanced Figma Server" workflow
+3. Server auto-configures for Replit environment
+4. Use external URLs for Figma plugin connections
 
-## 📦 Deployment
+### Local Production Setup
+1. Use production WSGI server:
+   ```bash
+   pip install gunicorn
+   gunicorn --bind 0.0.0.0:5000 server_enhanced:app
+   ```
 
-### Server Deployment
-The Python server is configured for Replit deployment:
-- Automatic dependency installation
-- Port 5000 forwarding configured
-- Production-ready Flask server
+2. Configure reverse proxy (nginx) for HTTPS
+3. Set up process monitoring (systemd, supervisor)
 
-### Plugin Distribution
-For sharing the plugin:
-1. Package `manifest.json`, `code.js`, and `ui.html` in a ZIP
-2. Share the ZIP file
-3. Recipients import via Figma's plugin developer tools
-
-## 🔐 Security Notes
-
-- Plugin only accesses allowed domains specified in manifest
-- Server fetches public websites only
-- No authentication or user data storage
-- CORS properly configured for security
-
-## 📈 Performance
-
-- **Server Response**: ~3-5 seconds per viewport
-- **Element Limit**: Max 100 elements per viewport (configurable)
-- **Memory Usage**: Optimized for Figma performance
-- **Multi-Viewport**: Parallel processing for faster capture
-
-## 🎯 Use Cases
-
-- **Design Research**: Analyze competitor layouts across devices
-- **Rapid Prototyping**: Import existing designs as starting points
-- **Responsive Design**: Study how designs adapt to different screen sizes
-- **Design System Creation**: Extract components from live sites
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
-2. Make your changes
-3. Test thoroughly with various websites
-4. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📄 License
+## License
 
-MIT License - feel free to use and modify
+MIT License - See LICENSE file for details
+
+## Support
+
+For issues and questions:
+1. Check the troubleshooting section
+2. Review server logs for error details
+3. Test with simple websites first
+4. Report bugs with website URLs and error messages
+
+---
+
+**Status**: Production Ready  
+**Latest Version**: Enhanced Multi-Viewport Capture  
+**Compatibility**: Figma Desktop App, Chrome/Chromium browsers

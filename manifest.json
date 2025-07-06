@@ -10,7 +10,7 @@
     "scripting"
   ],
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "popup-debug.html",
     "default_title": "Website to Figma Exporter",
     "default_icon": {
       "16": "icons/icon16.svg",

@@ -583,17 +583,78 @@ class DOMCapturer {
             color: style.color,
             backgroundColor: style.backgroundColor,
             borderColor: style.borderColor,
-            outlineColor: style.outlineColor
+            borderTopColor: style.borderTopColor,
+            borderRightColor: style.borderRightColor,
+            borderBottomColor: style.borderBottomColor,
+            borderLeftColor: style.borderLeftColor,
+            outlineColor: style.outlineColor,
+            textDecorationColor: style.textDecorationColor,
+            columnRuleColor: style.columnRuleColor,
+            caretColor: style.caretColor
         };
         
-        // Add colors to collection
+        // Extract colors from gradients and complex backgrounds
+        if (style.backgroundImage && style.backgroundImage !== 'none') {
+            colors.backgroundImage = style.backgroundImage;
+            // Extract gradient colors
+            const gradientColors = this.extractGradientColors(style.backgroundImage);
+            gradientColors.forEach(color => this.colors.add(color));
+        }
+        
+        // Extract colors from box-shadow
+        if (style.boxShadow && style.boxShadow !== 'none') {
+            const shadowColors = this.extractShadowColors(style.boxShadow);
+            shadowColors.forEach(color => this.colors.add(color));
+        }
+        
+        // Extract colors from text-shadow
+        if (style.textShadow && style.textShadow !== 'none') {
+            const textShadowColors = this.extractShadowColors(style.textShadow);
+            textShadowColors.forEach(color => this.colors.add(color));
+        }
+        
+        // Add all valid colors to collection
         Object.values(colors).forEach(color => {
-            if (color && color !== 'transparent' && color !== 'rgba(0, 0, 0, 0)') {
+            if (color && color !== 'transparent' && color !== 'rgba(0, 0, 0, 0)' && color !== 'initial' && color !== 'inherit') {
                 this.colors.add(color);
             }
         });
         
         return colors;
+    }
+    
+    extractGradientColors(backgroundImage) {
+        const colors = [];
+        const colorRegex = /#[0-9a-f]{3,8}|rgba?\([^)]+\)|hsla?\([^)]+\)|[a-z]+/gi;
+        const matches = backgroundImage.match(colorRegex) || [];
+        
+        matches.forEach(match => {
+            if (this.isValidColor(match)) {
+                colors.push(match);
+            }
+        });
+        
+        return colors;
+    }
+    
+    extractShadowColors(shadowValue) {
+        const colors = [];
+        const colorRegex = /#[0-9a-f]{3,8}|rgba?\([^)]+\)|hsla?\([^)]+\)|[a-z]+/gi;
+        const matches = shadowValue.match(colorRegex) || [];
+        
+        matches.forEach(match => {
+            if (this.isValidColor(match)) {
+                colors.push(match);
+            }
+        });
+        
+        return colors;
+    }
+    
+    isValidColor(color) {
+        // Skip common non-color keywords
+        const nonColors = ['none', 'auto', 'normal', 'inherit', 'initial', 'unset', 'px', 'em', 'rem', 'solid', 'dashed', 'dotted'];
+        return !nonColors.includes(color.toLowerCase());
     }
     
     extractVisualStyles(style) {
@@ -625,27 +686,133 @@ class DOMCapturer {
             backgroundColor: style.backgroundColor,
             backgroundImage: style.backgroundImage,
             backgroundPosition: style.backgroundPosition,
+            backgroundPositionX: style.backgroundPositionX,
+            backgroundPositionY: style.backgroundPositionY,
             backgroundSize: style.backgroundSize,
             backgroundRepeat: style.backgroundRepeat,
+            backgroundRepeatX: style.backgroundRepeatX,
+            backgroundRepeatY: style.backgroundRepeatY,
             backgroundAttachment: style.backgroundAttachment,
             backgroundClip: style.backgroundClip,
-            backgroundOrigin: style.backgroundOrigin
+            backgroundOrigin: style.backgroundOrigin,
+            backgroundBlendMode: style.backgroundBlendMode
         };
         
-        // Collect gradients
-        if (style.backgroundImage && style.backgroundImage.includes('gradient')) {
-            this.gradients.add(style.backgroundImage);
+        // Extract and collect background images
+        if (style.backgroundImage && style.backgroundImage !== 'none') {
+            const imageUrls = this.extractBackgroundImageUrls(style.backgroundImage);
+            imageUrls.forEach(url => {
+                if (url) {
+                    this.images.add(url);
+                }
+            });
+            
+            // Collect gradients separately
+            if (style.backgroundImage.includes('gradient')) {
+                this.gradients.add(style.backgroundImage);
+            }
         }
         
-        // Handle image elements
+        // Handle image elements with comprehensive data
         if (element.tagName === 'IMG' && element.src) {
             background.imageSrc = element.src;
-            background.imageAlt = element.alt;
-            background.imageNaturalWidth = element.naturalWidth;
-            background.imageNaturalHeight = element.naturalHeight;
+            background.imageAlt = element.alt || '';
+            background.imageTitle = element.title || '';
+            background.imageNaturalWidth = element.naturalWidth || 0;
+            background.imageNaturalHeight = element.naturalHeight || 0;
+            background.imageDisplayWidth = element.width || 0;
+            background.imageDisplayHeight = element.height || 0;
+            background.imageLoading = element.loading || 'auto';
+            background.imageCrossOrigin = element.crossOrigin || null;
+            background.imageSrcset = element.srcset || '';
+            background.imageSizes = element.sizes || '';
+            
+            // Add to images collection
+            this.images.add(element.src);
+        }
+        
+        // Handle video elements
+        if (element.tagName === 'VIDEO') {
+            if (element.poster) {
+                background.videoPoster = element.poster;
+                this.images.add(element.poster);
+            }
+            if (element.currentSrc) {
+                background.videoSrc = element.currentSrc;
+            }
+        }
+        
+        // Handle source elements (for picture/video)
+        if (element.tagName === 'SOURCE' && element.srcset) {
+            background.sourceSrcset = element.srcset;
+            background.sourceMedia = element.media || '';
+            background.sourceType = element.type || '';
+            
+            // Extract individual image URLs from srcset
+            const srcsetUrls = this.extractSrcsetUrls(element.srcset);
+            srcsetUrls.forEach(url => this.images.add(url));
+        }
+        
+        // Extract images from CSS content property
+        if (style.content && style.content.includes('url(')) {
+            const contentUrls = this.extractBackgroundImageUrls(style.content);
+            contentUrls.forEach(url => {
+                if (url) {
+                    this.images.add(url);
+                }
+            });
+        }
+        
+        // Extract images from list-style-image
+        if (style.listStyleImage && style.listStyleImage !== 'none') {
+            const listImageUrls = this.extractBackgroundImageUrls(style.listStyleImage);
+            listImageUrls.forEach(url => {
+                if (url) {
+                    this.images.add(url);
+                }
+            });
+        }
+        
+        // Extract images from border-image
+        if (style.borderImage && style.borderImage !== 'none') {
+            const borderImageUrls = this.extractBackgroundImageUrls(style.borderImage);
+            borderImageUrls.forEach(url => {
+                if (url) {
+                    this.images.add(url);
+                }
+            });
         }
         
         return background;
+    }
+    
+    extractBackgroundImageUrls(backgroundImageValue) {
+        const urls = [];
+        const urlRegex = /url\s*\(\s*["']?([^"')]+)["']?\s*\)/gi;
+        let match;
+        
+        while ((match = urlRegex.exec(backgroundImageValue)) !== null) {
+            urls.push(match[1]);
+        }
+        
+        return urls;
+    }
+    
+    extractSrcsetUrls(srcsetValue) {
+        const urls = [];
+        // Split by comma and extract URL part (before space or end)
+        const sources = srcsetValue.split(',');
+        
+        sources.forEach(source => {
+            const trimmed = source.trim();
+            const spaceIndex = trimmed.indexOf(' ');
+            const url = spaceIndex > 0 ? trimmed.substring(0, spaceIndex) : trimmed;
+            if (url) {
+                urls.push(url);
+            }
+        });
+        
+        return urls;
     }
     
     extractTransformData(style) {
@@ -706,7 +873,7 @@ class DOMCapturer {
     }
     
     extractFontData(style) {
-        return {
+        const fontData = {
             fontFamily: style.fontFamily,
             fontSize: style.fontSize,
             fontWeight: style.fontWeight,
@@ -716,8 +883,89 @@ class DOMCapturer {
             fontSizeAdjust: style.fontSizeAdjust,
             fontKerning: style.fontKerning,
             fontFeatureSettings: style.fontFeatureSettings,
-            fontVariationSettings: style.fontVariationSettings
+            fontVariationSettings: style.fontVariationSettings,
+            fontOpticalSizing: style.fontOpticalSizing,
+            fontSynthesis: style.fontSynthesis,
+            fontLanguageOverride: style.fontLanguageOverride
         };
+        
+        // Extract and collect all font families
+        if (style.fontFamily) {
+            const families = this.parseFontFamilies(style.fontFamily);
+            families.forEach(family => {
+                if (family) {
+                    this.fonts.add(family);
+                }
+            });
+        }
+        
+        // Extract web fonts from document stylesheets
+        this.extractWebFontsFromStylesheets();
+        
+        return fontData;
+    }
+    
+    parseFontFamilies(fontFamilyString) {
+        // Split font family string and clean up
+        const families = [];
+        const parts = fontFamilyString.split(',');
+        
+        parts.forEach(part => {
+            const family = part.trim().replace(/['"]/g, '');
+            if (family && !['inherit', 'initial', 'unset', 'normal'].includes(family.toLowerCase())) {
+                families.push(family);
+            }
+        });
+        
+        return families;
+    }
+    
+    extractWebFontsFromStylesheets() {
+        try {
+            // Extract fonts from document stylesheets
+            Array.from(document.styleSheets).forEach(sheet => {
+                try {
+                    if (sheet.href && (sheet.href.includes('fonts.googleapis.com') || sheet.href.includes('fonts.gstatic.com'))) {
+                        // Extract font family from Google Fonts URL
+                        const url = new URL(sheet.href);
+                        const familyParam = url.searchParams.get('family');
+                        if (familyParam) {
+                            const families = familyParam.split('|');
+                            families.forEach(family => {
+                                const fontName = family.split(':')[0].replace(/\+/g, ' ');
+                                this.fonts.add(fontName);
+                            });
+                        }
+                    }
+                    
+                    // Extract from @font-face and @import rules
+                    if (sheet.cssRules) {
+                        Array.from(sheet.cssRules).forEach(rule => {
+                            if (rule.type === CSSRule.FONT_FACE_RULE) {
+                                const fontFamily = rule.style.fontFamily;
+                                if (fontFamily) {
+                                    const families = this.parseFontFamilies(fontFamily);
+                                    families.forEach(family => this.fonts.add(family));
+                                }
+                            } else if (rule.type === CSSRule.IMPORT_RULE && rule.href) {
+                                if (rule.href.includes('fonts.googleapis.com')) {
+                                    const url = new URL(rule.href);
+                                    const familyParam = url.searchParams.get('family');
+                                    if (familyParam) {
+                                        const fontName = familyParam.split(':')[0].replace(/\+/g, ' ');
+                                        this.fonts.add(fontName);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } catch (e) {
+                    // Cross-origin stylesheet access may be blocked
+                }
+            });
+        } catch (e) {
+            // Stylesheet access errors
+        }
     }
     
     extractPseudoElementData(element) {

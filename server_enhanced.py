@@ -1045,42 +1045,301 @@ class WebsiteCapture:
         return 1
     
     def extract_css_information(self, soup, html_content, base_url):
-        """Extract CSS information from style tags and linked stylesheets"""
+        """Extract comprehensive CSS information including colors, fonts, and images"""
         css_data = {
             'inline_styles': [],
             'style_tags': [],
-            'external_stylesheets': []
+            'external_stylesheets': [],
+            'extracted_colors': set(),
+            'extracted_fonts': set(),
+            'background_images': set(),
+            'css_rules': [],
+            'computed_styles': {}
         }
         
-        # Extract from style tags
+        # Extract from style tags with comprehensive parsing
         for style_tag in soup.find_all('style'):
             if style_tag.string:
-                css_data['style_tags'].append({
-                    'content': style_tag.string,
-                    'media': style_tag.get('media', 'all')
-                })
+                style_content = style_tag.string.strip()
+                style_info = {
+                    'content': style_content,
+                    'media': style_tag.get('media', 'all'),
+                    'type': style_tag.get('type', 'text/css')
+                }
+                css_data['style_tags'].append(style_info)
+                
+                # Parse CSS content for colors, fonts, images
+                self.parse_css_content_comprehensive(style_content, css_data, base_url)
         
-        # Extract linked stylesheets
+        # Extract linked stylesheets with enhanced info
         for link in soup.find_all('link', rel='stylesheet'):
             href = link.get('href')
             if href:
-                css_data['external_stylesheets'].append({
+                full_url = self.resolve_url(href, base_url)
+                stylesheet_info = {
                     'url': href,
-                    'media': link.get('media', 'all')
-                })
+                    'full_url': full_url,
+                    'media': link.get('media', 'all'),
+                    'crossorigin': link.get('crossorigin'),
+                    'integrity': link.get('integrity')
+                }
+                css_data['external_stylesheets'].append(stylesheet_info)
+                
+                # Try to fetch and parse external CSS
+                try:
+                    external_css = self.fetch_external_css_safe(full_url)
+                    if external_css:
+                        self.parse_css_content_comprehensive(external_css, css_data, base_url)
+                except Exception as e:
+                    print(f"Could not fetch external CSS from {full_url}: {e}")
         
-        # Extract inline styles
+        # Extract comprehensive inline styles
         for element in soup.find_all(style=True):
             style_content = element.get('style')
             if style_content:
-                css_data['inline_styles'].append({
+                parsed_properties = self.parse_inline_style_comprehensive(style_content, css_data, base_url)
+                inline_style = {
                     'tag': element.name,
                     'class': element.get('class', []),
                     'id': element.get('id'),
-                    'style': style_content
-                })
+                    'style': style_content,
+                    'parsed_properties': parsed_properties
+                }
+                css_data['inline_styles'].append(inline_style)
+        
+        # Extract colors from HTML attributes
+        self.extract_html_colors(soup, css_data)
+        
+        # Extract fonts from HTML
+        self.extract_html_fonts(soup, css_data)
+        
+        # Extract images from HTML
+        self.extract_html_images(soup, css_data, base_url)
+        
+        # Convert sets to lists for JSON serialization
+        css_data['extracted_colors'] = list(css_data['extracted_colors'])
+        css_data['extracted_fonts'] = list(css_data['extracted_fonts'])
+        css_data['background_images'] = list(css_data['background_images'])
         
         return css_data
+    
+    def parse_css_content_comprehensive(self, css_content, css_data, base_url):
+        """Parse CSS content to extract all colors, fonts, images, and rules"""
+        import re
+        
+        # Extract all types of colors
+        color_patterns = [
+            r'#[0-9a-fA-F]{3,8}',  # Hex colors
+            r'rgb\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)',  # RGB colors
+            r'rgba\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*[\d.]+\s*\)',  # RGBA colors
+            r'hsl\s*\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*\)',  # HSL colors
+            r'hsla\s*\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*,\s*[\d.]+\s*\)',  # HSLA colors
+            # Named colors
+            r'\b(?:red|blue|green|yellow|purple|orange|pink|brown|black|white|gray|grey|cyan|magenta|lime|navy|olive|teal|silver|maroon|aqua|fuchsia|crimson|gold|indigo|violet|turquoise|coral|salmon|khaki|plum|orchid|tan|beige|ivory|snow)\b'
+        ]
+        
+        for pattern in color_patterns:
+            colors = re.findall(pattern, css_content, re.IGNORECASE)
+            for color in colors:
+                css_data['extracted_colors'].add(color.strip().lower())
+        
+        # Extract font families comprehensively
+        font_patterns = [
+            r'font-family\s*:\s*([^;{}]+)',
+            r'font\s*:\s*[^;]*?\s([^;,{}]+(?:,[^;,{}]+)*)',  # Font shorthand
+            r'@import\s+url\(["\']?[^"\']*fonts[^"\']*["\']?\)',  # Google Fonts imports
+        ]
+        
+        for pattern in font_patterns:
+            font_matches = re.findall(pattern, css_content, re.IGNORECASE)
+            for font_match in font_matches:
+                if isinstance(font_match, str):
+                    fonts = [f.strip().strip('"\'') for f in font_match.split(',')]
+                    for font in fonts:
+                        if font and font not in ['inherit', 'initial', 'unset', 'normal', 'bold', 'italic']:
+                            css_data['extracted_fonts'].add(font)
+        
+        # Extract background images and other image references
+        image_patterns = [
+            r'background-image\s*:\s*url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)',
+            r'background\s*:\s*[^;]*url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)',
+            r'content\s*:\s*url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)',
+            r'list-style-image\s*:\s*url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)',
+            r'border-image\s*:\s*url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)'
+        ]
+        
+        for pattern in image_patterns:
+            images = re.findall(pattern, css_content, re.IGNORECASE)
+            for image_url in images:
+                full_image_url = self.resolve_url(image_url, base_url)
+                css_data['background_images'].add(full_image_url)
+        
+        # Extract CSS rules with selectors for comprehensive analysis
+        rule_pattern = r'([^{}]+)\s*\{([^{}]*)\}'
+        rules = re.findall(rule_pattern, css_content, re.DOTALL)
+        
+        for selector, properties in rules:
+            if selector.strip() and properties.strip():
+                css_rule = {
+                    'selector': selector.strip(),
+                    'properties': {},
+                    'colors': [],
+                    'fonts': [],
+                    'images': []
+                }
+                
+                # Parse individual properties
+                prop_pattern = r'([^:;]+)\s*:\s*([^;]+)'
+                props = re.findall(prop_pattern, properties)
+                
+                for prop_name, prop_value in props:
+                    prop_name = prop_name.strip()
+                    prop_value = prop_value.strip()
+                    css_rule['properties'][prop_name] = prop_value
+                    
+                    # Extract colors from this property
+                    for color_pattern in color_patterns:
+                        colors = re.findall(color_pattern, prop_value, re.IGNORECASE)
+                        css_rule['colors'].extend([c.strip().lower() for c in colors])
+                    
+                    # Extract fonts from this property
+                    if 'font' in prop_name.lower():
+                        fonts = [f.strip().strip('"\'') for f in prop_value.split(',')]
+                        css_rule['fonts'].extend([f for f in fonts if f and f not in ['inherit', 'initial', 'unset', 'normal', 'bold', 'italic']])
+                    
+                    # Extract images from this property
+                    if 'url(' in prop_value:
+                        url_match = re.search(r'url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)', prop_value)
+                        if url_match:
+                            image_url = self.resolve_url(url_match.group(1), base_url)
+                            css_rule['images'].append(image_url)
+                
+                css_data['css_rules'].append(css_rule)
+    
+    def parse_inline_style_comprehensive(self, style_content, css_data, base_url):
+        """Parse inline styles comprehensively"""
+        import re
+        properties = {}
+        
+        # Split style into property-value pairs
+        prop_pattern = r'([^:;]+)\s*:\s*([^;]+)'
+        props = re.findall(prop_pattern, style_content)
+        
+        for prop_name, prop_value in props:
+            prop_name = prop_name.strip()
+            prop_value = prop_value.strip()
+            properties[prop_name] = prop_value
+            
+            # Extract colors
+            color_patterns = [
+                r'#[0-9a-fA-F]{3,8}',
+                r'rgb\s*\([^)]+\)',
+                r'rgba\s*\([^)]+\)',
+                r'hsl\s*\([^)]+\)',
+                r'hsla\s*\([^)]+\)',
+                r'\b(?:red|blue|green|yellow|purple|orange|pink|brown|black|white|gray|grey|cyan|magenta|lime|navy|olive|teal|silver|maroon|aqua|fuchsia)\b'
+            ]
+            
+            for pattern in color_patterns:
+                colors = re.findall(pattern, prop_value, re.IGNORECASE)
+                for color in colors:
+                    css_data['extracted_colors'].add(color.strip().lower())
+            
+            # Extract fonts
+            if 'font' in prop_name.lower():
+                fonts = [f.strip().strip('"\'') for f in prop_value.split(',')]
+                for font in fonts:
+                    if font and font not in ['inherit', 'initial', 'unset', 'normal', 'bold', 'italic']:
+                        css_data['extracted_fonts'].add(font)
+            
+            # Extract background images
+            if 'url(' in prop_value:
+                url_match = re.search(r'url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)', prop_value)
+                if url_match:
+                    image_url = self.resolve_url(url_match.group(1), base_url)
+                    css_data['background_images'].add(image_url)
+        
+        return properties
+    
+    def extract_html_colors(self, soup, css_data):
+        """Extract colors from HTML attributes"""
+        # Extract colors from deprecated HTML attributes
+        color_attributes = ['bgcolor', 'color', 'text', 'link', 'vlink', 'alink']
+        
+        for attr in color_attributes:
+            elements = soup.find_all(attrs={attr: True})
+            for element in elements:
+                color = element.get(attr)
+                if color:
+                    css_data['extracted_colors'].add(color.strip().lower())
+    
+    def extract_html_fonts(self, soup, css_data):
+        """Extract fonts from HTML attributes and elements"""
+        # Extract fonts from face attribute (deprecated but still used)
+        font_elements = soup.find_all('font', face=True)
+        for element in font_elements:
+            face = element.get('face')
+            if face:
+                fonts = [f.strip().strip('"\'') for f in face.split(',')]
+                for font in fonts:
+                    if font:
+                        css_data['extracted_fonts'].add(font)
+        
+        # Extract web fonts from link elements
+        font_links = soup.find_all('link', href=True)
+        for link in font_links:
+            href = link.get('href', '')
+            if 'fonts.googleapis.com' in href or 'fonts.gstatic.com' in href or 'font' in href.lower():
+                # Extract font family from Google Fonts URL
+                import re
+                family_match = re.search(r'family=([^&]+)', href)
+                if family_match:
+                    font_family = family_match.group(1).replace('+', ' ')
+                    css_data['extracted_fonts'].add(font_family)
+    
+    def extract_html_images(self, soup, css_data, base_url):
+        """Extract images from HTML elements"""
+        # Extract from img tags
+        img_elements = soup.find_all('img', src=True)
+        for img in img_elements:
+            src = img.get('src')
+            if src:
+                full_url = self.resolve_url(src, base_url)
+                css_data['background_images'].add(full_url)
+        
+        # Extract from other elements with image attributes
+        image_attributes = ['background', 'src', 'poster', 'data-src', 'data-background']
+        for attr in image_attributes:
+            elements = soup.find_all(attrs={attr: True})
+            for element in elements:
+                image_url = element.get(attr)
+                if image_url and ('.' in image_url):  # Basic check for image URL
+                    full_url = self.resolve_url(image_url, base_url)
+                    css_data['background_images'].add(full_url)
+    
+    def fetch_external_css_safe(self, css_url):
+        """Safely fetch external CSS content"""
+        try:
+            import requests
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+            response = requests.get(css_url, headers=headers, timeout=5)
+            response.raise_for_status()
+            return response.text
+        except Exception as e:
+            print(f"Failed to fetch CSS from {css_url}: {e}")
+            return None
+    
+    def resolve_url(self, url, base_url):
+        """Resolve relative URLs to absolute URLs"""
+        try:
+            from urllib.parse import urljoin, urlparse
+            if urlparse(url).netloc:  # Already absolute
+                return url
+            return urljoin(base_url, url)
+        except Exception:
+            return url
     
     def extract_page_colors(self, soup, css_data):
         """Extract real colors used on the page"""

@@ -1,0 +1,9 @@
+{
+  "name": "Website to Figma Enhanced",
+  "id": "website-to-figma-enhanced",
+  "api": "1.0.0",
+  "main": "code_enhanced.js",
+  "ui": "ui_enhanced.html",
+  "capabilities": [],
+  "enableProposedApi": false
+}

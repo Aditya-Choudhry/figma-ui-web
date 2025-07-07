@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Website to Figma Enhanced</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-height: 400px;
+    }
+    .container { max-width: 400px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 24px; }
+    .header h1 { margin: 0 0 8px 0; font-size: 24px; font-weight: 600; }
+    .header p { margin: 0; opacity: 0.9; font-size: 14px; }
+    
+    .tabs { 
+      display: flex; 
+      margin-bottom: 20px; 
+      border-radius: 8px; 
+      background: rgba(255,255,255,0.1); 
+      overflow: hidden;
+    }
+    .tab { 
+      flex: 1; 
+      padding: 12px; 
+      text-align: center; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+      font-weight: 500;
+    }
+    .tab.active { 
+      background: rgba(255,255,255,0.2); 
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
+    .form-group input, .form-group textarea { 
+      width: 100%; 
+      padding: 12px; 
+      border: none; 
+      border-radius: 6px; 
+      background: rgba(255,255,255,0.9); 
+      color: #333; 
+      font-size: 14px; 
+      box-sizing: border-box;
+    }
+    .form-group textarea {
+      resize: vertical;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+    .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+    .checkbox-label input[type="checkbox"] { width: auto; margin: 0; }
+    
+    .btn { 
+      width: 100%; 
+      padding: 14px; 
+      border: none; 
+      border-radius: 6px; 
+      background: rgba(255,255,255,0.2); 
+      color: white; 
+      font-size: 16px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+      margin-bottom: 12px;
+    }
+    .btn:hover { background: rgba(255,255,255,0.3); transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    
+    .status { 
+      padding: 12px; 
+      border-radius: 6px; 
+      background: rgba(255,255,255,0.1); 
+      text-align: center; 
+      font-size: 14px; 
+      min-height: 20px;
+    }
+    .status.loading { background: rgba(255,193,7,0.2); }
+    .status.success { background: rgba(40,167,69,0.2); }
+    .status.error { background: rgba(220,53,69,0.2); }
+    
+    .example-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 12px;
+      border-radius: 4px;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    .example-btn:hover { background: rgba(255,255,255,0.25); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🌐 Website to Figma Enhanced</h1>
+      <p>Capture websites or convert JSON to Figma layouts</p>
+    </div>
+    
+    <div class="tabs">
+      <div class="tab active" data-tab="website">Website Capture</div>
+      <div class="tab" data-tab="json">JSON Import</div>
+    </div>
+    
+    <!-- Website Capture Tab -->
+    <div id="website-content" class="tab-content active">
+      <div class="form-group">
+        <label for="websiteUrl">Website URL</label>
+        <input type="url" id="websiteUrl" placeholder="https://example.com" value="https://example.com">
+      </div>
+      <div class="form-group">
+        <label>Capture Viewports</label>
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="desktop" checked>
+            Desktop (1440px)
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="tablet" checked>
+            Tablet (768px)
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="mobile" checked>
+            Mobile (375px)
+          </label>
+        </div>
+      </div>
+      <button id="captureBtn" class="btn">Capture Responsive Views</button>
+    </div>
+    
+    <!-- JSON Import Tab -->
+    <div id="json-content" class="tab-content">
+      <div class="form-group">
+        <label for="jsonInput">JSON Design Structure</label>
+        <div class="example-btn" onclick="loadExample()">Load Example</div>
+        <textarea id="jsonInput" rows="10" placeholder='{"name": "My Design", "width": 800, "height": 600, "children": [...]}'></textarea>
+      </div>
+      <button id="jsonBtn" class="btn">Create from JSON</button>
+    </div>
+    
+    <div id="status" class="status">Select a tab to get started</div>
+  </div>
+
+  <script>
+    console.log('Enhanced UI loaded with JSON support');
+    
+    // Tab switching functionality
+    var tabs = document.querySelectorAll('.tab');
+    var tabContents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var targetTab = this.getAttribute('data-tab');
+        
+        // Remove active class from all tabs and contents
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        tabContents.forEach(function(tc) { tc.classList.remove('active'); });
+        
+        // Add active class to clicked tab and corresponding content
+        this.classList.add('active');
+        document.getElementById(targetTab + '-content').classList.add('active');
+        
+        updateStatus(targetTab === 'website' ? 'Enter a website URL and select viewports' : 'Paste or create JSON structure', 'info');
+      });
+    });
+    
+    // Website capture functionality
+    var captureBtn = document.getElementById('captureBtn');
+    var urlInput = document.getElementById('websiteUrl');
+    var status = document.getElementById('status');
+    
+    captureBtn.onclick = function() {
+      var url = urlInput.value.trim();
+      if (!url) {
+        updateStatus('Please enter a website URL', 'error');
+        return;
+      }
+      var selectedViewports = [];
+      if (document.getElementById('desktop').checked) selectedViewports.push('desktop');
+      if (document.getElementById('tablet').checked) selectedViewports.push('tablet');
+      if (document.getElementById('mobile').checked) selectedViewports.push('mobile');
+      if (selectedViewports.length === 0) {
+        updateStatus('Please select at least one viewport', 'error');
+        return;
+      }
+      captureBtn.disabled = true;
+      updateStatus('Starting capture for ' + selectedViewports.length + ' viewports...', 'loading');
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'captureResponsive', 
+          url: url, 
+          viewports: selectedViewports 
+        } 
+      }, '*');
+    };
+    
+    // JSON creation functionality
+    var jsonBtn = document.getElementById('jsonBtn');
+    var jsonInput = document.getElementById('jsonInput');
+    
+    jsonBtn.onclick = function() {
+      var jsonText = jsonInput.value.trim();
+      if (!jsonText) {
+        updateStatus('Please enter JSON structure', 'error');
+        return;
+      }
+      
+      try {
+        var jsonData = JSON.parse(jsonText);
+        jsonBtn.disabled = true;
+        updateStatus('Creating Figma design from JSON...', 'loading');
+        parent.postMessage({ 
+          pluginMessage: { 
+            type: 'createFromJSON', 
+            jsonData: jsonData 
+          } 
+        }, '*');
+      } catch (e) {
+        updateStatus('Invalid JSON format: ' + e.message, 'error');
+      }
+    };
+    
+    // Load example JSON
+    function loadExample() {
+      var example = {
+        "name": "Sample Design",
+        "width": 800,
+        "height": 600,
+        "children": [
+          {
+            "type": "text",
+            "content": "Hello World",
+            "fontSize": 32,
+            "color": "#2563eb",
+            "x": 50,
+            "y": 50,
+            "width": 300,
+            "height": 40
+          },
+          {
+            "type": "rectangle",
+            "width": 200,
+            "height": 100,
+            "color": "#10b981",
+            "cornerRadius": 8,
+            "x": 50,
+            "y": 120
+          },
+          {
+            "type": "frame",
+            "width": 400,
+            "height": 200,
+            "backgroundColor": "#f3f4f6",
+            "x": 300,
+            "y": 50,
+            "children": [
+              {
+                "type": "text",
+                "content": "Nested Content",
+                "fontSize": 18,
+                "color": "#374151",
+                "x": 20,
+                "y": 20
+              },
+              {
+                "type": "rectangle",
+                "width": 150,
+                "height": 60,
+                "color": "#ef4444",
+                "x": 20,
+                "y": 60
+              }
+            ]
+          }
+        ]
+      };
+      jsonInput.value = JSON.stringify(example, null, 2);
+      updateStatus('Example JSON loaded - click "Create from JSON" to convert', 'success');
+    }
+    
+    // Handle messages from plugin
+    window.onmessage = function(event) {
+      if (!event.data.pluginMessage) return;
+      var messageData = event.data.pluginMessage;
+      
+      if (messageData.type === 'captureComplete') {
+        captureBtn.disabled = false;
+        jsonBtn.disabled = false;
+        
+        if (messageData.success) {
+          updateStatus(messageData.message || 'Operation completed successfully!', 'success');
+        } else {
+          updateStatus(messageData.error || 'Operation failed', 'error');
+        }
+      }
+    };
+    
+    function updateStatus(message, type) {
+      status.textContent = message;
+      status.className = 'status ' + (type || 'info');
+    }
+    
+    // Initialize
+    updateStatus('Enter a website URL and select viewports to start', 'info');
+  </script>
+</body>
+</html>

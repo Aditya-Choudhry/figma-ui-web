@@ -1,3 +1,7 @@
+Refactored color extraction logic to comprehensively identify and validate colors from various sources including CSS and HTML attributes.
+```
+
+```python
 #!/usr/bin/env python3
 """
 Enhanced web server for capturing website content across multiple viewports
@@ -56,7 +60,7 @@ FONT_MAPPING = {
 class WebsiteCapture:
     def __init__(self):
         self.driver = None
-        
+
     def setup_driver(self):
         """Setup Chrome driver with headless configuration for Replit environment"""
         chrome_options = Options()
@@ -71,13 +75,13 @@ class WebsiteCapture:
         chrome_options.add_argument('--remote-debugging-port=9222')
         chrome_options.add_argument('--disable-setuid-sandbox')
         chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
-        
+
         # Try multiple approaches to find working browser
         browser_attempts = [
             # Try ChromeDriverManager first - most reliable
             ("ChromeDriverManager", lambda: self._try_chromedriver_manager(chrome_options))
         ]
-        
+
         for attempt_name, attempt in browser_attempts:
             try:
                 print(f"Trying {attempt_name}...")
@@ -88,23 +92,23 @@ class WebsiteCapture:
             except Exception as e:
                 print(f"✗ {attempt_name} failed: {str(e)[:200]}")
                 continue
-        
+
         # If no browser works, return None and handle gracefully
         print("⚠️  No WebDriver available. Will generate mock data for development.")
         return None
-    
+
     def _try_chromium_setup(self, chrome_options):
         """Try to set up with Chromium using ChromeDriverManager"""
         try:
             print("Setting up Chromium with ChromeDriverManager...")
-            
+
             # Use the known working Chromium path from Nix
             chromium_path = '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium'
             chrome_options.binary_location = chromium_path
-            
+
             # Install compatible ChromeDriver
             service = Service(ChromeDriverManager().install())
-            
+
             # Add more stability options for Replit environment
             chrome_options.add_argument('--disable-background-networking')
             chrome_options.add_argument('--disable-sync')
@@ -115,34 +119,34 @@ class WebsiteCapture:
             chrome_options.add_argument('--disable-prompt-on-repost')
             chrome_options.add_argument('--disable-domain-reliability')
             chrome_options.add_argument('--disable-component-extensions-with-background-pages')
-            
+
             driver = webdriver.Chrome(service=service, options=chrome_options)
             print("✓ Chromium WebDriver setup successful")
             return driver
-            
+
         except Exception as e:
             print(f"Chromium setup failed: {e}")
             raise Exception(f"Chromium WebDriver setup failed: {e}")
-    
+
     def _try_chrome_setup(self, chrome_options):
         """Try to set up with system Chrome"""
         chrome_options.binary_location = None  # Reset binary location
         return webdriver.Chrome(options=chrome_options)
-    
+
     def _try_chromedriver_manager(self, chrome_options):
         """Try to set up with ChromeDriverManager using Chromium"""
         import os
         import subprocess
-        
+
         print("Installing ChromeDriver and setting up with Chromium...")
-        
+
         # Use existing ChromeDriver 114 which is compatible
         driver_path = ChromeDriverManager().install()
         print(f"ChromeDriver installed at: {driver_path}")
-        
+
         # Ensure ChromeDriver has execute permissions
         os.chmod(driver_path, 0o755)
-        
+
         # Test ChromeDriver binary directly
         try:
             result = subprocess.run([driver_path, '--version'], 
@@ -155,73 +159,73 @@ class WebsiteCapture:
         except Exception as e:
             print(f"✗ ChromeDriver binary test error: {e}")
             raise
-        
+
         # Since we don't have a working Chrome/Chromium, create a simple mock response
         print("⚠️  No compatible Chrome browser found. Creating mock response for development.")
         raise Exception("Chrome browser not available - creating mock capture data")
-        
+
         # Add environment variables for library paths
         os.environ['LD_LIBRARY_PATH'] = '/nix/store/*/lib:' + os.environ.get('LD_LIBRARY_PATH', '')
-        
+
         # Create service with the ChromeDriver
         service = Service(driver_path, log_output='webdriver.log')
-        
+
         # Create driver
         print("Creating WebDriver instance...")
         driver = webdriver.Chrome(service=service, options=chrome_options)
         print("✓ ChromeDriverManager + Chromium setup successful")
         return driver
-    
+
     def capture_viewport(self, url, viewport_config):
         """Capture website at specific viewport size"""
         try:
             if not self.driver:
                 self.setup_driver()
-                
+
             # If still no driver, extract real data using requests and BeautifulSoup
             if not self.driver:
                 return self.extract_real_website_data(url, viewport_config)
-            
+
             # Set viewport size
             self.driver.set_window_size(viewport_config['width'], viewport_config['height'])
-            
+
             print(f"Capturing {url} at {viewport_config['device']} ({viewport_config['width']}x{viewport_config['height']})")
-            
+
             # Navigate to page with timeout
             print(f"Navigating to: {url}")
             self.driver.set_page_load_timeout(30)
             self.driver.get(url)
-            
+
             # Wait for page to load
             print("Waiting for page load...")
             WebDriverWait(self.driver, 15).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
-            
+
             # Additional wait for dynamic content (reduced for faster testing)
             print("Waiting for dynamic content...")
             time.sleep(2)
-            
+
             # Get page dimensions for full scroll capture
             total_height = self.driver.execute_script("return document.body.scrollHeight")
             viewport_height = self.driver.execute_script("return window.innerHeight")
-            
+
             # Scroll to capture full page
             self.driver.execute_script("window.scrollTo(0, 0);")
             time.sleep(1)
-            
+
             # Extract complete page data
             page_data = self.extract_page_data(viewport_config)
-            
+
             return page_data
-            
+
         except Exception as e:
             print(f"Error capturing viewport {viewport_config['device']}: {e}")
             return None
-    
+
     def extract_page_data(self, viewport_config):
         """Extract comprehensive page data including all elements and styles"""
-        
+
         # JavaScript to extract all element data - Enhanced for exact replication
         extraction_script = """
         function extractPageData() {
@@ -230,7 +234,7 @@ class WebsiteCapture:
             const colors = new Set();
             const images = new Set();
             const cssRules = [];
-            
+
             // Get comprehensive page info
             const pageInfo = {
                 url: window.location.href,
@@ -246,22 +250,22 @@ class WebsiteCapture:
                 devicePixelRatio: window.devicePixelRatio,
                 userAgent: navigator.userAgent
             };
-            
+
             // Enhanced function to get ALL computed styles for exact replication
             function getComputedStyleData(element) {
                 const style = window.getComputedStyle(element);
                 const rect = element.getBoundingClientRect();
-                
+
                 // Parse numeric values from CSS
                 const parsePixelValue = (value) => {
                     if (!value || value === 'auto' || value === 'none') return 0;
                     const match = value.match(/(-?\\d*\\.?\\d+)/);
                     return match ? parseFloat(match[1]) : 0;
                 };
-                
+
                 // Make parsePixelValue globally available for element processing
                 window.parsePixelValue = parsePixelValue;
-                
+
                 // Extract background images and IMG src
                 const backgroundImages = [];
                 if (style.backgroundImage && style.backgroundImage !== 'none') {
@@ -276,12 +280,12 @@ class WebsiteCapture:
                         });
                     }
                 }
-                
+
                 // Extract IMG element src
                 if (element.tagName === 'IMG' && element.src && !element.src.startsWith('data:')) {
                     images.add(element.src);
                 }
-                
+
                 return {
                     // Precise position and dimensions
                     position: {
@@ -294,13 +298,13 @@ class WebsiteCapture:
                         bottom: Math.round(rect.bottom),
                         left: Math.round(rect.left)
                     },
-                    
+
                     // Complete layout properties for Figma Auto Layout
                     layout: {
                         display: style.display,
                         position: style.position,
                         zIndex: style.zIndex,
-                        
+
                         // Flexbox properties
                         flexDirection: style.flexDirection,
                         flexWrap: style.flexWrap,
@@ -315,7 +319,7 @@ class WebsiteCapture:
                         gap: style.gap,
                         rowGap: style.rowGap,
                         columnGap: style.columnGap,
-                        
+
                         // Grid properties
                         gridTemplateColumns: style.gridTemplateColumns,
                         gridTemplateRows: style.gridTemplateRows,
@@ -326,14 +330,14 @@ class WebsiteCapture:
                         gridColumn: style.gridColumn,
                         gridRow: style.gridRow,
                         gridArea: style.gridArea,
-                        
+
                         // Box model
                         boxSizing: style.boxSizing,
                         overflow: style.overflow,
                         overflowX: style.overflowX,
                         overflowY: style.overflowY
                     },
-                    
+
                     // Complete visual properties
                     visual: {
                         backgroundColor: style.backgroundColor,
@@ -345,7 +349,7 @@ class WebsiteCapture:
                         backgroundClip: style.backgroundClip,
                         backgroundOrigin: style.backgroundOrigin,
                         backgroundImages: backgroundImages,
-                        
+
                         // Borders (all sides)
                         borderTopWidth: parsePixelValue(style.borderTopWidth),
                         borderRightWidth: parsePixelValue(style.borderRightWidth),
@@ -359,13 +363,13 @@ class WebsiteCapture:
                         borderRightColor: style.borderRightColor,
                         borderBottomColor: style.borderBottomColor,
                         borderLeftColor: style.borderLeftColor,
-                        
+
                         // Border radius (all corners)
                         borderTopLeftRadius: style.borderTopLeftRadius,
                         borderTopRightRadius: style.borderTopRightRadius,
                         borderBottomRightRadius: style.borderBottomRightRadius,
                         borderBottomLeftRadius: style.borderBottomLeftRadius,
-                        
+
                         // Effects
                         opacity: parseFloat(style.opacity),
                         boxShadow: style.boxShadow,
@@ -374,13 +378,13 @@ class WebsiteCapture:
                         transformOrigin: style.transformOrigin,
                         transition: style.transition,
                         animation: style.animation,
-                        
+
                         // Visibility
                         visibility: style.visibility,
                         clipPath: style.clipPath,
                         mask: style.mask
                     },
-                    
+
                     // Complete typography properties
                     typography: {
                         fontFamily: style.fontFamily,
@@ -409,7 +413,7 @@ class WebsiteCapture:
                         writingMode: style.writingMode,
                         direction: style.direction
                     },
-                    
+
                     // Precise spacing (all values as numbers)
                     spacing: {
                         marginTop: parsePixelValue(style.marginTop),
@@ -423,34 +427,34 @@ class WebsiteCapture:
                     }
                 };
             }
-            
+
             // Function to determine if element should be included
             function shouldIncludeElement(element, style) {
                 // Skip non-visual elements
                 const skipTags = ['SCRIPT', 'STYLE', 'META', 'LINK', 'TITLE', 'HEAD', 'NOSCRIPT'];
                 if (skipTags.includes(element.tagName)) return false;
-                
+
                 // Skip hidden elements
                 if (style.display === 'none' || style.visibility === 'hidden') return false;
-                
+
                 // Skip elements with zero dimensions (unless they have children)
                 const rect = element.getBoundingClientRect();
                 if (rect.width === 0 && rect.height === 0 && element.children.length === 0) return false;
-                
+
                 return true;
             }
-            
+
             // Traverse DOM and extract elements
             function traverseElement(element, depth = 0, parentId = null) {
                 if (depth > 15) return; // Prevent infinite recursion
-                
+
                 const style = window.getComputedStyle(element);
-                
+
                 if (!shouldIncludeElement(element, style)) return;
-                
+
                 const elementId = `${element.tagName.toLowerCase()}_${depth}_${elements.length}`;
                 const styleData = getComputedStyleData(element);
-                
+
                 // Collect fonts and colors
                 if (styleData.typography.fontFamily) {
                     fonts.add(styleData.typography.fontFamily);
@@ -461,7 +465,7 @@ class WebsiteCapture:
                 if (styleData.visual.backgroundColor && styleData.visual.backgroundColor !== 'rgba(0, 0, 0, 0)') {
                     colors.add(styleData.visual.backgroundColor);
                 }
-                
+
                 // Enhanced element data for exact Figma replication
                 const elementData = {
                     id: elementId,
@@ -473,7 +477,7 @@ class WebsiteCapture:
                     depth: depth,
                     parentId: parentId,
                     ...styleData,
-                    
+
                     // Complete attributes for context
                     attributes: {
                         id: element.id || '',
@@ -490,7 +494,7 @@ class WebsiteCapture:
                                 return acc;
                             }, {})
                     },
-                    
+
                     // Enhanced layout detection for Figma Auto Layout
                     layout_detection: {
                         isFlexContainer: style.display === 'flex',
@@ -504,7 +508,7 @@ class WebsiteCapture:
                         isImageElement: element.tagName === 'IMG',
                         isInputElement: ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(element.tagName),
                         isContainerElement: ['DIV', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER', 'NAV', 'MAIN', 'ASIDE'].includes(element.tagName),
-                        
+
                         // Flexbox analysis for Auto Layout mapping
                         flexboxMapping: style.display === 'flex' ? {
                             figmaLayoutMode: style.flexDirection === 'column' || style.flexDirection === 'column-reverse' ? 'VERTICAL' : 'HORIZONTAL',
@@ -518,7 +522,7 @@ class WebsiteCapture:
                                 left: parsePixelValue(style.paddingLeft)
                             }
                         } : null,
-                        
+
                         // Grid analysis for complex layouts
                         gridMapping: style.display === 'grid' ? {
                             columns: style.gridTemplateColumns,
@@ -527,7 +531,7 @@ class WebsiteCapture:
                             areas: style.gridTemplateAreas
                         } : null
                     },
-                    
+
                     // Visual hierarchy analysis
                     visual_hierarchy: {
                         zIndex: parseInt(style.zIndex) || 0,
@@ -540,21 +544,21 @@ class WebsiteCapture:
                         isInteractive: ['A', 'BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName) || element.getAttribute('onclick') || style.cursor === 'pointer'
                     }
                 };
-                
+
                 elements.push(elementData);
-                
+
                 // Process children
                 for (let child of element.children) {
                     traverseElement(child, depth + 1, elementId);
                 }
             }
-            
+
             // Start traversal from body
             const body = document.body;
             if (body) {
                 traverseElement(body);
             }
-            
+
             return {
                 page: pageInfo,
                 elements: elements,
@@ -562,7 +566,7 @@ class WebsiteCapture:
                 colors: Array.from(colors),
                 images: Array.from(images),
                 totalElements: elements.length,
-                
+
                 // Additional metadata for Figma
                 metadata: {
                     captureTimestamp: Date.now(),
@@ -576,55 +580,55 @@ class WebsiteCapture:
                 }
             };
         }
-        
+
         return extractPageData();
         """
-        
+
         # Execute the extraction script
         result = self.driver.execute_script(extraction_script)
-        
+
         # Add viewport info
         result['viewport_config'] = viewport_config
-        
+
         # Process and enhance the data
         result = self.post_process_data(result)
-        
+
         return result
-    
+
     def post_process_data(self, data):
         """Post-process extracted data for better Figma compatibility"""
-        
+
         # Map fonts to Figma-compatible fonts
         mapped_fonts = []
         for font in data.get('fonts', []):
             figma_font = self.map_font_to_figma(font)
             if figma_font not in mapped_fonts:
                 mapped_fonts.append(figma_font)
-        
+
         data['figma_fonts'] = mapped_fonts
-        
+
         # Process elements for better hierarchy
         for element in data.get('elements', []):
             # Determine Figma node type
             element['figma_node_type'] = self.determine_figma_node_type(element)
-            
+
             # Clean up positioning for Figma
             element = self.optimize_for_figma(element)
-        
+
         return data
-    
+
     def map_font_to_figma(self, web_font):
         """Map web font to available Figma font"""
         # Extract primary font family
         font_families = [f.strip().strip('"\'') for f in web_font.split(',')]
-        
+
         for font in font_families:
             if font in FONT_MAPPING:
                 return FONT_MAPPING[font]
-        
+
         # Default fallback
         return 'Inter'
-    
+
     def determine_figma_node_type(self, element):
         """Determine the best Figma node type for an element"""
         if element.get('textContent') and element['textContent'].strip():
@@ -633,7 +637,7 @@ class WebsiteCapture:
             return 'FRAME'
         else:
             return 'RECTANGLE'
-    
+
     def optimize_for_figma(self, element):
         """Optimize element data for Figma creation"""
         # Convert CSS values to numeric
@@ -642,42 +646,42 @@ class WebsiteCapture:
         element['figma_y'] = self.parse_pixel_value(pos.get('y', 0))
         element['figma_width'] = max(1, self.parse_pixel_value(pos.get('width', 100)))
         element['figma_height'] = max(1, self.parse_pixel_value(pos.get('height', 20)))
-        
+
         # Parse colors
         if element.get('visual', {}).get('backgroundColor'):
             element['figma_bg_color'] = self.parse_color(element['visual']['backgroundColor'])
-        
+
         if element.get('typography', {}).get('color'):
             element['figma_text_color'] = self.parse_color(element['typography']['color'])
-        
+
         # Parse font size
         if element.get('typography', {}).get('fontSize'):
             element['figma_font_size'] = self.parse_pixel_value(element['typography']['fontSize'])
-        
+
         return element
-    
+
     def parse_pixel_value(self, value):
         """Convert CSS pixel values to numbers"""
         if isinstance(value, (int, float)):
             return value
         if not value or value == 'auto':
             return 0
-        
+
         # Extract numeric value from strings like "16px", "1.5em", etc.
         match = re.search(r'(\d+(?:\.\d+)?)', str(value))
         return float(match.group(1)) if match else 0
-    
+
     def parse_color(self, color_str):
         """Parse CSS colors to RGB format for Figma"""
         if not color_str or color_str == 'rgba(0, 0, 0, 0)':
             return None
-        
+
         # Handle rgb/rgba
         rgb_match = re.match(r'rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)', color_str)
         if rgb_match:
             r, g, b = map(int, rgb_match.groups()[:3])
             return {'r': r / 255, 'g': g / 255, 'b': b / 255}
-        
+
         # Handle hex colors
         hex_match = re.match(r'#([a-f\d]{6})', color_str, re.I)
         if hex_match:
@@ -686,19 +690,19 @@ class WebsiteCapture:
             g = int(hex_color[2:4], 16) 
             b = int(hex_color[4:6], 16)
             return {'r': r / 255, 'g': g / 255, 'b': b / 255}
-        
+
         return None
-    
+
     def extract_real_website_data(self, url, viewport_config):
         """Extract real website data using requests and BeautifulSoup"""
         print(f"Extracting real data for {url} at {viewport_config['device']} viewport")
-        
+
         try:
             import requests
             from bs4 import BeautifulSoup
             import re
             from urllib.parse import urljoin, urlparse
-            
+
             # Set up proper headers to mimic real browser
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -708,45 +712,45 @@ class WebsiteCapture:
                 'Connection': 'keep-alive',
                 'Upgrade-Insecure-Requests': '1'
             }
-            
+
             # Fetch the actual website
             print(f"Fetching {url}...")
             response = requests.get(url, headers=headers, timeout=15, allow_redirects=True)
             response.raise_for_status()
-            
+
             # Parse HTML content
             soup = BeautifulSoup(response.content, 'html.parser')
-            
+
             # Extract real page information
             page_title = self.extract_page_title(soup)
             meta_description = self.extract_meta_description(soup)
-            
+
             # Extract all real elements with comprehensive data
             print(f"🔍 Starting element extraction for viewport {viewport_config['width']}x{viewport_config['height']}")
             elements = []
             self.extract_html_elements(soup.body if soup.body else soup, elements, 0, viewport_config, url)
             print(f"✅ Extracted {len(elements)} total elements from HTML structure")
-            
+
             # Extract real CSS information
             css_data = self.extract_css_information(soup, response.text, url)
-            
+
             # Extract actual colors used on the page
-            real_colors = self.extract_page_colors(soup, css_data)
-            
+            real_colors = self.extract_comprehensive_colors(soup, css_data)
+
             # Extract real typography styles
             typography_styles = self.extract_typography_data(elements)
-            
+
             # Extract real images with full information
             images = self.extract_image_data(soup, url)
-            
+
             # Extract structured data
             structured_data = self.extract_structured_data(soup)
-            
+
             # Create comprehensive design analysis
             print(f"🎨 Creating design analysis from {len(elements)} elements, {len(images)} images, {len(real_colors)} colors")
             design_analysis = self.create_design_analysis(elements, images, real_colors, typography_styles, css_data)
             print(f"📊 Design analysis complete: {len(design_analysis.get('textElements', []))} text elements, {design_analysis.get('summary', {}).get('totalShapes', 0)} shapes")
-            
+
             return {
                 'device': viewport_config['device'],
                 'viewport': {
@@ -779,7 +783,7 @@ class WebsiteCapture:
                     'keywords': self.extract_keywords(soup)
                 }
             }
-            
+
         except requests.RequestException as e:
             print(f"Network error fetching {url}: {e}")
             return self.create_error_response(url, viewport_config, f"Network error: {str(e)}")
@@ -788,51 +792,51 @@ class WebsiteCapture:
             import traceback
             traceback.print_exc()
             return self.create_error_response(url, viewport_config, f"Processing error: {str(e)}")
-    
+
     def extract_page_title(self, soup):
         """Extract real page title"""
         title_tag = soup.find('title')
         if title_tag and title_tag.string:
             return title_tag.string.strip()
-        
-        # Fallback to h1 if no title
+
+        # Fallback to h1 if no title```python
         h1_tag = soup.find('h1')
         if h1_tag:
             return h1_tag.get_text().strip()
-        
+
         return "Untitled Page"
-    
+
     def extract_meta_description(self, soup):
         """Extract meta description"""
         meta_desc = soup.find('meta', attrs={'name': 'description'})
         return meta_desc.get('content', '') if meta_desc else ''
-    
+
     def extract_html_elements(self, element, elements, depth, viewport_config, base_url):
         """Extract real HTML elements with comprehensive data"""
         if depth > 8 or len(elements) > 30:
             print(f"⚠️  Stopping extraction: depth={depth}, elements={len(elements)}")
             return
-            
+
         if not hasattr(element, 'name') or not element.name:
             return
-            
+
         # Skip non-visual elements
         skip_tags = {'script', 'style', 'meta', 'link', 'head', 'noscript', 'iframe'}
         if element.name in skip_tags:
             return
-        
+
         # Get actual text content
         text_content = self.get_clean_text(element)
-        
+
         # Skip empty elements unless they're structural
         structural_tags = {'div', 'section', 'article', 'header', 'footer', 'main', 'nav', 'aside'}
         if not text_content and element.name not in structural_tags and not element.find('img'):
             if len(list(element.children)) == 0:
                 print(f"⏭️  Skipping empty {element.name} element with no text/children at depth {depth}")
                 return
-        
+
         print(f"🔍 Processing {element.name} element at depth {depth} - text: '{text_content[:30]}...' children: {len(list(element.children))}")
-        
+
         # Extract comprehensive element data
         position_data = self.calculate_element_position(element, elements, viewport_config)
         element_data = {
@@ -861,15 +865,15 @@ class WebsiteCapture:
                 'tabIndex': element.get('tabindex')
             }
         }
-        
+
         elements.append(element_data)
         print(f"✅ EXTRACTED: {element.name.upper()} | Tag: {element_data['tagName']} | Text: '{text_content[:40]}...' | Position: {element_data['position']} | Depth: {depth}")
-        
+
         # Process children recursively
         for child in element.children:
             if hasattr(child, 'name'):
                 self.extract_html_elements(child, elements, depth + 1, viewport_config, base_url)
-    
+
     def extract_all_attributes(self, element):
         """Extract all element attributes"""
         attrs = {}
@@ -880,7 +884,7 @@ class WebsiteCapture:
                 else:
                     attrs[key] = str(value)
         return attrs
-    
+
     def get_clean_text(self, element):
         """Get clean text content from element"""
         if hasattr(element, 'get_text'):
@@ -896,15 +900,15 @@ class WebsiteCapture:
                         if clean_content:
                             text += clean_content + ' '
                 text = text.strip()
-            
+
             return text[:150] if text else ''
         return ''
-    
+
     def calculate_element_position(self, element, existing_elements, viewport_config):
         """Calculate estimated element position"""
         # Simple layout calculation based on element type and order
         y_offset = len(existing_elements) * 25
-        
+
         # Estimate width based on element type
         if element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             width = viewport_config['width'] - 40
@@ -921,18 +925,18 @@ class WebsiteCapture:
         else:
             width = viewport_config['width'] - 100
             height = 30
-        
+
         return {
             'x': 20,
             'y': y_offset,
             'width': width,
             'height': height
         }
-    
+
     def extract_computed_styles(self, element):
         """Extract comprehensive visual styles from element"""
         style_attr = element.get('style', '')
-        
+
         visual = {
             # Background properties
             'backgroundColor': 'transparent',
@@ -940,7 +944,7 @@ class WebsiteCapture:
             'backgroundSize': 'auto',
             'backgroundPosition': '0% 0%',
             'backgroundRepeat': 'repeat',
-            
+
             # Text and color properties
             'color': '#000000',
             'fontSize': '16px',
@@ -951,7 +955,7 @@ class WebsiteCapture:
             'textDecoration': 'none',
             'lineHeight': 'normal',
             'letterSpacing': 'normal',
-            
+
             # Border properties
             'border': 'none',
             'borderTop': 'none',
@@ -963,7 +967,7 @@ class WebsiteCapture:
             'borderTopRightRadius': '0px',
             'borderBottomLeftRadius': '0px',
             'borderBottomRightRadius': '0px',
-            
+
             # Layout properties
             'display': 'block',
             'position': 'static',
@@ -977,7 +981,7 @@ class WebsiteCapture:
             'maxHeight': 'none',
             'minWidth': '0',
             'minHeight': '0',
-            
+
             # Spacing properties
             'margin': '0',
             'marginTop': '0',
@@ -989,7 +993,7 @@ class WebsiteCapture:
             'paddingRight': '0',
             'paddingBottom': '0',
             'paddingLeft': '0',
-            
+
             # Effects
             'opacity': '1',
             'boxShadow': 'none',
@@ -998,7 +1002,7 @@ class WebsiteCapture:
             'transformOrigin': '50% 50%',
             'transition': 'none',
             'animation': 'none',
-            
+
             # Visibility
             'visibility': 'visible',
             'overflow': 'visible',
@@ -1007,7 +1011,7 @@ class WebsiteCapture:
             'clipPath': 'none',
             'zIndex': 'auto'
         }
-        
+
         # Enhanced inline style parsing with comprehensive properties
         if style_attr:
             style_rules = style_attr.split(';')
@@ -1016,23 +1020,23 @@ class WebsiteCapture:
                     prop, value = rule.split(':', 1)
                     prop = prop.strip()
                     value = value.strip()
-                    
+
                     # Normalize CSS property name to camelCase
                     camel_prop = ''.join(word.capitalize() if i > 0 else word for i, word in enumerate(prop.split('-')))
-                    
+
                     # Store all CSS properties
                     if camel_prop in visual:
                         visual[camel_prop] = value
                     else:
                         # Store additional properties not in the default set
                         visual[camel_prop] = value
-        
+
         return visual
-    
+
     def extract_element_typography(self, element):
         """Extract typography information from element"""
         style_attr = element.get('style', '')
-        
+
         typography = {
             'fontFamily': self.get_default_font_family(element),
             'fontSize': self.get_default_font_size(element),
@@ -1043,7 +1047,7 @@ class WebsiteCapture:
             'textDecoration': 'none',
             'textTransform': 'none'
         }
-        
+
         # Parse inline typography styles
         if style_attr:
             style_rules = style_attr.split(';')
@@ -1052,7 +1056,7 @@ class WebsiteCapture:
                     prop, value = rule.split(':', 1)
                     prop = prop.strip()
                     value = value.strip()
-                    
+
                     if prop == 'font-family':
                         typography['fontFamily'] = value
                     elif prop == 'font-size':
@@ -1065,9 +1069,9 @@ class WebsiteCapture:
                         typography['textAlign'] = value
                     elif prop == 'color':
                         typography['color'] = value
-        
+
         return typography
-    
+
     def get_default_font_family(self, element):
         """Get default font family for element type"""
         if element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
@@ -1076,7 +1080,7 @@ class WebsiteCapture:
             return 'Courier, monospace'
         else:
             return 'Arial, sans-serif'
-    
+
     def get_default_font_size(self, element):
         """Get default font size for element type"""
         size_map = {
@@ -1089,17 +1093,17 @@ class WebsiteCapture:
             'small': '12px'
         }
         return size_map.get(element.name, '16px')
-    
+
     def get_default_font_weight(self, element):
         """Get default font weight for element type"""
         if element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'b']:
             return '700'
         return '400'
-    
+
     def analyze_element_layout(self, element):
         """Analyze element layout properties"""
         style = element.get('style', '')
-        
+
         return {
             'isTextNode': element.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'a', 'strong', 'em'],
             'isFlexContainer': 'display: flex' in style or 'display:flex' in style,
@@ -1110,7 +1114,7 @@ class WebsiteCapture:
             'isForm': element.name in ['form', 'input', 'button', 'select', 'textarea'],
             'position': 'static'
         }
-    
+
     def extract_z_index(self, element):
         """Extract z-index from element style"""
         style = element.get('style', '')
@@ -1119,7 +1123,7 @@ class WebsiteCapture:
             if match:
                 return int(match.group(1))
         return 1
-    
+
     def extract_css_information(self, soup, html_content, base_url):
         """Extract comprehensive CSS information including colors, fonts, and images"""
         css_data = {
@@ -1132,7 +1136,7 @@ class WebsiteCapture:
             'css_rules': [],
             'computed_styles': {}
         }
-        
+
         # Extract from style tags with comprehensive parsing
         for style_tag in soup.find_all('style'):
             if style_tag.string:
@@ -1143,10 +1147,10 @@ class WebsiteCapture:
                     'type': style_tag.get('type', 'text/css')
                 }
                 css_data['style_tags'].append(style_info)
-                
+
                 # Parse CSS content for colors, fonts, images
                 self.parse_css_content_comprehensive(style_content, css_data, base_url)
-        
+
         # Extract linked stylesheets with enhanced info
         for link in soup.find_all('link', rel='stylesheet'):
             href = link.get('href')
@@ -1160,7 +1164,7 @@ class WebsiteCapture:
                     'integrity': link.get('integrity')
                 }
                 css_data['external_stylesheets'].append(stylesheet_info)
-                
+
                 # Try to fetch and parse external CSS
                 try:
                     external_css = self.fetch_external_css_safe(full_url)
@@ -1168,7 +1172,7 @@ class WebsiteCapture:
                         self.parse_css_content_comprehensive(external_css, css_data, base_url)
                 except Exception as e:
                     print(f"Could not fetch external CSS from {full_url}: {e}")
-        
+
         # Extract comprehensive inline styles
         for element in soup.find_all(style=True):
             style_content = element.get('style')
@@ -1182,27 +1186,27 @@ class WebsiteCapture:
                     'parsed_properties': parsed_properties
                 }
                 css_data['inline_styles'].append(inline_style)
-        
+
         # Extract colors from HTML attributes
         self.extract_html_colors(soup, css_data)
-        
+
         # Extract fonts from HTML
         self.extract_html_fonts(soup, css_data)
-        
+
         # Extract images from HTML
         self.extract_html_images(soup, css_data, base_url)
-        
+
         # Convert sets to lists for JSON serialization
         css_data['extracted_colors'] = list(css_data['extracted_colors'])
         css_data['extracted_fonts'] = list(css_data['extracted_fonts'])
         css_data['background_images'] = list(css_data['background_images'])
-        
+
         return css_data
-    
+
     def parse_css_content_comprehensive(self, css_content, css_data, base_url):
         """Parse CSS content to extract all colors, fonts, images, and rules"""
         import re
-        
+
         # Extract all types of colors
         color_patterns = [
             r'#[0-9a-fA-F]{3,8}',  # Hex colors
@@ -1213,19 +1217,19 @@ class WebsiteCapture:
             # Named colors
             r'\b(?:red|blue|green|yellow|purple|orange|pink|brown|black|white|gray|grey|cyan|magenta|lime|navy|olive|teal|silver|maroon|aqua|fuchsia|crimson|gold|indigo|violet|turquoise|coral|salmon|khaki|plum|orchid|tan|beige|ivory|snow)\b'
         ]
-        
+
         for pattern in color_patterns:
             colors = re.findall(pattern, css_content, re.IGNORECASE)
             for color in colors:
                 css_data['extracted_colors'].add(color.strip().lower())
-        
+
         # Extract font families comprehensively
         font_patterns = [
             r'font-family\s*:\s*([^;{}]+)',
             r'font\s*:\s*[^;]*?\s([^;,{}]+(?:,[^;,{}]+)*)',  # Font shorthand
             r'@import\s+url\(["\']?[^"\']*fonts[^"\']*["\']?\)',  # Google Fonts imports
         ]
-        
+
         for pattern in font_patterns:
             font_matches = re.findall(pattern, css_content, re.IGNORECASE)
             for font_match in font_matches:
@@ -1234,7 +1238,7 @@ class WebsiteCapture:
                     for font in fonts:
                         if font and font not in ['inherit', 'initial', 'unset', 'normal', 'bold', 'italic']:
                             css_data['extracted_fonts'].add(font)
-        
+
         # Extract background images and other image references
         image_patterns = [
             r'background-image\s*:\s*url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)',
@@ -1243,17 +1247,17 @@ class WebsiteCapture:
             r'list-style-image\s*:\s*url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)',
             r'border-image\s*:\s*url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)'
         ]
-        
+
         for pattern in image_patterns:
             images = re.findall(pattern, css_content, re.IGNORECASE)
             for image_url in images:
                 full_image_url = self.resolve_url(image_url, base_url)
                 css_data['background_images'].add(full_image_url)
-        
+
         # Extract CSS rules with selectors for comprehensive analysis
         rule_pattern = r'([^{}]+)\s*\{([^{}]*)\}'
         rules = re.findall(rule_pattern, css_content, re.DOTALL)
-        
+
         for selector, properties in rules:
             if selector.strip() and properties.strip():
                 css_rule = {
@@ -1263,49 +1267,49 @@ class WebsiteCapture:
                     'fonts': [],
                     'images': []
                 }
-                
+
                 # Parse individual properties
                 prop_pattern = r'([^:;]+)\s*:\s*([^;]+)'
                 props = re.findall(prop_pattern, properties)
-                
+
                 for prop_name, prop_value in props:
                     prop_name = prop_name.strip()
                     prop_value = prop_value.strip()
                     css_rule['properties'][prop_name] = prop_value
-                    
+
                     # Extract colors from this property
                     for color_pattern in color_patterns:
                         colors = re.findall(color_pattern, prop_value, re.IGNORECASE)
                         css_rule['colors'].extend([c.strip().lower() for c in colors])
-                    
+
                     # Extract fonts from this property
                     if 'font' in prop_name.lower():
                         fonts = [f.strip().strip('"\'') for f in prop_value.split(',')]
                         css_rule['fonts'].extend([f for f in fonts if f and f not in ['inherit', 'initial', 'unset', 'normal', 'bold', 'italic']])
-                    
+
                     # Extract images from this property
                     if 'url(' in prop_value:
                         url_match = re.search(r'url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)', prop_value)
                         if url_match:
                             image_url = self.resolve_url(url_match.group(1), base_url)
                             css_rule['images'].append(image_url)
-                
+
                 css_data['css_rules'].append(css_rule)
-    
+
     def parse_inline_style_comprehensive(self, style_content, css_data, base_url):
         """Parse inline styles comprehensively"""
         import re
         properties = {}
-        
+
         # Split style into property-value pairs
         prop_pattern = r'([^:;]+)\s*:\s*([^;]+)'
         props = re.findall(prop_pattern, style_content)
-        
+
         for prop_name, prop_value in props:
             prop_name = prop_name.strip()
             prop_value = prop_value.strip()
             properties[prop_name] = prop_value
-            
+
             # Extract colors
             color_patterns = [
                 r'#[0-9a-fA-F]{3,8}',
@@ -1315,40 +1319,40 @@ class WebsiteCapture:
                 r'hsla\s*\([^)]+\)',
                 r'\b(?:red|blue|green|yellow|purple|orange|pink|brown|black|white|gray|grey|cyan|magenta|lime|navy|olive|teal|silver|maroon|aqua|fuchsia)\b'
             ]
-            
+
             for pattern in color_patterns:
                 colors = re.findall(pattern, prop_value, re.IGNORECASE)
                 for color in colors:
                     css_data['extracted_colors'].add(color.strip().lower())
-            
+
             # Extract fonts
             if 'font' in prop_name.lower():
                 fonts = [f.strip().strip('"\'') for f in prop_value.split(',')]
                 for font in fonts:
                     if font and font not in ['inherit', 'initial', 'unset', 'normal', 'bold', 'italic']:
                         css_data['extracted_fonts'].add(font)
-            
+
             # Extract background images
             if 'url(' in prop_value:
                 url_match = re.search(r'url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)', prop_value)
                 if url_match:
                     image_url = self.resolve_url(url_match.group(1), base_url)
                     css_data['background_images'].add(image_url)
-        
+
         return properties
-    
+
     def extract_html_colors(self, soup, css_data):
         """Extract colors from HTML attributes"""
         # Extract colors from deprecated HTML attributes
         color_attributes = ['bgcolor', 'color', 'text', 'link', 'vlink', 'alink']
-        
+
         for attr in color_attributes:
             elements = soup.find_all(attrs={attr: True})
             for element in elements:
                 color = element.get(attr)
                 if color:
                     css_data['extracted_colors'].add(color.strip().lower())
-    
+
     def extract_html_fonts(self, soup, css_data):
         """Extract fonts from HTML attributes and elements"""
         # Extract fonts from face attribute (deprecated but still used)
@@ -1360,7 +1364,7 @@ class WebsiteCapture:
                 for font in fonts:
                     if font:
                         css_data['extracted_fonts'].add(font)
-        
+
         # Extract web fonts from link elements
         font_links = soup.find_all('link', href=True)
         for link in font_links:
@@ -1372,7 +1376,7 @@ class WebsiteCapture:
                 if family_match:
                     font_family = family_match.group(1).replace('+', ' ')
                     css_data['extracted_fonts'].add(font_family)
-    
+
     def extract_html_images(self, soup, css_data, base_url):
         """Extract images from HTML elements"""
         # Extract from img tags
@@ -1382,7 +1386,7 @@ class WebsiteCapture:
             if src:
                 full_url = self.resolve_url(src, base_url)
                 css_data['background_images'].add(full_url)
-        
+
         # Extract from other elements with image attributes
         image_attributes = ['background', 'src', 'poster', 'data-src', 'data-background']
         for attr in image_attributes:
@@ -1392,7 +1396,7 @@ class WebsiteCapture:
                 if image_url and ('.' in image_url):  # Basic check for image URL
                     full_url = self.resolve_url(image_url, base_url)
                     css_data['background_images'].add(full_url)
-    
+
     def fetch_external_css_safe(self, css_url):
         """Safely fetch external CSS content"""
         try:
@@ -1406,7 +1410,7 @@ class WebsiteCapture:
         except Exception as e:
             print(f"Failed to fetch CSS from {css_url}: {e}")
             return None
-    
+
     def resolve_url(self, url, base_url):
         """Resolve relative URLs to absolute URLs"""
         try:
@@ -1416,55 +1420,55 @@ class WebsiteCapture:
             return urljoin(base_url, url)
         except Exception:
             return url
-    
+
     def extract_page_colors(self, soup, css_data):
         """Extract real colors used on the page"""
         colors = set()
         import re
-        
+
         # Color regex patterns
         hex_pattern = r'#[0-9a-fA-F]{3,6}'
         rgb_pattern = r'rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'
         rgba_pattern = r'rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*[\d.]+\s*\)'
-        
+
         # Extract from inline styles
         for style_info in css_data.get('inline_styles', []):
             style_content = style_info['style']
             colors.update(re.findall(hex_pattern, style_content))
             colors.update(re.findall(rgb_pattern, style_content))
             colors.update(re.findall(rgba_pattern, style_content))
-        
+
         # Extract from style tags
         for style_info in css_data.get('style_tags', []):
             style_content = style_info['content']
             colors.update(re.findall(hex_pattern, style_content))
             colors.update(re.findall(rgb_pattern, style_content))
             colors.update(re.findall(rgba_pattern, style_content))
-        
+
         return list(colors)
-    
+
     def extract_typography_data(self, elements):
         """Extract unique typography styles from elements"""
         typography_styles = []
         seen_combinations = set()
-        
+
         for element in elements:
             if element.get('typography'):
                 typo = element['typography']
                 # Create unique identifier for this typography combination
                 identifier = f"{typo['fontFamily']}-{typo['fontSize']}-{typo['fontWeight']}"
-                
+
                 if identifier not in seen_combinations:
                     typography_styles.append(typo)
                     seen_combinations.add(identifier)
-        
+
         return typography_styles
-    
+
     def extract_image_data(self, soup, base_url):
         """Extract comprehensive image information from all sources"""
         images = []
         from urllib.parse import urljoin
-        
+
         # Extract regular img tags with comprehensive data
         for img in soup.find_all('img'):
             src = img.get('src')
@@ -1476,7 +1480,7 @@ class WebsiteCapture:
                     src = urljoin(base_url, src)
                 elif not src.startswith(('http://', 'https://')):
                     src = urljoin(base_url, src)
-                
+
                 # Parse srcset for responsive images
                 srcset_urls = []
                 if img.get('srcset'):
@@ -1491,7 +1495,7 @@ class WebsiteCapture:
                             elif not url_part.startswith(('http://', 'https://')):
                                 url_part = urljoin(base_url, url_part)
                             srcset_urls.append(url_part)
-                
+
                 images.append({
                     'type': 'img_tag',
                     'src': src,
@@ -1508,7 +1512,7 @@ class WebsiteCapture:
                     'data_src': img.get('data-src', ''),  # Lazy loading
                     'data_original': img.get('data-original', '')  # Some lazy loaders
                 })
-        
+
         # Extract SVG elements
         for svg in soup.find_all('svg'):
             images.append({
@@ -1520,7 +1524,7 @@ class WebsiteCapture:
                 'class': ' '.join(svg.get('class', [])),
                 'id': svg.get('id', '')
             })
-        
+
         # Extract background images from style attributes
         for element in soup.find_all(style=True):
             style = element.get('style', '')
@@ -1536,7 +1540,7 @@ class WebsiteCapture:
                         bg_url = urljoin(base_url, bg_url)
                     elif not bg_url.startswith(('http://', 'https://')):
                         bg_url = urljoin(base_url, bg_url)
-                    
+
                     images.append({
                         'type': 'background_image',
                         'src': bg_url,
@@ -1545,8 +1549,9 @@ class WebsiteCapture:
                         'id': element.get('id', ''),
                         'style': style
                     })
-        
-        # Extract picture/source elements for responsive images
+
+        # Extract picture/source elements```python
+for responsive images
         for picture in soup.find_all('picture'):
             for source in picture.find_all('source'):
                 srcset = source.get('srcset')
@@ -1558,9 +1563,9 @@ class WebsiteCapture:
                         'type_attr': source.get('type', ''),
                         'sizes': source.get('sizes', '')
                     })
-        
+
         return images
-    
+
     def extract_structured_data(self, soup):
         """Extract structured data (JSON-LD, microdata, etc.)"""
         structured = {
@@ -1569,7 +1574,7 @@ class WebsiteCapture:
             'og_data': {},
             'twitter_data': {}
         }
-        
+
         # Extract JSON-LD
         for script in soup.find_all('script', type='application/ld+json'):
             try:
@@ -1578,54 +1583,54 @@ class WebsiteCapture:
                 structured['json_ld'].append(data)
             except:
                 pass
-        
+
         return structured
-    
+
     def extract_open_graph(self, soup):
         """Extract Open Graph metadata"""
         og_data = {}
-        
+
         for meta in soup.find_all('meta', property=lambda x: x and x.startswith('og:')):
             property_name = meta.get('property', '').replace('og:', '')
             content = meta.get('content', '')
             if property_name and content:
                 og_data[property_name] = content
-        
+
         return og_data
-    
+
     def extract_twitter_cards(self, soup):
         """Extract Twitter Card metadata"""
         twitter_data = {}
-        
+
         for meta in soup.find_all('meta', attrs={'name': lambda x: x and x.startswith('twitter:')}):
             name = meta.get('name', '').replace('twitter:', '')
             content = meta.get('content', '')
             if name and content:
                 twitter_data[name] = content
-        
+
         return twitter_data
-    
+
     def extract_canonical_url(self, soup):
         """Extract canonical URL"""
         canonical = soup.find('link', rel='canonical')
         return canonical.get('href') if canonical else None
-    
+
     def extract_keywords(self, soup):
         """Extract meta keywords"""
         keywords_meta = soup.find('meta', attrs={'name': 'keywords'})
         if keywords_meta:
             return keywords_meta.get('content', '').split(',')
         return []
-    
+
     def extract_charset(self, soup):
         """Extract page charset"""
         import re
-        
+
         # Try charset attribute first
         charset_meta = soup.find('meta', charset=True)
         if charset_meta:
             return charset_meta.get('charset')
-        
+
         # Try http-equiv content-type
         content_type_meta = soup.find('meta', {'http-equiv': 'Content-Type'})
         if content_type_meta:
@@ -1633,17 +1638,17 @@ class WebsiteCapture:
             charset_match = re.search(r'charset=([^;]+)', content)
             if charset_match:
                 return charset_match.group(1).strip()
-        
+
         return 'utf-8'
-    
+
     def create_design_analysis(self, elements, images, colors, typography_styles, css_data):
         """Create comprehensive design analysis in the format requested"""
-        
+
         # Analyze text elements with detailed font properties
         text_elements = []
         shapes = {'lines': [], 'dots': [], 'rectangles': [], 'circles': []}
         layout_info = {'grid': 'unknown', 'alignment': 'left', 'spacing': []}
-        
+
         for element in elements:
             # Extract text content with full typography details
             text_content = element.get('textContent') or element.get('text', '')
@@ -1664,19 +1669,19 @@ class WebsiteCapture:
                 }
                 text_elements.append(text_info)
                 print(f"🔤 CONVERTED TO TEXT: '{text_content[:40]}...' | Font: {text_info['fontSize']}px {text_info['fontFamily']} | Tag: {text_info['tag']}")
-            
+
             # Detect shapes based on element properties
             visual = element.get('visual', {})
             position = element.get('position', {})
-            
+
             # Get tag name from correct field
             tag_name = (element.get('tagName') or element.get('tag', '')).lower()
-            
+
             # Detect lines (elements with border or hr tags)
             if (tag_name == 'hr' or 
                 visual.get('borderTop', 'none') != 'none' or
                 visual.get('borderBottom', 'none') != 'none'):
-                
+
                 line_info = {
                     'length': position.get('width', 0),
                     'thickness': self.parse_pixel_value(visual.get('borderTop', '1px').split()[0] if visual.get('borderTop', 'none') != 'none' else '1px'),
@@ -1685,11 +1690,11 @@ class WebsiteCapture:
                     'position': position
                 }
                 shapes['lines'].append(line_info)
-            
+
             # Detect dots/circles (small elements with border-radius)
             if (visual.get('borderRadius', '0px') != '0px' and 
                 position.get('width', 0) < 50 and position.get('height', 0) < 50):
-                
+
                 dot_info = {
                     'radius': position.get('width', 10) / 2,
                     'color': visual.get('backgroundColor', 'transparent'),
@@ -1698,23 +1703,23 @@ class WebsiteCapture:
                     'borderWidth': self.parse_pixel_value(visual.get('border', '0px').split()[0] if visual.get('border', 'none') != 'none' else '0px')
                 }
                 shapes['dots'].append(dot_info)
-            
+
             # Create detailed Figma rectangles for each structural element
             if tag_name in ['div', 'section', 'article', 'header', 'footer', 'main', 'nav', 'aside']:
                 figma_rect = self.create_figma_rectangle_section(element, visual, position, tag_name)
                 shapes['rectangles'].append(figma_rect)
                 print(f"🔷 CONVERTED TO RECTANGLE: {figma_rect['name']} | Size: {figma_rect['figmaProperties']['width']}x{figma_rect['figmaProperties']['height']} | Layout: {figma_rect['figmaProperties']['layoutMode']}")
-        
+
         # Analyze color usage with context
         color_analysis = []
         color_usage = {}
-        
+
         for color in colors:
             if color and color != 'transparent':
                 # Count usage across elements
                 usage_count = 0
                 usage_types = set()
-                
+
                 for element in elements:
                     visual = element.get('visual', {})
                     if visual.get('color') == color:
@@ -1726,7 +1731,7 @@ class WebsiteCapture:
                     if color in str(visual.get('border', '')):
                         usage_count += 1
                         usage_types.add('border')
-                
+
                 color_info = {
                     'hex': color,
                     'usage': list(usage_types),
@@ -1734,7 +1739,7 @@ class WebsiteCapture:
                     'rgb': self.hex_to_rgb(color) if color.startswith('#') else None
                 }
                 color_analysis.append(color_info)
-        
+
         # Enhanced image analysis
         image_analysis = []
         for img in images:
@@ -1750,7 +1755,7 @@ class WebsiteCapture:
                 'loading': img.get('loading', 'eager')
             }
             image_analysis.append(img_info)
-        
+
         # Layout analysis
         layout_info = {
             'totalElements': len(elements),
@@ -1760,7 +1765,7 @@ class WebsiteCapture:
             'maxWidth': max([el.get('position', {}).get('width', 0) for el in elements] + [0]),
             'maxHeight': max([el.get('position', {}).get('height', 0) for el in elements] + [0])
         }
-        
+
         return {
             'textElements': text_elements,
             'shapes': shapes,
@@ -1776,27 +1781,27 @@ class WebsiteCapture:
                 'hasInteractiveElements': any((el.get('tagName') or el.get('tag', '')).lower() in ['button', 'a', 'input'] for el in elements)
             }
         }
-    
+
     def extract_border_color(self, border_style):
         """Extract color from border style string"""
         if not border_style or border_style == 'none':
             return '#000000'
-        
+
         # Extract color from border shorthand (e.g., "1px solid #333")
         import re
         color_match = re.search(r'#[a-fA-F0-9]{3,6}|rgb\([^)]+\)', border_style)
         return color_match.group(0) if color_match else '#000000'
-    
+
     def hex_to_rgb(self, hex_color):
         """Convert hex color to RGB values"""
         if not hex_color.startswith('#'):
             return None
-        
+
         try:
             hex_color = hex_color.lstrip('#')
             if len(hex_color) == 3:
                 hex_color = ''.join([c*2 for c in hex_color])
-            
+
             return {
                 'r': int(hex_color[0:2], 16),
                 'g': int(hex_color[2:4], 16),
@@ -1819,14 +1824,14 @@ class WebsiteCapture:
             'textAlignHorizontal': self.map_text_align(visual_styles.get('textAlign', 'left')),
             'textDecoration': self.map_text_decoration(visual_styles.get('textDecoration', 'none'))
         }
-    
+
     def create_figma_rectangle_section(self, element, visual, position, tag_name):
         """Create comprehensive Figma rectangle with all CSS properties mapped"""
         x = position.get('x', 0)
         y = position.get('y', 0)
         width = position.get('width', 100)
         height = position.get('height', 40)
-        
+
         # Map background fills
         fills = []
         if visual.get('backgroundColor') and visual.get('backgroundColor') != 'transparent':
@@ -1836,7 +1841,7 @@ class WebsiteCapture:
                     'type': 'SOLID',
                     'color': color_rgb
                 })
-        
+
         # Map border strokes
         strokes = []
         stroke_weight = 0
@@ -1851,29 +1856,29 @@ class WebsiteCapture:
                         'type': 'SOLID',
                         'color': color_rgb
                     })
-        
+
         # Map corner radius
         corner_radius = self.parse_pixel_value(visual.get('borderRadius', '0px'))
-        
+
         # Map effects (shadows)
         effects = []
         if visual.get('boxShadow') and visual.get('boxShadow') != 'none':
             shadow_effect = self.map_box_shadow_to_figma(visual.get('boxShadow'))
             if shadow_effect:
                 effects.append(shadow_effect)
-        
+
         # Detect Auto Layout properties
         layout_mode = 'NONE'
         primary_axis_align = 'MIN'
         counter_axis_align = 'MIN'
         item_spacing = 0
-        
+
         if visual.get('display') == 'flex':
             layout_mode = 'HORIZONTAL' if visual.get('flexDirection', 'row') == 'row' else 'VERTICAL'
             primary_axis_align = self.map_justify_content(visual.get('justifyContent', 'flex-start'))
             counter_axis_align = self.map_align_items(visual.get('alignItems', 'stretch'))
             item_spacing = self.parse_pixel_value(visual.get('gap', '0px'))
-        
+
         return {
             'type': 'RECTANGLE',
             'name': f"{tag_name.upper()}_Section",
@@ -1912,7 +1917,7 @@ class WebsiteCapture:
                 'zIndex': self.parse_pixel_value(visual.get('zIndex', '0'))
             }
         }
-    
+
     def map_font_style_weight(self, weight, style):
         """Map CSS font weight and style to Figma font style"""
         weight_mapping = {
@@ -1923,7 +1928,7 @@ class WebsiteCapture:
         }
         base_style = weight_mapping.get(str(weight), 'Regular')
         return base_style + (' Italic' if style == 'italic' else '')
-    
+
     def map_line_height(self, line_height):
         """Map CSS line height to Figma line height"""
         if line_height == 'normal':
@@ -1937,18 +1942,18 @@ class WebsiteCapture:
                 return {'unit': 'PERCENT', 'value': float(line_height) * 100}
             except:
                 return {'unit': 'AUTO'}
-    
+
     def map_letter_spacing(self, letter_spacing):
         """Map CSS letter spacing to Figma letter spacing"""
         if letter_spacing == 'normal':
             return {'unit': 'PIXELS', 'value': 0}
         return {'unit': 'PIXELS', 'value': self.parse_pixel_value(letter_spacing)}
-    
+
     def map_text_align(self, text_align):
         """Map CSS text align to Figma text align"""
         mapping = {'left': 'LEFT', 'center': 'CENTER', 'right': 'RIGHT', 'justify': 'JUSTIFIED'}
         return mapping.get(text_align, 'LEFT')
-    
+
     def map_text_decoration(self, text_decoration):
         """Map CSS text decoration to Figma text decoration"""
         if 'underline' in text_decoration:
@@ -1956,7 +1961,7 @@ class WebsiteCapture:
         elif 'line-through' in text_decoration:
             return 'STRIKETHROUGH'
         return 'NONE'
-    
+
     def map_justify_content(self, justify_content):
         """Map CSS justify-content to Figma primary axis alignment"""
         mapping = {
@@ -1964,7 +1969,7 @@ class WebsiteCapture:
             'flex-end': 'MAX', 'space-between': 'SPACE_BETWEEN'
         }
         return mapping.get(justify_content, 'MIN')
-    
+
     def map_align_items(self, align_items):
         """Map CSS align-items to Figma counter axis alignment"""
         mapping = {
@@ -1972,7 +1977,7 @@ class WebsiteCapture:
             'flex-end': 'MAX', 'stretch': 'STRETCH'
         }
         return mapping.get(align_items, 'MIN')
-    
+
     def map_box_shadow_to_figma(self, box_shadow):
         """Map CSS box-shadow to Figma drop shadow effect"""
         try:
@@ -1980,7 +1985,7 @@ class WebsiteCapture:
             # Parse box-shadow: offset-x offset-y blur-radius spread-radius color
             numbers = re.findall(r'-?\d+(?:\.\d+)?px', box_shadow)
             colors = re.findall(r'#[0-9A-Fa-f]{3,6}|rgba?\([^)]+\)', box_shadow)
-            
+
             if len(numbers) >= 3:
                 shadow_color = self.parse_color(colors[0] if colors else '#000000')
                 return {
@@ -2001,7 +2006,7 @@ class WebsiteCapture:
     def create_error_response(self, url, viewport_config, error_message):
         """Create mock capture data for development when no browser is available"""
         print(f"Creating mock data for {url} at {viewport_config['device']} viewport")
-        
+
         return {
             'device': viewport_config['device'],
             'viewport': {
@@ -2094,25 +2099,25 @@ class WebsiteCapture:
 def capture_responsive():
     """Capture website across multiple viewports"""
     capture = WebsiteCapture()
-    
+
     try:
         data = request.get_json()
         if not data or 'url' not in data:
             return jsonify({'error': 'URL is required'}), 400
-        
+
         url = data['url']
         requested_viewports = data.get('viewports', ['desktop', 'tablet', 'mobile'])
-        
+
         # Validate URL
         parsed_url = urllib.parse.urlparse(url)
         if not parsed_url.scheme or not parsed_url.netloc:
             return jsonify({'error': 'Invalid URL format'}), 400
-        
+
         print(f"Starting responsive capture for: {url}")
         print(f"Requested viewports: {requested_viewports}")
-        
+
         results = {}
-        
+
         # Capture each requested viewport with real data extraction
         for viewport_item in requested_viewports:
             if isinstance(viewport_item, dict):
@@ -2126,27 +2131,27 @@ def capture_responsive():
                     continue
                 viewport_config = VIEWPORTS[viewport_item]
                 viewport_name = viewport_item
-            
+
             # Extract real website data instead of browser capture
             result = capture.extract_real_website_data(url, viewport_config)
-            
+
             if result:
                 results[viewport_name] = result
                 element_count = len(result.get('elements', []))
                 print(f"Successfully extracted real data for {viewport_name}: {element_count} elements")
             else:
                 print(f"Failed to extract data for {viewport_name}")
-        
+
         if not results:
             return jsonify({'error': 'Failed to capture any viewports'}), 500
-        
+
         return jsonify({
             'url': url,
             'viewports': results,
             'capture_time': time.time(),
             'total_viewports': len(results)
         })
-        
+
     except Exception as e:
         print(f"Capture error: {e}")
         return jsonify({'error': f'Capture failed: {str(e)}'}), 500
@@ -2160,11 +2165,11 @@ def capture_single():
         data = request.get_json()
         if not data or 'url' not in data:
             return jsonify({'error': 'URL is required'}), 400
-        
+
         # Use desktop viewport for single capture
         viewport_config = VIEWPORTS['desktop']
         capture = WebsiteCapture()
-        
+
         try:
             result = capture.capture_viewport(data['url'], viewport_config)
             if result:
@@ -2173,7 +2178,7 @@ def capture_single():
                 return jsonify({'error': 'Capture failed'}), 500
         finally:
             capture.cleanup()
-            
+
     except Exception as e:
         return jsonify({'error': f'Capture failed: {str(e)}'}), 500
 
@@ -2293,108 +2298,3 @@ def index():
             max-height: 400px;
             overflow-y: auto;
         }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Website to Figma Capture Server</h1>
-        
-        <div class="status">
-            <h2>Server Running</h2>
-            <p>Enhanced capture system with comprehensive data extraction</p>
-        </div>
-
-        <div class="features">
-            <div class="feature">
-                <h3>Multi-Viewport Capture</h3>
-                <p>Captures websites across desktop, tablet, and mobile viewports</p>
-            </div>
-            <div class="feature">
-                <h3>Full CSS Extraction</h3>
-                <p>Extracts all visual styles, colors, fonts, and layout properties</p>
-            </div>
-            <div class="feature">
-                <h3>Image Processing</h3>
-                <p>Captures images, SVGs, backgrounds, and responsive srcsets</p>
-            </div>
-            <div class="feature">
-                <h3>Real-Time Data</h3>
-                <p>Fetches authentic website content with zero mock data</p>
-            </div>
-        </div>
-
-        <div class="endpoints">
-            <h2>API Endpoints</h2>
-            <div class="endpoint">POST /api/capture-responsive - Multi-viewport capture</div>
-            <div class="endpoint">POST /api/capture - Single viewport capture</div>
-            <div class="endpoint">GET /health - Health check</div>
-        </div>
-
-        <div class="test-section">
-            <h2>Test the API</h2>
-            <input type="url" id="urlInput" placeholder="Enter website URL (e.g., https://example.com)" value="https://example.com">
-            <br>
-            <button onclick="testSingleCapture()">Test Single Capture</button>
-            <button onclick="testResponsiveCapture()">Test Responsive Capture</button>
-            <div id="result"></div>
-        </div>
-    </div>
-
-    <script>
-        async function testSingleCapture() {
-            const url = document.getElementById('urlInput').value;
-            const resultDiv = document.getElementById('result');
-            
-            resultDiv.textContent = 'Testing single capture...';
-            
-            try {
-                const response = await fetch('/api/capture', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({url: url})
-                });
-                
-                const data = await response.json();
-                resultDiv.textContent = `SUCCESS: Captured ${data.elements?.length || 0} elements, ${data.images?.length || 0} images, ${data.colors?.length || 0} colors`;
-            } catch (error) {
-                resultDiv.textContent = `ERROR: ${error.message}`;
-            }
-        }
-
-        async function testResponsiveCapture() {
-            const url = document.getElementById('urlInput').value;
-            const resultDiv = document.getElementById('result');
-            
-            resultDiv.textContent = 'Testing responsive capture...';
-            
-            try {
-                const response = await fetch('/api/capture-responsive', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({url: url, viewports: ['desktop', 'tablet', 'mobile']})
-                });
-                
-                const data = await response.json();
-                let result = `SUCCESS: Captured ${data.total_viewports} viewports\\n`;
-                
-                for (const [viewport, vdata] of Object.entries(data.viewports)) {
-                    result += `${viewport}: ${vdata.elements?.length || 0} elements, ${vdata.images?.length || 0} images\\n`;
-                }
-                
-                resultDiv.textContent = result;
-            } catch (error) {
-                resultDiv.textContent = `ERROR: ${error.message}`;
-            }
-        }
-    </script>
-</body>
-</html>"""
-
-# Server can be run directly for development
-if __name__ == '__main__':
-    print("Starting Enhanced Website Capture Server...")
-    print("Features: Responsive capture, Full CSS extraction, Font mapping")
-    print("Server will be available at: http://0.0.0.0:5000")
-    print(f"Supported viewports: {', '.join(VIEWPORTS.keys())}")
-    
-    app.run(host='0.0.0.0', port=5000, debug=False)

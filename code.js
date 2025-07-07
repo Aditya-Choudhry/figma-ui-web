@@ -78,7 +78,7 @@ var simpleHTML = `
     var captureBtn = document.getElementById('captureBtn');
     var urlInput = document.getElementById('websiteUrl');
     var status = document.getElementById('status');
-    
+
     captureBtn.onclick = function() {
       var url = urlInput.value.trim();
       if (!url) {
@@ -101,7 +101,7 @@ var simpleHTML = `
       updateStatus('Starting capture for ' + selectedViewports.length + ' viewports...', 'loading');
       parent.postMessage({ pluginMessage: { type: 'captureResponsive', url: url, viewports: selectedViewports } }, '*');
     };
-    
+
     window.onmessage = function(event) {
       if (!event.data.pluginMessage) return;
       var messageData = event.data.pluginMessage;
@@ -114,7 +114,7 @@ var simpleHTML = `
         }
       }
     };
-    
+
     function updateStatus(message, type) {
       status.textContent = message;
       status.className = 'status ' + (type || 'info');
@@ -150,11 +150,11 @@ figma.ui.onmessage = function(msg) {
         });
         figma.notify('JSON conversion failed: ' + error.message, { error: true });
       });
-      
+
   } else if (msg.type === 'captureResponsive') {
     var url = msg.url;
     var viewports = msg.viewports;
-    
+
     figma.notify('Starting responsive capture for ' + viewports.length + ' viewports...', { timeout: 2000 });
 
     console.log('Fetching responsive website data from server...');
@@ -221,9 +221,9 @@ function createResponsiveFigmaLayouts(data) {
     for (var i = 0; i < viewportNames.length; i++) {
       var viewportName = viewportNames[i];
       var viewportData = viewports[viewportName];
-      
+
       console.log('Creating layout for ' + viewportName + '...');
-      
+
       // Validate viewport data structure
       if (!viewportData || !viewportData.device) {
         console.warn('Skipping invalid viewport data for ' + viewportName + ':', viewportData);
@@ -234,7 +234,7 @@ function createResponsiveFigmaLayouts(data) {
       var page = viewportData.page || {};
       var elements = viewportData.elements || [];
       var scaleFactor = page.scale_factor || 1;
-      
+
       // Ensure proper dimensions
       var isDesktop = viewportData.device === 'Desktop';
       var frameWidth = isDesktop ? 1440 : (viewportData.viewport && viewportData.viewport.width ? viewportData.viewport.width : 375);
@@ -273,7 +273,7 @@ function createResponsiveFigmaLayouts(data) {
 
 function createElementsInFrame(parentFrame, elements) {
   console.log('Creating ' + elements.length + ' elements...');
-  
+
   // Sort elements by z-index and depth for proper layering
   var sortedElements = elements.slice().sort(function(a, b) {
     var aZ = (a.visual_hierarchy && a.visual_hierarchy.zIndex) || 0;
@@ -284,7 +284,7 @@ function createElementsInFrame(parentFrame, elements) {
 
   // Process elements with a reasonable limit for performance
   for (var i = 0; i < Math.min(sortedElements.length, 50); i++) {
-    var element = sortedElements[i];
+    var var element = sortedElements[i];
     try {
       var node = createNodeFromElement(element);
       if (node) {
@@ -315,7 +315,7 @@ function createNodeFromElement(element) {
     if (textContent && textContent.trim()) {
       // Create text node with proper font loading
       node = figma.createText();
-      
+
       // Set text content immediately with default font
       try {
         node.characters = textContent.trim().substring(0, 200); // Limit text length
@@ -341,15 +341,55 @@ function createNodeFromElement(element) {
     var height = Math.max(layout.height || 20, 1);
     node.resize(width, height);
 
-    // Apply basic styling
+    // Apply comprehensive color styling
+    var hasAppliedFill = false;
+
+    // Check background color
     if (visual.backgroundColor && visual.backgroundColor !== 'rgba(0, 0, 0, 0)' && visual.backgroundColor !== 'transparent') {
       var bgColor = parseColor(visual.backgroundColor);
       if (bgColor) {
         node.fills = [{ type: 'SOLID', color: bgColor }];
+        hasAppliedFill = true;
       }
-    } else if (node.type === 'RECTANGLE') {
-      // Give rectangles a light gray background if no background is specified
-      node.fills = [{ type: 'SOLID', color: { r: 0.95, g: 0.95, b: 0.95 } }];
+    }
+
+    // Check for border colors
+    var borderColors = [
+      visual.borderColor,
+      visual.borderTopColor,
+      visual.borderRightColor,
+      visual.borderBottomColor,
+      visual.borderLeftColor
+    ];
+
+    for (var i = 0; i < borderColors.length; i++) {
+      var borderColor = borderColors[i];
+      if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)' && borderColor !== 'transparent' && borderColor !== 'currentColor') {
+        var bColor = parseColor(borderColor);
+        if (bColor && !hasAppliedFill) {
+          node.fills = [{ type: 'SOLID', color: bColor }];
+          hasAppliedFill = true;
+          break;
+        }
+      }
+    }
+
+    // Check text color for text nodes
+    if (node.type === 'TEXT' && visual.color && visual.color !== 'rgba(0, 0, 0, 0)') {
+      var textColor = parseColor(visual.color);
+      if (textColor) {
+        node.fills = [{ type: 'SOLID', color: textColor }];
+        hasAppliedFill = true;
+      }
+    }
+
+    // Default styling if no colors found
+    if (!hasAppliedFill) {
+      if (node.type === 'RECTANGLE') {
+        node.fills = [{ type: 'SOLID', color: { r: 0.95, g: 0.95, b: 0.95 } }];
+      } else if (node.type === 'TEXT') {
+        node.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+      }
     }
 
     // Set name with more descriptive info
@@ -364,7 +404,7 @@ function createNodeFromElement(element) {
 
     console.log('Created node: ' + elementName + ' at (' + node.x + ', ' + node.y + ') size ' + width + 'x' + height);
     return node;
-    
+
   } catch (error) {
     console.warn('Error in createNodeFromElement:', error);
     return null;
@@ -373,7 +413,7 @@ function createNodeFromElement(element) {
 
 function parseColor(colorString) {
   if (!colorString) return { r: 0, g: 0, b: 0 };
-  
+
   if (colorString.indexOf('#') === 0) {
     var hex = colorString.substring(1);
     var r = parseInt(hex.substring(0, 2), 16) / 255;
@@ -381,7 +421,7 @@ function parseColor(colorString) {
     var b = parseInt(hex.substring(4, 6), 16) / 255;
     return { r: r, g: g, b: b };
   }
-  
+
   return { r: 0, g: 0, b: 0 };
 }
 
@@ -397,26 +437,26 @@ function createFigmaFromJSON(jsonData) {
   return new Promise(function(resolve, reject) {
     try {
       console.log('Creating Figma design from JSON structure...');
-      
+
       // Create main frame
       var mainFrame = figma.createFrame();
       mainFrame.name = jsonData.name || 'JSON Generated Design';
       mainFrame.resize(jsonData.width || 800, jsonData.height || 600);
       mainFrame.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-      
+
       figma.currentPage.appendChild(mainFrame);
-      
+
       // Process children elements
       if (jsonData.children && jsonData.children.length > 0) {
         processJSONChildren(mainFrame, jsonData.children);
       }
-      
+
       // Focus on the created frame
       figma.viewport.scrollAndZoomIntoView([mainFrame]);
-      
+
       console.log('JSON to Figma conversion complete');
       resolve();
-      
+
     } catch (error) {
       console.error('Error in createFigmaFromJSON:', error);
       reject(error);
@@ -426,33 +466,33 @@ function createFigmaFromJSON(jsonData) {
 
 function processJSONChildren(parentFrame, children) {
   var yOffset = 20;
-  
+
   for (var i = 0; i < children.length; i++) {
     var child = children[i];
     var node = null;
-    
+
     try {
       if (child.type === 'text') {
         node = figma.createText();
         node.characters = child.content || 'Sample Text';
         node.fontSize = Math.max(child.fontSize || 16, 8);
-        
+
         if (child.color) {
           var textColor = parseColor(child.color);
           if (textColor) {
             node.fills = [{ type: 'SOLID', color: textColor }];
           }
         }
-        
+
         // Auto-size text width, set minimum height
         var textWidth = child.width || 200;
         var textHeight = Math.max(child.height || 30, node.fontSize * 1.2);
         node.resize(textWidth, textHeight);
-        
+
       } else if (child.type === 'rectangle') {
         node = figma.createRectangle();
         node.resize(child.width || 200, child.height || 100);
-        
+
         if (child.color) {
           var rectColor = parseColor(child.color);
           if (rectColor) {
@@ -462,44 +502,44 @@ function processJSONChildren(parentFrame, children) {
           // Default light background for rectangles
           node.fills = [{ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.95 } }];
         }
-        
+
         if (child.cornerRadius) {
           node.cornerRadius = child.cornerRadius;
         }
-        
+
       } else if (child.type === 'frame') {
         node = figma.createFrame();
         node.resize(child.width || 300, child.height || 200);
-        
+
         if (child.backgroundColor) {
           var bgColor = parseColor(child.backgroundColor);
           if (bgColor) {
             node.fills = [{ type: 'SOLID', color: bgColor }];
           }
         }
-        
+
         // Process nested children
         if (child.children && child.children.length > 0) {
           processJSONChildren(node, child.children);
         }
       }
-      
+
       if (node) {
         // Position the node
         node.x = child.x !== undefined ? child.x : 20;
         node.y = child.y !== undefined ? child.y : yOffset;
         node.name = child.name || (child.type + '_' + i);
-        
+
         parentFrame.appendChild(node);
-        
+
         // Update y offset for next element if no specific position
         if (child.y === undefined) {
           yOffset += (child.height || 50) + 20;
         }
-        
+
         console.log('Created JSON node:', node.name, 'at (' + node.x + ', ' + node.y + ')');
       }
-      
+
     } catch (error) {
       console.warn('Failed to create JSON element:', child, error);
     }
